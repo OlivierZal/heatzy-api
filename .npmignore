@@ -1,0 +1,8 @@
+/.github/
+/.vscode/
+/coverage/
+/docs/
+/eslint.config.js
+/jest.config.ts
+/sonar-project.properties
+/tests/
