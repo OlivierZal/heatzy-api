@@ -1,12 +1,19 @@
 {
-  "name": "heatzy-api",
+  "name": "@olivierzal/heatzy-api",
   "version": "1.0.0",
-  "description": "Heatzy API package for NodeJS",
+  "description": "Heatzy API for Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist/",
+    "src/"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/OlivierZal/heatzy-api.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "keywords": [
     "heatzy",
@@ -25,6 +32,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "docs": "typedoc",
     "format": "prettier . --check",
     "format:fix": "prettier . --write",
     "lint": "eslint .",
@@ -33,17 +41,21 @@
     "prepare": "npm run build"
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin": "^1.8.0",
+    "@eslint/js": "^9.3.0",
+    "@stylistic/eslint-plugin": "^2.1.0",
     "@types/luxon": "^3.4.2",
-    "@types/node": "^20.12.7",
-    "eslint": "^9.1.1",
+    "@types/node": "^20.12.12",
+    "eslint": "^9.2.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.1",
-    "globals": "^15.1.0",
+    "eslint-plugin-jsdoc": "^48.2.5",
+    "globals": "^15.2.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.4.5",
-    "typescript-eslint": "^7.8.0"
+    "typedoc": "^0.25.13",
+    "typedoc-plugin-markdown": "^4.0.2",
+    "typescript": "^5.5.0-dev.20240516",
+    "typescript-eslint": "^8.0.0-alpha.13"
   },
   "dependencies": {
     "axios": "^1.6.8",

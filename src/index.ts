@@ -16,31 +16,30 @@ import {
   NUMBER_1,
   Switch,
 } from './types'
-import APICallContextData from './lib/APICallContextData'
-import APICallRequestData from './lib/APICallRequestData'
-import APICallResponseData from './lib/APICallResponseData'
-import HeatzyAPI from './lib/HeatzyAPI'
-import createAPICallErrorData from './lib/APICallErrorData'
+import HeatzyAPI, {
+  type APISettings,
+  type Logger,
+  type SettingManager,
+} from './lib/HeatzyAPI'
 
 export {
   HeatzyAPI as default,
-  APICallContextData,
-  APICallRequestData,
-  APICallResponseData,
-  createAPICallErrorData,
-  NUMBER_1,
-  Mode,
   DerogMode,
+  Mode,
   Switch,
-  type Data,
-  type ErrorData,
-  type LoginCredentials,
-  type LoginPostData,
-  type LoginData,
-  type Bindings,
-  type FirstGenDevicePostData,
+  NUMBER_1,
+  type APISettings,
   type BaseAttrs,
+  type Bindings,
+  type Data,
+  type DeviceData,
   type DevicePostData,
   type DevicePostDataAny,
-  type DeviceData,
+  type ErrorData,
+  type FirstGenDevicePostData,
+  type LoginCredentials,
+  type LoginData,
+  type LoginPostData,
+  type Logger,
+  type SettingManager,
 }
