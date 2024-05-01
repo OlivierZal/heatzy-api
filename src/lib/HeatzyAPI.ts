@@ -1,16 +1,4 @@
 import {
-  APICallRequestData,
-  APICallResponseData,
-  type Bindings,
-  type Data,
-  type DeviceData,
-  type DevicePostDataAny,
-  type LoginCredentials,
-  type LoginData,
-  type LoginPostData,
-  createAPICallErrorData,
-} from '..'
-import {
   type AxiosError,
   type AxiosInstance,
   type AxiosResponse,
@@ -18,21 +6,33 @@ import {
   type InternalAxiosRequestConfig,
   create as createAxiosInstance,
 } from 'axios'
+import type {
+  Bindings,
+  Data,
+  DeviceData,
+  DevicePostDataAny,
+  LoginCredentials,
+  LoginData,
+  LoginPostData,
+} from '..'
 import { DateTime, Duration } from 'luxon'
+import APICallRequestData from './APICallRequestData'
+import APICallResponseData from './APICallResponseData'
+import createAPICallErrorData from './createAPICallErrorData'
 
-interface APISettings {
+export interface APISettings {
   readonly expireAt?: number | null
   readonly password?: string | null
   readonly token?: string | null
   readonly username?: string | null
 }
 
-interface Logger {
+export interface Logger {
   readonly error: Console['error']
   readonly log: Console['log']
 }
 
-interface SettingManager {
+export interface SettingManager {
   get: <K extends keyof APISettings>(
     key: K,
   ) => APISettings[K] | null | undefined
@@ -43,7 +43,7 @@ const APPLICATION_ID = 'X-Gizwits-Application-Id'
 const LOGIN_URL = '/login'
 const NUMBER_0 = 0
 
-export default class HeatzyAPI {
+export default class {
   #retry = true
 
   #retryTimeout!: NodeJS.Timeout
@@ -65,7 +65,7 @@ export default class HeatzyAPI {
   }
 
   public async applyLogin(data?: LoginCredentials): Promise<boolean> {
-    const { password, username } = data ?? {
+    const { username, password } = data ?? {
       password: this.#settingManager.get('password') ?? '',
       username: this.#settingManager.get('username') ?? '',
     }

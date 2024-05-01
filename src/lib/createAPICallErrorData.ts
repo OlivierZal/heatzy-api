@@ -1,10 +1,8 @@
-import {
-  type APICallContextData,
-  APICallRequestData,
-  APICallResponseData,
-  type ErrorData,
-} from '..'
+import type APICallContextData from './APICallContextData'
+import APICallRequestData from './APICallRequestData'
+import APICallResponseData from './APICallResponseData'
 import type { AxiosError } from 'axios'
+import type { ErrorData } from '..'
 
 interface APICallContextDataWithErrorMessage extends APICallContextData {
   readonly errorMessage: string
@@ -32,11 +30,7 @@ const withErrorMessage = <T extends new (...args: any[]) => APICallContextData>(
     public readonly errorMessage = getMessage(error)
   }
 
-const createAPICallErrorData = (
-  error: AxiosError,
-): APICallContextDataWithErrorMessage =>
+export default (error: AxiosError): APICallContextDataWithErrorMessage =>
   typeof error.response === 'undefined' ?
     new (withErrorMessage(APICallRequestData, error))(error.config)
   : new (withErrorMessage(APICallResponseData, error))(error.response)
-
-export default createAPICallErrorData
