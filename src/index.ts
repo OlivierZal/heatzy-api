@@ -16,18 +16,10 @@ import {
   NUMBER_1,
   Switch,
 } from './types'
-import APICallContextData from './lib/APICallContextData'
-import APICallRequestData from './lib/APICallRequestData'
-import APICallResponseData from './lib/APICallResponseData'
 import HeatzyAPI from './lib/HeatzyAPI'
-import createAPICallErrorData from './lib/APICallErrorData'
 
 export {
   HeatzyAPI as default,
-  APICallContextData,
-  APICallRequestData,
-  APICallResponseData,
-  createAPICallErrorData,
   NUMBER_1,
   Mode,
   DerogMode,

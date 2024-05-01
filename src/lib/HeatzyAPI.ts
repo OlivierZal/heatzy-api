@@ -1,16 +1,4 @@
 import {
-  APICallRequestData,
-  APICallResponseData,
-  type Bindings,
-  type Data,
-  type DeviceData,
-  type DevicePostDataAny,
-  type LoginCredentials,
-  type LoginData,
-  type LoginPostData,
-  createAPICallErrorData,
-} from '..'
-import {
   type AxiosError,
   type AxiosInstance,
   type AxiosResponse,
@@ -18,7 +6,19 @@ import {
   type InternalAxiosRequestConfig,
   create as createAxiosInstance,
 } from 'axios'
+import type {
+  Bindings,
+  Data,
+  DeviceData,
+  DevicePostDataAny,
+  LoginCredentials,
+  LoginData,
+  LoginPostData,
+} from '..'
 import { DateTime, Duration } from 'luxon'
+import APICallRequestData from './APICallRequestData'
+import APICallResponseData from './APICallResponseData'
+import createAPICallErrorData from './createAPICallErrorData'
 
 interface APISettings {
   readonly expireAt?: number | null
@@ -65,7 +65,7 @@ export default class HeatzyAPI {
   }
 
   public async applyLogin(data?: LoginCredentials): Promise<boolean> {
-    const { password, username } = data ?? {
+    const { username, password } = data ?? {
       password: this.#settingManager.get('password') ?? '',
       username: this.#settingManager.get('username') ?? '',
     }
