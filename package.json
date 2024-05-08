@@ -4,6 +4,10 @@
   "description": "Heatzy API for Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist/",
+    "src/"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/OlivierZal/heatzy-api.git"
