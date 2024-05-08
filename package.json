@@ -1,7 +1,7 @@
 {
   "name": "@olivierzal/heatzy-api",
   "version": "1.0.0",
-  "description": "Heatzy API for NodeJS",
+  "description": "Heatzy API for Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {
