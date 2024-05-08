@@ -20,19 +20,19 @@ import APICallRequestData from './APICallRequestData'
 import APICallResponseData from './APICallResponseData'
 import createAPICallErrorData from './createAPICallErrorData'
 
-interface APISettings {
+export interface APISettings {
   readonly expireAt?: number | null
   readonly password?: string | null
   readonly token?: string | null
   readonly username?: string | null
 }
 
-interface Logger {
+export interface Logger {
   readonly error: Console['error']
   readonly log: Console['log']
 }
 
-interface SettingManager {
+export interface SettingManager {
   get: <K extends keyof APISettings>(
     key: K,
   ) => APISettings[K] | null | undefined
