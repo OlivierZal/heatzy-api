@@ -227,6 +227,7 @@ module.exports = tsEslint.config(
           varsIgnorePattern: 'onHomeyReady',
         },
       ],
+      'func-style': 'error',
       'no-underscore-dangle': [
         'error',
         {
