@@ -43,7 +43,7 @@ const APPLICATION_ID = 'X-Gizwits-Application-Id'
 const LOGIN_URL = '/login'
 const NUMBER_0 = 0
 
-export default class HeatzyAPI {
+export default class {
   #retry = true
 
   #retryTimeout!: NodeJS.Timeout
