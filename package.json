@@ -41,6 +41,7 @@
     "prepare": "npm run build"
   },
   "devDependencies": {
+    "@eslint/js": "^9.3.0",
     "@stylistic/eslint-plugin": "^2.1.0",
     "@types/luxon": "^3.4.2",
     "@types/node": "^20.12.12",
