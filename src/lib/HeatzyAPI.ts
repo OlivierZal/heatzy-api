@@ -19,6 +19,7 @@ import { DateTime, Duration } from 'luxon'
 import APICallRequestData from './APICallRequestData'
 import APICallResponseData from './APICallResponseData'
 import createAPICallErrorData from './createAPICallErrorData'
+import https from 'https'
 
 export interface APISettings {
   readonly expireAt?: number | null
@@ -44,30 +45,94 @@ const LOGIN_URL = '/login'
 const NUMBER_0 = 0
 
 export default class {
+  readonly #settingManager?: SettingManager
+
+  #expireAt = NUMBER_0
+
+  #password = ''
+
   #retry = true
 
   #retryTimeout!: NodeJS.Timeout
+
+  #token = ''
+
+  #username = ''
 
   readonly #api: AxiosInstance
 
   readonly #logger: Logger
 
-  readonly #settingManager: SettingManager
-
-  public constructor(settingManager: SettingManager, logger: Logger = console) {
-    this.#settingManager = settingManager
+  public constructor(
+    config: {
+      logger?: Logger
+      settingManager?: SettingManager
+      shouldVerifySSL?: boolean
+    } = {},
+  ) {
+    const { logger = console, settingManager, shouldVerifySSL = true } = config
+    if (settingManager) {
+      this.#settingManager = settingManager
+    }
     this.#logger = logger
     this.#api = createAxiosInstance({
       baseURL: 'https://euapi.gizwits.com/app',
       headers: { [APPLICATION_ID]: 'c70a66ff039d41b4a220e198b0fcc8b3' },
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: shouldVerifySSL,
+      }),
     })
     this.#setupAxiosInterceptors()
   }
 
+  private get expireAt(): number {
+    return this.#settingManager?.get('expireAt') ?? this.#expireAt
+  }
+
+  private set expireAt(value: number) {
+    this.#expireAt = value
+    if (this.#settingManager) {
+      this.#settingManager.set('expireAt', this.#expireAt)
+    }
+  }
+
+  private get password(): string {
+    return this.#settingManager?.get('password') ?? this.#password
+  }
+
+  private set password(value: string) {
+    this.#password = value
+    if (this.#settingManager) {
+      this.#settingManager.set('password', this.#password)
+    }
+  }
+
+  private get token(): string {
+    return this.#settingManager?.get('token') ?? this.#token
+  }
+
+  private set token(value: string) {
+    this.#token = value
+    if (this.#settingManager) {
+      this.#settingManager.set('token', this.#token)
+    }
+  }
+
+  private get username(): string {
+    return this.#settingManager?.get('username') ?? this.#username
+  }
+
+  private set username(value: string) {
+    this.#username = value
+    if (this.#settingManager) {
+      this.#settingManager.set('username', this.#username)
+    }
+  }
+
   public async applyLogin(data?: LoginCredentials): Promise<boolean> {
     const { username, password } = data ?? {
-      password: this.#settingManager.get('password') ?? '',
-      username: this.#settingManager.get('username') ?? '',
+      password: this.password,
+      username: this.username,
     }
     if (username && password) {
       try {
@@ -99,10 +164,10 @@ export default class {
 
   public async login(postData: LoginPostData): Promise<{ data: LoginData }> {
     const response = await this.#api.post<LoginData>(LOGIN_URL, postData)
-    this.#settingManager.set('username', postData.username)
-    this.#settingManager.set('password', postData.password)
-    this.#settingManager.set('token', response.data.token)
-    this.#settingManager.set('expireAt', response.data.expire_at)
+    this.username = postData.username
+    this.password = postData.password
+    this.token = response.data.token
+    this.expireAt = response.data.expire_at
     return response
   }
 
@@ -127,16 +192,11 @@ export default class {
   ): Promise<InternalAxiosRequestConfig> {
     const newConfig = { ...config }
     if (newConfig.url !== LOGIN_URL) {
-      const expiredAt = this.#settingManager.get('expireAt') ?? NUMBER_0
-      if (expiredAt && DateTime.fromSeconds(expiredAt) < DateTime.now()) {
+      const { expireAt, token } = this
+      if (expireAt && DateTime.fromSeconds(expireAt) < DateTime.now()) {
         await this.applyLogin()
       }
-    }
-    if (newConfig.url !== LOGIN_URL) {
-      newConfig.headers.set(
-        'X-Gizwits-User-token',
-        this.#settingManager.get('token'),
-      )
+      newConfig.headers.set('X-Gizwits-User-token', token)
     }
     this.#logger.log(String(new APICallRequestData(newConfig)))
     return newConfig
