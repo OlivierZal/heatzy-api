@@ -71,16 +71,12 @@ export default class {
     } = {},
   ) {
     const { logger = console, settingManager, shouldVerifySSL = true } = config
-    if (settingManager) {
-      this.#settingManager = settingManager
-    }
     this.#logger = logger
+    this.#settingManager = settingManager
     this.#api = createAxiosInstance({
       baseURL: 'https://euapi.gizwits.com/app',
       headers: { [APPLICATION_ID]: 'c70a66ff039d41b4a220e198b0fcc8b3' },
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: shouldVerifySSL,
-      }),
+      httpsAgent: new https.Agent({ rejectUnauthorized: shouldVerifySSL }),
     })
     this.#setupAxiosInterceptors()
   }
@@ -91,9 +87,7 @@ export default class {
 
   private set expireAt(value: number) {
     this.#expireAt = value
-    if (this.#settingManager) {
-      this.#settingManager.set('expireAt', this.#expireAt)
-    }
+    this.#settingManager?.set('expireAt', this.#expireAt)
   }
 
   private get password(): string {
@@ -102,9 +96,7 @@ export default class {
 
   private set password(value: string) {
     this.#password = value
-    if (this.#settingManager) {
-      this.#settingManager.set('password', this.#password)
-    }
+    this.#settingManager?.set('password', this.#password)
   }
 
   private get token(): string {
@@ -113,9 +105,7 @@ export default class {
 
   private set token(value: string) {
     this.#token = value
-    if (this.#settingManager) {
-      this.#settingManager.set('token', this.#token)
-    }
+    this.#settingManager?.set('token', this.#token)
   }
 
   private get username(): string {
@@ -124,16 +114,11 @@ export default class {
 
   private set username(value: string) {
     this.#username = value
-    if (this.#settingManager) {
-      this.#settingManager.set('username', this.#username)
-    }
+    this.#settingManager?.set('username', this.#username)
   }
 
   public async applyLogin(data?: LoginCredentials): Promise<boolean> {
-    const { username, password } = data ?? {
-      password: this.password,
-      username: this.username,
-    }
+    const { username = this.username, password = this.password } = data ?? {}
     if (username && password) {
       try {
         await this.login({ password, username })
