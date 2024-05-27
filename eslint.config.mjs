@@ -272,5 +272,10 @@ export default tsEslint.config(
   {
     files: ['**/*.mjs'],
     ...tsEslint.configs.disableTypeChecked,
+    languageOptions: {
+      parserOptions: {
+        project: 'tsconfig.mjs.json',
+      },
+    },
   },
 )
