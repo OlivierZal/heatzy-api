@@ -154,7 +154,7 @@ export default class {
     const response = await this.#api.post<LoginData>(LOGIN_URL, {
       password,
       username,
-    })
+    } satisfies LoginPostData)
     this.username = username
     this.password = password
     this.token = response.data.token
