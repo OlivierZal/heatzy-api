@@ -147,10 +147,16 @@ export default class {
     return this.#api.get<DeviceData>(`/devdata/${id}/latest`)
   }
 
-  public async login(postData: LoginPostData): Promise<{ data: LoginData }> {
-    const response = await this.#api.post<LoginData>(LOGIN_URL, postData)
-    this.username = postData.username
-    this.password = postData.password
+  public async login({
+    username,
+    password,
+  }: LoginPostData): Promise<{ data: LoginData }> {
+    const response = await this.#api.post<LoginData>(LOGIN_URL, {
+      password,
+      username,
+    })
+    this.username = username
+    this.password = password
     this.token = response.data.token
     this.expireAt = response.data.expire_at
     return response
