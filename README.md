@@ -69,7 +69,7 @@ new default(config: {
 
 ###### Source
 
-[src/lib/HeatzyAPI.ts:66](https://github.com/OlivierZal/heatzy-api/blob/6febc1d92fa9deaa2996a11f15d2e0eed9cb8029/src/lib/HeatzyAPI.ts#L66)
+[src/lib/HeatzyAPI.ts:66](https://github.com/OlivierZal/heatzy-api/blob/fc9cdd18d93602fd698b105a9561d939b47865b4/src/lib/HeatzyAPI.ts#L66)
 
 #### Methods
 
@@ -91,7 +91,7 @@ applyLogin(data?: LoginCredentials): Promise<boolean>
 
 ###### Source
 
-[src/lib/HeatzyAPI.ts:120](https://github.com/OlivierZal/heatzy-api/blob/6febc1d92fa9deaa2996a11f15d2e0eed9cb8029/src/lib/HeatzyAPI.ts#L120)
+[src/lib/HeatzyAPI.ts:120](https://github.com/OlivierZal/heatzy-api/blob/fc9cdd18d93602fd698b105a9561d939b47865b4/src/lib/HeatzyAPI.ts#L120)
 
 ##### bindings()
 
@@ -113,7 +113,7 @@ bindings(): Promise<{
 
 ###### Source
 
-[src/lib/HeatzyAPI.ts:135](https://github.com/OlivierZal/heatzy-api/blob/6febc1d92fa9deaa2996a11f15d2e0eed9cb8029/src/lib/HeatzyAPI.ts#L135)
+[src/lib/HeatzyAPI.ts:135](https://github.com/OlivierZal/heatzy-api/blob/fc9cdd18d93602fd698b105a9561d939b47865b4/src/lib/HeatzyAPI.ts#L135)
 
 ##### control()
 
@@ -142,7 +142,7 @@ control(id: string, postData: DevicePostDataAny): Promise<{
 
 ###### Source
 
-[src/lib/HeatzyAPI.ts:139](https://github.com/OlivierZal/heatzy-api/blob/6febc1d92fa9deaa2996a11f15d2e0eed9cb8029/src/lib/HeatzyAPI.ts#L139)
+[src/lib/HeatzyAPI.ts:139](https://github.com/OlivierZal/heatzy-api/blob/fc9cdd18d93602fd698b105a9561d939b47865b4/src/lib/HeatzyAPI.ts#L139)
 
 ##### deviceData()
 
@@ -170,7 +170,7 @@ deviceData(id: string): Promise<{
 
 ###### Source
 
-[src/lib/HeatzyAPI.ts:146](https://github.com/OlivierZal/heatzy-api/blob/6febc1d92fa9deaa2996a11f15d2e0eed9cb8029/src/lib/HeatzyAPI.ts#L146)
+[src/lib/HeatzyAPI.ts:146](https://github.com/OlivierZal/heatzy-api/blob/fc9cdd18d93602fd698b105a9561d939b47865b4/src/lib/HeatzyAPI.ts#L146)
 
 ##### login()
 
@@ -198,7 +198,7 @@ login(__namedParameters: LoginPostData): Promise<{
 
 ###### Source
 
-[src/lib/HeatzyAPI.ts:150](https://github.com/OlivierZal/heatzy-api/blob/6febc1d92fa9deaa2996a11f15d2e0eed9cb8029/src/lib/HeatzyAPI.ts#L150)
+[src/lib/HeatzyAPI.ts:150](https://github.com/OlivierZal/heatzy-api/blob/fc9cdd18d93602fd698b105a9561d939b47865b4/src/lib/HeatzyAPI.ts#L150)
 
 ## Interfaces
 
@@ -345,7 +345,7 @@ type Data: Record<string, never>;
 
 #### Source
 
-[src/types.ts:23](https://github.com/OlivierZal/heatzy-api/blob/6febc1d92fa9deaa2996a11f15d2e0eed9cb8029/src/types.ts#L23)
+[src/types.ts:23](https://github.com/OlivierZal/heatzy-api/blob/fc9cdd18d93602fd698b105a9561d939b47865b4/src/types.ts#L23)
 
 ***
 
@@ -357,7 +357,7 @@ type DevicePostDataAny: DevicePostData | FirstGenDevicePostData;
 
 #### Source
 
-[src/types.ts:72](https://github.com/OlivierZal/heatzy-api/blob/6febc1d92fa9deaa2996a11f15d2e0eed9cb8029/src/types.ts#L72)
+[src/types.ts:72](https://github.com/OlivierZal/heatzy-api/blob/fc9cdd18d93602fd698b105a9561d939b47865b4/src/types.ts#L72)
 
 ## Variables
 
@@ -369,4 +369,4 @@ const NUMBER_1: 1 = 1;
 
 #### Source
 
-[src/types.ts:1](https://github.com/OlivierZal/heatzy-api/blob/6febc1d92fa9deaa2996a11f15d2e0eed9cb8029/src/types.ts#L1)
+[src/types.ts:1](https://github.com/OlivierZal/heatzy-api/blob/fc9cdd18d93602fd698b105a9561d939b47865b4/src/types.ts#L1)
