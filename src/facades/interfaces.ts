@@ -10,6 +10,9 @@ export interface DerogSettings {
 
 export interface IDeviceFacade extends IBaseDeviceModel {
   get: () => Promise<Attrs>
+  isFirstGen: boolean
+  isFirstPilot: boolean
+  isGlow: boolean
   mode: Mode
   set: (data: Attrs) => Promise<Attrs>
   cftTempH?: number

@@ -29,11 +29,20 @@ export class DeviceFacade implements IDeviceFacade {
 
   public readonly id: string
 
-  readonly #isFirstGen: boolean
+  public readonly isFirstGen: boolean
+
+  public readonly isFirstPilot: boolean
+
+  public readonly isGlow: boolean
 
   public constructor(manager: FacadeManager, instance: DeviceModel) {
     ;({ api: this.api } = manager)
-    ;({ id: this.id, isFirstGen: this.#isFirstGen } = instance)
+    ;({
+      id: this.id,
+      isFirstGen: this.isFirstGen,
+      isFirstPilot: this.isFirstPilot,
+      isGlow: this.isGlow,
+    } = instance)
   }
 
   public get cftTempH(): number | undefined {
@@ -134,7 +143,7 @@ export class DeviceFacade implements IDeviceFacade {
 
   #handle(attrs: Attrs): DevicePostDataAny | undefined {
     if (Object.keys(attrs).length) {
-      if (this.#isFirstGen) {
+      if (this.isFirstGen) {
         return attrs.mode === undefined ?
             undefined
           : { raw: [UNIT, UNIT, attrs.mode] }
