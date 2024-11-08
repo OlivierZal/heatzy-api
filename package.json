@@ -51,7 +51,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jsdoc": "^48.9.2",
+    "eslint-plugin-jsdoc": "^50.4.3",
     "markdownlint-cli2": "^0.14.0",
     "prettier": "^3.3.3",
     "typedoc": "^0.26.11",
