@@ -90,6 +90,12 @@ export class API implements IAPI {
   @setting
   private accessor username = ''
 
+  public static async create(config: APIConfig = {}): Promise<API> {
+    const api = new API(config)
+    await api.fetch()
+    return api
+  }
+
   @syncDevices
   public async fetch(): Promise<readonly Device[]> {
     this.clearSync()
