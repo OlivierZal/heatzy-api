@@ -1,35 +1,11 @@
-export const NUMBER_1 = 1
-
-export enum Mode {
-  cft = 0,
-  eco = 1,
-  fro = 2,
-  stop = 3,
-  cft1 = 4,
-  cft2 = 5,
-}
-
-export enum DerogMode {
-  off = 0,
-  vacation = 1,
-  boost = 2,
-}
-
-export enum Switch {
-  off = 0,
-  on = 1,
-}
+import type { UNIT } from './constants.js'
+import type { DerogMode, Mode, Switch } from './enums.js'
 
 export type Data = Record<string, never>
 
 export interface ErrorData {
   readonly detail_message: string | null
   readonly error_message: string | null
-}
-
-export interface LoginCredentials {
-  readonly password: string
-  readonly username: string
 }
 
 export interface LoginPostData {
@@ -42,35 +18,37 @@ export interface LoginData {
   readonly token: string
 }
 
+export interface Device {
+  readonly dev_alias: string
+  readonly did: string
+  readonly product_key: string
+  readonly product_name: string
+}
+
 export interface Bindings {
-  readonly devices: readonly {
-    readonly dev_alias: string
-    readonly did: string
-    readonly product_key: string
-    readonly product_name: string
-  }[]
+  readonly devices: readonly Device[]
 }
 
 export interface FirstGenDevicePostData {
-  readonly raw: [typeof NUMBER_1, typeof NUMBER_1, Mode]
+  readonly raw: [typeof UNIT, typeof UNIT, Mode]
 }
 
-export interface BaseAttrs {
-  cft_tempH?: number
-  cft_tempL?: number
-  derog_mode?: DerogMode
-  derog_time?: number
-  lock_switch?: Switch
-  mode?: Mode
-  timer_switch?: Switch
+export interface Attrs {
+  readonly cft_tempH?: number
+  readonly cft_tempL?: number
+  readonly derog_mode?: DerogMode
+  readonly derog_time?: number
+  readonly lock_switch?: Switch
+  readonly mode?: Mode
+  readonly timer_switch?: Switch
 }
 
 export interface DevicePostData {
-  readonly attrs: BaseAttrs
+  readonly attrs: Attrs
 }
 
 export type DevicePostDataAny = DevicePostData | FirstGenDevicePostData
 
 export interface DeviceData {
-  readonly attr: Exclude<BaseAttrs, 'mode'> & { readonly mode: string }
+  readonly attr: Attrs
 }
