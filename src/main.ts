@@ -8,7 +8,7 @@ export { DeviceFacade } from './facades/device.js'
 export { FacadeManager } from './facades/manager.js'
 export { DeviceModel } from './models/device.js'
 export { API as HeatzyAPI } from './services/api.js'
-export type { IDeviceFacade } from './facades/interfaces.js'
+export type { DerogSettings, IDeviceFacade } from './facades/interfaces.js'
 export type { IBaseDeviceModel, IDeviceModel } from './models/interfaces.js'
 export type {
   APIConfig,
@@ -21,6 +21,7 @@ export type {
   Attrs,
   Bindings,
   Data,
+  Device,
   DeviceData,
   DevicePostData,
   DevicePostDataAny,
