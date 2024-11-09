@@ -61,7 +61,7 @@ export class DeviceModel implements IDeviceModel {
     )
   }
 
-  public update(data: Attrs): void {
+  public update(data: Partial<Attrs>): void {
     this.#data = { ...this.#data, ...data }
   }
 }

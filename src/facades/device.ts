@@ -3,11 +3,11 @@ import { DateTime } from 'luxon'
 import { UNIT } from '../constants.js'
 import { syncDevices } from '../decorators/syncDevices.js'
 import { updateDevice } from '../decorators/updateDevice.js'
-import { DerogMode, type Mode, type Switch } from '../enums.js'
+import { DerogMode, Mode, type Switch } from '../enums.js'
 import { DeviceModel } from '../models/device.js'
 
 import type { API } from '../services/api.js'
-import type { Attrs, DevicePostDataAny } from '../types.js'
+import type { Attrs, BaseAttrs, DevicePostDataAny } from '../types.js'
 
 import type { DerogSettings, IDeviceFacade } from './interfaces.js'
 import type { FacadeManager } from './manager.js'
@@ -96,14 +96,11 @@ export class DeviceFacade implements IDeviceFacade {
     return this.data.lock_switch
   }
 
-  public get mode(): Mode {
+  public get mode(): keyof typeof Mode {
     const {
       data: { mode },
     } = this
-    if (mode === undefined) {
-      throw new Error('Mode undefined')
-    }
-    return mode
+    return typeof mode === 'number' ? (Mode[mode] as keyof typeof Mode) : mode
   }
 
   public get name(): string {
@@ -130,7 +127,7 @@ export class DeviceFacade implements IDeviceFacade {
 
   @syncDevices
   @updateDevice
-  public async set(data: Attrs): Promise<Attrs> {
+  public async set(data: BaseAttrs): Promise<BaseAttrs> {
     const postData = this.#handle(data)
     if (postData) {
       await this.api.control({
@@ -141,12 +138,13 @@ export class DeviceFacade implements IDeviceFacade {
     return data
   }
 
-  #handle(attrs: Attrs): DevicePostDataAny | undefined {
+  #handle(attrs: BaseAttrs): DevicePostDataAny | undefined {
     if (Object.keys(attrs).length) {
       if (this.isFirstGen) {
-        return attrs.mode === undefined ?
-            undefined
-          : { raw: [UNIT, UNIT, attrs.mode] }
+        const { mode } = attrs
+        if (mode !== undefined && mode in Mode) {
+          return { raw: [UNIT, UNIT, Mode[mode as keyof typeof Mode]] }
+        }
       }
       return { attrs }
     }

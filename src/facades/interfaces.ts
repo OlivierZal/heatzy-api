@@ -1,6 +1,6 @@
 import type { DerogMode, Mode, Switch } from '../enums.js'
 import type { IBaseDeviceModel } from '../models/interfaces.js'
-import type { Attrs } from '../types.js'
+import type { Attrs, BaseAttrs } from '../types.js'
 
 export interface DerogSettings {
   derogEnd: string | null
@@ -10,8 +10,8 @@ export interface DerogSettings {
 
 export interface IDeviceFacade extends IBaseDeviceModel {
   get: () => Promise<Attrs>
-  mode: Mode
-  set: (data: Attrs) => Promise<Attrs>
+  mode: keyof typeof Mode
+  set: (data: BaseAttrs) => Promise<BaseAttrs>
   cftTempH?: number
   cftTempL?: number
   derogMode?: DerogMode

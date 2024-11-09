@@ -33,22 +33,25 @@ export interface FirstGenDevicePostData {
   readonly raw: [typeof UNIT, typeof UNIT, Mode]
 }
 
-export interface Attrs {
+export interface BaseAttrs {
   readonly cft_tempH?: number
   readonly cft_tempL?: number
   readonly derog_mode?: DerogMode
   readonly derog_time?: number
   readonly lock_switch?: Switch
-  readonly mode?: Mode
+  readonly mode?: Mode | keyof typeof Mode
   readonly timer_switch?: Switch
 }
 
 export interface DevicePostData {
-  readonly attrs: Attrs
+  readonly attrs: BaseAttrs
 }
 
 export type DevicePostDataAny = DevicePostData | FirstGenDevicePostData
 
+export type Attrs = Omit<BaseAttrs, 'mode'> & {
+  readonly mode: keyof typeof Mode
+}
 export interface DeviceData {
   readonly attr: Attrs
 }
