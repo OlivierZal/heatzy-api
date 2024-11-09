@@ -7,13 +7,25 @@ import type {
   InternalAxiosRequestConfig,
 } from 'axios'
 
+import type { ErrorData } from '../types.js'
+
 import type { APICallContextData } from './context.js'
 
 export interface APICallContextDataWithErrorMessage extends APICallContextData {
   readonly errorMessage: string
 }
 
-const getMessage = (error: AxiosError): string => error.message
+const getMessage = (error: AxiosError): string => {
+  const data = error.response?.data as ErrorData | null | undefined
+  if (data !== undefined && data) {
+    const { detail_message: detailMessage, error_message: errorMessage } = data
+    const message = detailMessage ?? errorMessage ?? ''
+    if (message) {
+      return message
+    }
+  }
+  return error.message
+}
 
 const withErrorMessage = <T extends AxiosResponse | InternalAxiosRequestConfig>(
   base: new (arg?: T) => APICallContextData,
