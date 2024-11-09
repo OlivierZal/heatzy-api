@@ -142,8 +142,10 @@ export class DeviceFacade implements IDeviceFacade {
     if (Object.keys(attrs).length) {
       if (this.isFirstGen) {
         const { mode } = attrs
-        if (mode !== undefined && mode in Mode) {
-          return { raw: [UNIT, UNIT, Mode[mode as keyof typeof Mode]] }
+        if (mode !== undefined) {
+          return {
+            raw: [UNIT, UNIT, typeof mode === 'string' ? Mode[mode] : mode],
+          }
         }
       }
       return { attrs }
