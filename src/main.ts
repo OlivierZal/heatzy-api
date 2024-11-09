@@ -19,6 +19,7 @@ export type {
 } from './services/interfaces.js'
 export type {
   Attrs,
+  BaseAttrs,
   Bindings,
   Data,
   Device,
