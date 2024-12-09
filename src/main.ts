@@ -16,7 +16,7 @@ export type {
   IDeviceV2Facade,
   IFacadeManager,
 } from './facades/interfaces.ts'
-export type { IDeviceModel } from './models/interfaces.ts'
+export type { IDeviceModel, Product } from './models/interfaces.ts'
 export type {
   APIConfig,
   APISettings,
@@ -38,4 +38,3 @@ export type {
   LoginData,
   LoginPostData,
 } from './types.ts'
-export type { Product } from './utils.ts'

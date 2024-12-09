@@ -1,8 +1,6 @@
-import { getProduct, type Product } from '../utils.ts'
+import { getProduct, type IDeviceModel, type Product } from './interfaces.ts'
 
 import type { Attrs, Device } from '../types.ts'
-
-import type { IDeviceModel } from './interfaces.ts'
 
 export class DeviceModel implements IDeviceModel {
   static #instances = new Map<string, DeviceModel>()
