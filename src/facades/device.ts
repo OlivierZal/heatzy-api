@@ -23,6 +23,10 @@ export class DeviceFacade implements IDeviceFacade {
     this.supportsExtendedMode = !['v1', 'v2'].includes(instance.product)
   }
 
+  public get isOn(): boolean {
+    return this.mode === Mode.stop
+  }
+
   public get mode(): Mode {
     return this.getValue('mode')
   }
@@ -41,10 +45,6 @@ export class DeviceFacade implements IDeviceFacade {
       throw new Error('Device not found')
     }
     return instance
-  }
-
-  public get onOff(): boolean {
-    return this.mode === Mode.stop
   }
 
   public async onSync(): Promise<void> {

@@ -9,8 +9,8 @@ export interface DerogSettings {
 }
 
 export interface IDeviceFacade extends IBaseDeviceModel {
+  isOn: boolean
   mode: Mode
-  onOff: boolean
   supportsExtendedMode: boolean
   onSync: () => Promise<void>
   setValues: (data: Attrs) => Promise<Attrs>
