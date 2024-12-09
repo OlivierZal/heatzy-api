@@ -1,4 +1,4 @@
-import type { DerogMode, Mode, TemperatureCompensation } from '../enums.ts'
+import type { Mode, TemperatureCompensation } from '../enums.ts'
 import type { IBaseDeviceModel, IDeviceModel } from '../models/interfaces.ts'
 import type { Attrs } from '../types.ts'
 
@@ -9,9 +9,9 @@ export interface DerogSettings {
 }
 
 export interface IDeviceFacade extends IBaseDeviceModel {
+  device: IDeviceModel
   isOn: boolean
   mode: Mode
-  supportsExtendedMode: boolean
   onSync: () => Promise<void>
   setValues: (data: Attrs) => Promise<Attrs>
   values: () => Promise<Attrs>
@@ -34,7 +34,6 @@ export interface IDeviceProFacade extends IDeviceGlowFacade {
 }
 
 export interface IDeviceV2Facade extends IDeviceFacade {
-  derogMode: DerogMode
   derogSettings: DerogSettings
   lockSwitch: boolean
   timerSwitch: boolean

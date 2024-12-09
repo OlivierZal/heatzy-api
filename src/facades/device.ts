@@ -11,16 +11,22 @@ import type { Attrs } from '../types.ts'
 import type { IDeviceFacade } from './interfaces.ts'
 
 export class DeviceFacade implements IDeviceFacade {
-  public readonly id: string
+  public readonly doesNotSupportExtendedMode: boolean
 
-  public readonly supportsExtendedMode: boolean
+  public readonly id: string
 
   protected readonly api: IAPI
 
   public constructor(api: IAPI, instance: IDeviceModel) {
     this.api = api
-    ;({ id: this.id } = instance)
-    this.supportsExtendedMode = !['v1', 'v2'].includes(instance.product)
+    ;({
+      doesNotSupportExtendedMode: this.doesNotSupportExtendedMode,
+      id: this.id,
+    } = instance)
+  }
+
+  public get device(): IDeviceModel {
+    return this.instance
   }
 
   public get isOn(): boolean {

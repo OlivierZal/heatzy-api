@@ -23,12 +23,8 @@ const getBoostEnd = (minutes: number): string =>
   DateTime.now().plus({ minutes }).toLocaleString(DateTime.TIME_24_SIMPLE)
 
 export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
-  public get derogMode(): DerogMode {
-    return this.getValue('derog_mode')
-  }
-
   public get derogSettings(): DerogSettings {
-    switch (this.derogMode) {
+    switch (this.#derogMode) {
       case DerogMode.boost:
         return {
           derogEnd: getBoostEnd(this.#derogTime),
@@ -57,6 +53,10 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
 
   public get timerSwitch(): boolean {
     return Boolean(this.getValue('timer_switch'))
+  }
+
+  get #derogMode(): DerogMode {
+    return this.getValue('derog_mode')
   }
 
   get #derogTime(): number {

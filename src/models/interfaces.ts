@@ -1,6 +1,7 @@
 import type { Attrs } from '../types.ts'
 
 export interface IBaseDeviceModel {
+  doesNotSupportExtendedMode: boolean
   id: string
   name: string
 }
