@@ -1,5 +1,5 @@
 import type { DerogMode, Mode, TemperatureCompensation } from '../enums.ts'
-import type { IBaseDeviceModel } from '../models/interfaces.ts'
+import type { IBaseDeviceModel, IDeviceModel } from '../models/interfaces.ts'
 import type { Attrs } from '../types.ts'
 
 export interface DerogSettings {
@@ -39,3 +39,13 @@ export interface IDeviceV2Facade extends IDeviceFacade {
   lockSwitch: boolean
   timerSwitch: boolean
 }
+
+export interface IFacadeManager {
+  get: (instance?: IDeviceModel) => IDeviceFacade | undefined
+}
+
+export type IDeviceFacadeAny =
+  | IDeviceFacade
+  | IDeviceGlowFacade
+  | IDeviceProFacade
+  | IDeviceV2Facade

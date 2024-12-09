@@ -1,3 +1,5 @@
+export type Product = 'glow' | 'pro' | 'v1' | 'v2' | 'v4'
+
 const productMapping: Record<Product, string[]> = {
   glow: [
     '2fd622e45283470f9e27e8e6167d7533',
@@ -29,5 +31,3 @@ export const getProduct = (productKey: string): Product => {
   }
   throw new Error(`Invalid product: ${productKey}`)
 }
-
-export type Product = 'glow' | 'pro' | 'v1' | 'v2' | 'v4'

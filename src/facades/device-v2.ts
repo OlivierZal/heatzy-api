@@ -35,20 +35,19 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
           derogTimeBoost: this.#derogTime,
           derogTimeVacation: 0,
         }
-      case DerogMode.off:
-        return {
-          derogEnd: null,
-          derogTimeBoost: 0,
-          derogTimeVacation: 0,
-        }
       case DerogMode.vacation:
         return {
           derogEnd: getVacationEnd(this.#derogTime),
           derogTimeBoost: 0,
           derogTimeVacation: this.#derogTime,
         }
+      case DerogMode.off:
       default:
-        throw new Error('Invalid derog mode')
+        return {
+          derogEnd: null,
+          derogTimeBoost: 0,
+          derogTimeVacation: 0,
+        }
     }
   }
 

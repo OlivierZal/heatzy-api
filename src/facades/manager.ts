@@ -6,20 +6,20 @@ import { DeviceFacade } from './device.ts'
 import type { IDeviceModel } from '../models/interfaces.ts'
 import type { IAPI } from '../services/interfaces.ts'
 
-import type { IDeviceFacade } from './interfaces.ts'
+import type { IDeviceFacadeAny, IFacadeManager } from './interfaces.ts'
 
-export class FacadeManager {
+export class FacadeManager implements IFacadeManager {
   public readonly api: IAPI
 
-  readonly #facades = new Map<string, IDeviceFacade>()
+  readonly #facades = new Map<string, IDeviceFacadeAny>()
 
   public constructor(api: IAPI) {
     this.api = api
   }
 
   public get(): undefined
-  public get(instance: IDeviceModel): IDeviceFacade
-  public get(instance?: IDeviceModel): IDeviceFacade | undefined {
+  public get(instance: IDeviceModel): IDeviceFacadeAny
+  public get(instance?: IDeviceModel): IDeviceFacadeAny | undefined {
     if (instance) {
       const { id, product } = instance
       if (!this.#facades.has(id)) {

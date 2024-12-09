@@ -4,7 +4,10 @@ import type { Mode } from '../enums.ts'
 
 import type { IDeviceProFacade } from './interfaces.ts'
 
-export class DeviceProFacade extends DeviceGlowFacade implements IDeviceProFacade {
+export class DeviceProFacade
+  extends DeviceGlowFacade
+  implements IDeviceProFacade
+{
   public override get comfortTemperature(): number {
     return this.getValue('cft_temp')
   }
