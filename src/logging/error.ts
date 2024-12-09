@@ -15,13 +15,24 @@ export interface APICallContextDataWithErrorMessage extends APICallContextData {
   readonly errorMessage: string
 }
 
+const isErrorData = (data: unknown): data is ErrorData =>
+  data !== null &&
+  typeof data === 'object' &&
+  'detail_message' in data &&
+  'error_message' in data
+
 const getMessage = (error: AxiosError): string => {
-  const data = error.response?.data as ErrorData | null | undefined
-  if (data !== undefined && data) {
-    const { detail_message: detailMessage, error_message: errorMessage } = data
-    const message = detailMessage ?? errorMessage ?? ''
-    if (message) {
-      return message
+  if (error.response) {
+    const {
+      response: { data },
+    } = error
+    if (isErrorData(data)) {
+      const { detail_message: detailMessage, error_message: errorMessage } =
+        data
+      const message = detailMessage ?? errorMessage ?? ''
+      if (message) {
+        return message
+      }
     }
   }
   return error.message
