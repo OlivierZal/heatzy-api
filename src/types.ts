@@ -12,9 +12,9 @@ export interface Attrs {
   readonly derog_mode?: DerogMode
   readonly derog_time?: number
   readonly timer_switch?: Switch
-  // Product: not 'v1' or 'glow'
+  // Product: not 'v1', 'glow'
   readonly lock_switch?: Switch
-  // Product: not 'v1', 'v2' or 'v4'
+  // Product: not 'v1', 'v2', 'v4'
   readonly com_temp?: TemperatureCompensation
   // Product: 'glow'
   readonly cft_tempH?: number

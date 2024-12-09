@@ -4,7 +4,7 @@ import { updateDevice } from '../decorators/update-device.ts'
 import { Mode } from '../enums.ts'
 import { DeviceModel } from '../models/device.ts'
 
-import type { IDeviceModel } from '../models/interfaces.ts'
+import type { IDeviceModel, Product } from '../models/interfaces.ts'
 import type { IAPI } from '../services/interfaces.ts'
 import type { Attrs } from '../types.ts'
 
@@ -15,6 +15,8 @@ export class DeviceFacade implements IDeviceFacade {
 
   public readonly id: string
 
+  public product: Product
+
   protected readonly api: IAPI
 
   public constructor(api: IAPI, instance: IDeviceModel) {
@@ -22,6 +24,7 @@ export class DeviceFacade implements IDeviceFacade {
     ;({
       doesNotSupportExtendedMode: this.doesNotSupportExtendedMode,
       id: this.id,
+      product: this.product,
     } = instance)
   }
 

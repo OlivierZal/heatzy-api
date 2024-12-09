@@ -4,11 +4,11 @@ export interface IBaseDeviceModel {
   doesNotSupportExtendedMode: boolean
   id: string
   name: string
+  product: Product
 }
 
 export interface IDeviceModel extends IBaseDeviceModel {
   data: Attrs
-  product: Product
   productKey: string
   productName: string
   update: (data: Attrs) => void
