@@ -1,25 +1,24 @@
 import 'source-map-support/register.js'
 
-export { UNIT } from './constants.js'
-export { syncDevices } from './decorators/syncDevices.js'
-export { updateDevice } from './decorators/updateDevice.js'
-export { DerogMode, Mode, Switch } from './enums.js'
-export { DeviceFacade } from './facades/device.js'
-export { FacadeManager } from './facades/manager.js'
-export { DeviceModel } from './models/device.js'
-export { API as HeatzyAPI } from './services/api.js'
-export type { DerogSettings, IDeviceFacade } from './facades/interfaces.js'
-export type { IBaseDeviceModel, IDeviceModel } from './models/interfaces.js'
+export { UNIT } from './constants.ts'
+export { syncDevices } from './decorators/sync-devices.ts'
+export { updateDevice } from './decorators/update-device.ts'
+export { DerogMode, Mode, Switch } from './enums.ts'
+export { DeviceFacade } from './facades/device.ts'
+export { FacadeManager } from './facades/manager.ts'
+export { DeviceModel } from './models/device.ts'
+export { API as HeatzyAPI } from './services/api.ts'
+export type { DerogSettings, IDeviceFacade } from './facades/interfaces.ts'
+export type { IBaseDeviceModel, IDeviceModel } from './models/interfaces.ts'
 export type {
   APIConfig,
   APISettings,
   IAPI,
   Logger,
   SettingManager,
-} from './services/interfaces.js'
+} from './services/interfaces.ts'
 export type {
   Attrs,
-  BaseAttrs,
   Bindings,
   Data,
   Device,
@@ -30,4 +29,4 @@ export type {
   FirstGenDevicePostData,
   LoginData,
   LoginPostData,
-} from './types.js'
+} from './types.ts'

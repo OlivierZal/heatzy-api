@@ -1,6 +1,6 @@
-import type { DerogMode, Mode, Switch } from '../enums.js'
-import type { IBaseDeviceModel } from '../models/interfaces.js'
-import type { Attrs, BaseAttrs } from '../types.js'
+import type { DerogMode, Mode, TemperatureCompensation } from '../enums.ts'
+import type { IBaseDeviceModel } from '../models/interfaces.ts'
+import type { Attrs } from '../types.ts'
 
 export interface DerogSettings {
   derogEnd: string | null
@@ -9,14 +9,33 @@ export interface DerogSettings {
 }
 
 export interface IDeviceFacade extends IBaseDeviceModel {
-  get: () => Promise<Attrs>
-  mode: keyof typeof Mode
-  set: (data: BaseAttrs) => Promise<BaseAttrs>
-  cftTempH?: number
-  cftTempL?: number
-  derogMode?: DerogMode
-  derogSettings?: DerogSettings
-  derogTime?: number
-  lockSwitch?: Switch
-  timerSwitch?: Switch
+  mode: Mode
+  onOff: boolean
+  supportsExtendedMode: boolean
+  onSync: () => Promise<void>
+  setValues: (data: Attrs) => Promise<Attrs>
+  values: () => Promise<Attrs>
+}
+
+export interface IDeviceGlowFacade extends IDeviceV2Facade {
+  comfortTemperature: number
+  currentTemperature: number
+  ecoTemperature: number
+  temperatureCompensation: TemperatureCompensation
+}
+
+export interface IDeviceProFacade extends IDeviceGlowFacade {
+  currentHumidity: number
+  currentMode: Mode
+  currentSignal: Mode
+  heatingState: boolean
+  temperatureStep: boolean
+  windowSwitch: boolean
+}
+
+export interface IDeviceV2Facade extends IDeviceFacade {
+  derogMode: DerogMode
+  derogSettings: DerogSettings
+  lockSwitch: boolean
+  timerSwitch: boolean
 }

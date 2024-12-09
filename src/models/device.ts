@@ -1,8 +1,8 @@
-import { isFirstGen, isFirstPilot, isGlow } from './utils.js'
+import { getProduct, type Product } from '../utils.ts'
 
-import type { Attrs, Device } from '../types.js'
+import type { Attrs, Device } from '../types.ts'
 
-import type { IDeviceModel } from './interfaces.js'
+import type { IDeviceModel } from './interfaces.ts'
 
 export class DeviceModel implements IDeviceModel {
   static #instances = new Map<string, DeviceModel>()
@@ -11,15 +11,11 @@ export class DeviceModel implements IDeviceModel {
 
   public readonly name: string
 
+  public readonly product: Product
+
   public readonly productKey: string
 
   public readonly productName: string
-
-  public isFirstGen: boolean
-
-  public isFirstPilot: boolean
-
-  public isGlow: boolean
 
   #data: Attrs
 
@@ -30,9 +26,7 @@ export class DeviceModel implements IDeviceModel {
       product_key: this.productKey,
       product_name: this.productName,
     } = device)
-    this.isFirstGen = isFirstGen(this.productKey)
-    this.isFirstPilot = isFirstPilot(this.productName)
-    this.isGlow = isGlow(this.productKey)
+    this.product = getProduct(this.productKey)
     this.#data = data
   }
 

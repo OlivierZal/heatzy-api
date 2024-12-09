@@ -9,12 +9,19 @@ import axios, {
 } from 'axios'
 import { DateTime, Duration, Settings as LuxonSettings } from 'luxon'
 
-import { setting } from '../decorators/setting.js'
-import { syncDevices } from '../decorators/syncDevices.js'
-import { createAPICallErrorData } from '../logging/error.js'
-import { APICallRequestData } from '../logging/request.js'
-import { APICallResponseData } from '../logging/response.js'
-import { DeviceModel } from '../models/device.js'
+import { syncDevices } from '../decorators/sync-devices.ts'
+import { createAPICallErrorData } from '../logging/error.ts'
+import { APICallRequestData } from '../logging/request.ts'
+import { APICallResponseData } from '../logging/response.ts'
+import { DeviceModel } from '../models/device.ts'
+
+import {
+  isAPISetting,
+  type APIConfig,
+  type IAPI,
+  type Logger,
+  type SettingManager,
+} from './interfaces.ts'
 
 import type {
   Attrs,
@@ -25,9 +32,7 @@ import type {
   DevicePostDataAny,
   LoginData,
   LoginPostData,
-} from '../types.js'
-
-import type { APIConfig, IAPI, Logger, SettingManager } from './interfaces.js'
+} from '../types.ts'
 
 const APPLICATION_ID = 'X-Gizwits-Application-Id'
 const LOGIN_PATH = '/login'
@@ -35,6 +40,30 @@ const LOGIN_PATH = '/login'
 const DEFAULT_SYNC_INTERVAL = 1
 const NO_SYNC_INTERVAL = 0
 const RETRY_DELAY = 1000
+
+const setting = <This extends API>(
+  target: ClassAccessorDecoratorTarget<This, string>,
+  context: ClassAccessorDecoratorContext<This, string>,
+): ClassAccessorDecoratorResult<This, string> => ({
+  get(this: This): string {
+    const key = String(context.name)
+    if (!isAPISetting(key)) {
+      throw new Error(`Invalid setting: ${key}`)
+    }
+    return this.settingManager?.get(key) ?? target.get.call(this)
+  },
+  set(this: This, value: string): void {
+    const key = String(context.name)
+    if (!isAPISetting(key)) {
+      throw new Error(`Invalid setting: ${key}`)
+    }
+    if (this.settingManager) {
+      this.settingManager.set(key, value)
+      return
+    }
+    target.set.call(this, value)
+  },
+})
 
 export class API implements IAPI {
   public readonly onSync?: () => Promise<void>
@@ -282,6 +311,7 @@ export class API implements IAPI {
   async #sync(devices: readonly Device[]): Promise<void> {
     DeviceModel.sync(
       devices,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
       Object.fromEntries(
         await Promise.all(
           devices.map(async ({ did }) => [

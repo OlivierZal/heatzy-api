@@ -7,130 +7,15 @@ import packageJson from 'eslint-plugin-package-json/configs/recommended'
 import perfectionist from 'eslint-plugin-perfectionist'
 import ts, { configs as tsConfigs } from 'typescript-eslint'
 
-const modifiersOrder = [
-  ['declare', 'override', ''],
-  ['static', '', 'abstract'],
-  ['decorated', ''],
-  ['', 'protected', 'private'],
-  ['', 'optional'],
-  ['readonly', ''],
-]
+import { classGroups } from './eslint-utils/class-groups.js'
 
-const selectorOrder = [
-  'index-signature',
-  'property',
-  'function-property',
-  'static-block',
-  'constructor',
-  'accessor-property',
-  ['get-method', 'set-method'],
-  'event-handler',
-  'method',
-]
-
-const cartesianProduct = (arrays) =>
-  arrays.reduce(
-    (acc, array) =>
-      acc.flatMap((accItem) =>
-        array.map((item) => [
-          ...(Array.isArray(accItem) ? accItem : [accItem]),
-          item,
-        ]),
-      ),
-    [[]],
-  )
-
-const allModifierCombos = cartesianProduct(modifiersOrder).map((combo) =>
-  combo.filter((modifier) => modifier !== ''),
-)
-
-const modifierIncompatibilities = {
-  abstract: ['decorated', 'private', 'static'],
-  declare: ['decorated', 'override'],
-}
-
-const compatibleModifierCombos = allModifierCombos.filter((combo) =>
-  combo.every((modifier) =>
-    (modifierIncompatibilities[modifier] ?? []).every(
-      (incompatibleModifier) => !combo.includes(incompatibleModifier),
-    ),
-  ),
-)
-
-const allModifiers = [
-  'abstract',
-  'declare',
-  'decorated',
-  'optional',
-  'override',
-  'private',
-  'protected',
-  'readonly',
-  'static',
-]
-const baseMethodIncompatibilities = ['declare', 'readonly']
-const accessorIncompatibilities = [...baseMethodIncompatibilities, 'optional']
-
-const selectorIncompatibilities = {
-  'accessor-property': accessorIncompatibilities,
-  constructor: [
-    ...baseMethodIncompatibilities,
-    'abstract',
-    'decorated',
-    'optional',
-    'override',
-    'static',
-  ],
-  'event-handler': allModifiers,
-  'function-property': ['abstract', 'declare'],
-  'get-method': accessorIncompatibilities,
-  'index-signature': [
-    'abstract',
-    'declare',
-    'decorated',
-    'optional',
-    'override',
-    'private',
-    'protected',
-  ],
-  method: baseMethodIncompatibilities,
-  property: [],
-  'set-method': accessorIncompatibilities,
-  'static-block': allModifiers,
-}
-
-const generateGroupsForSelector = (selector) =>
-  compatibleModifierCombos
-    .filter((modifiers) =>
-      modifiers.every(
-        (modifier) =>
-          !(selectorIncompatibilities[selector] ?? []).includes(modifier),
-      ),
-    )
-    .map((modifiers) => [...modifiers, selector].join('-'))
-
-const groups = selectorOrder.flatMap((selector) => {
-  if (Array.isArray(selector)) {
-    const groupPairs = selector.map((pairedSelector) =>
-      generateGroupsForSelector(pairedSelector),
-    )
-    const [groupPair] = groupPairs
-    return [...Array(groupPair.length).keys()].map((index) =>
-      groupPairs.map((group) => group[index]),
-    )
-  }
-  return generateGroupsForSelector(selector)
-})
-
-const classGroups = {
-  customGroups: [
-    {
-      elementNamePattern: 'on*',
-      groupName: 'event-handler',
-      selector: 'method',
-    },
-  ],
-  groups,
+const decoratorGroups = {
+  customGroups: {
+    'fetch-decorator': '^fetchDevices$',
+    'sync-decorator': '^syncDevices$',
+    'update-decorator': '^updateDevice(s)?$',
+  },
+  groups: ['sync-decorator', 'update-decorator', 'unknown', 'fetch-decorator'],
 }
 
 const importGroups = {
@@ -156,6 +41,31 @@ const importGroups = {
   ],
 }
 
+const moduleGroups = {
+  groups: [
+    'declare-enum',
+    'enum',
+    'export-enum',
+    'declare-interface',
+    'interface',
+    'export-interface',
+    'declare-type',
+    'type',
+    'export-type',
+    'declare-class',
+    'class',
+    'export-class',
+    'declare-function',
+    'function',
+    'export-function',
+    [
+      'export-default-interface',
+      'export-default-class',
+      'export-default-function',
+    ],
+  ],
+}
+
 const typeGroups = {
   groups: [
     'import',
@@ -174,8 +84,15 @@ const typeGroups = {
   ],
 }
 
-const requiredFirst = {
-  groupKind: 'required-first',
+const typeLikeGroups = {
+  groups: [
+    'required-index-signature',
+    'optional-index-signature',
+    'required-property',
+    'optional-property',
+    'required-method',
+    'optional-method',
+  ],
 }
 
 const valuesFirst = {
@@ -190,8 +107,8 @@ const config = [
     {
       extends: [
         js.configs.all,
-        ...tsConfigs.all,
-        ...tsConfigs.strictTypeChecked,
+        tsConfigs.all,
+        tsConfigs.strictTypeChecked,
         importPlugin.flatConfigs.errors,
         importPlugin.flatConfigs.typescript,
         prettier,
@@ -243,7 +160,7 @@ const config = [
           {
             filter: {
               match: true,
-              regex: '^cft_temp(H|L)$',
+              regex: '^(eco|cft|cur)_temp(H|L)$',
             },
             format: null,
             selector: 'typeProperty',
@@ -375,15 +292,18 @@ const config = [
         'one-var': ['error', 'never'],
         'perfectionist/sort-array-includes': 'error',
         'perfectionist/sort-classes': ['error', classGroups],
+        'perfectionist/sort-decorators': ['error', decoratorGroups],
         'perfectionist/sort-enums': 'error',
         'perfectionist/sort-exports': ['error', valuesFirst],
+        'perfectionist/sort-heritage-clauses': 'error',
         'perfectionist/sort-imports': ['error', importGroups],
-        'perfectionist/sort-interfaces': ['error', requiredFirst],
+        'perfectionist/sort-interfaces': ['error', typeLikeGroups],
         'perfectionist/sort-intersection-types': ['error', typeGroups],
         'perfectionist/sort-maps': 'error',
+        'perfectionist/sort-modules': ['error', moduleGroups],
         'perfectionist/sort-named-exports': ['error', valuesFirst],
         'perfectionist/sort-named-imports': ['error', valuesFirst],
-        'perfectionist/sort-object-types': ['error', requiredFirst],
+        'perfectionist/sort-object-types': ['error', typeLikeGroups],
         'perfectionist/sort-objects': 'error',
         'perfectionist/sort-sets': 'error',
         'perfectionist/sort-switch-case': 'error',
@@ -394,6 +314,7 @@ const config = [
       settings: {
         perfectionist: {
           ignoreCase: false,
+          locales: 'en_US',
           order: 'asc',
           partitionByComment: true,
           type: 'natural',
@@ -401,7 +322,7 @@ const config = [
         ...importPlugin.flatConfigs.typescript.settings,
         'import/resolver': {
           ...importPlugin.flatConfigs.typescript.settings['import/resolver'],
-          typescript: {
+          '@helljs/eslint-import-resolver-x': {
             alwaysTryTypes: true,
           },
         },
@@ -412,6 +333,7 @@ const config = [
       files: ['**/*.js'],
       rules: {
         '@typescript-eslint/explicit-function-return-type': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
       },
     },
     {

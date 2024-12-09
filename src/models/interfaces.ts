@@ -1,15 +1,14 @@
-import type { Attrs } from '../types.js'
+import type { Attrs } from '../types.ts'
+import type { Product } from '../utils.ts'
 
 export interface IBaseDeviceModel {
-  data: Attrs
   id: string
-  isFirstGen: boolean
-  isFirstPilot: boolean
-  isGlow: boolean
   name: string
 }
 
 export interface IDeviceModel extends IBaseDeviceModel {
+  data: Attrs
+  product: Product
   productKey: string
   productName: string
   update: (data: Attrs) => void

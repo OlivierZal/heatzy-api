@@ -6,7 +6,7 @@ import type {
   DevicePostDataAny,
   LoginData,
   LoginPostData,
-} from '../types.js'
+} from '../types.ts'
 
 export interface APISettings {
   expireAt?: string | null
@@ -25,27 +25,18 @@ export const isAPISetting = (key: string): key is keyof APISettings =>
     ] satisfies (keyof APISettings)[] as string[]
   ).includes(key)
 
-export interface SettingManager {
-  get: <K extends keyof APISettings>(key: K) => APISettings[K]
-  set: <K extends keyof APISettings>(key: K, value: APISettings[K]) => void
-}
-
-export interface Logger {
-  error: Console['error']
-  log: Console['log']
-}
-
 export interface APIConfig extends Partial<LoginPostData> {
   autoSyncInterval?: number | null
   language?: string
   logger?: Logger
-  onSync?: () => Promise<void>
+  onSync?: OnSyncFunction
   settingManager?: SettingManager
   shouldVerifySSL?: boolean
   timezone?: string
 }
 
 export interface IAPI {
+  onSync?: OnSyncFunction
   authenticate: (data?: LoginPostData) => Promise<boolean>
   bindings: () => Promise<{ data: Bindings }>
   clearSync: () => void
@@ -63,5 +54,16 @@ export interface IAPI {
   }: {
     postData: LoginPostData
   }) => Promise<{ data: LoginData }>
-  onSync?: () => Promise<void>
 }
+
+export interface Logger {
+  error: Console['error']
+  log: Console['log']
+}
+
+export interface SettingManager {
+  get: <K extends keyof APISettings>(key: K) => APISettings[K]
+  set: <K extends keyof APISettings>(key: K, value: APISettings[K]) => void
+}
+
+export type OnSyncFunction = (params?: { ids?: string[] }) => Promise<void>

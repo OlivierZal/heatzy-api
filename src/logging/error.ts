@@ -1,5 +1,5 @@
-import { APICallRequestData } from './request.js'
-import { APICallResponseData } from './response.js'
+import { APICallRequestData } from './request.ts'
+import { APICallResponseData } from './response.ts'
 
 import type {
   AxiosError,
