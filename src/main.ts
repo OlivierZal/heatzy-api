@@ -15,6 +15,9 @@ export type {
   IDeviceProFacade,
   IDeviceV2Facade,
   IFacadeManager,
+  supportsGlow,
+  supportsPro,
+  supportsV2,
 } from './facades/interfaces.ts'
 export type { IDeviceModel, Product } from './models/interfaces.ts'
 export type {
