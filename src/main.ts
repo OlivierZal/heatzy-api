@@ -40,4 +40,5 @@ export type {
   FirstGenDevicePostData,
   LoginData,
   LoginPostData,
+  PostAttrs,
 } from './types.ts'
