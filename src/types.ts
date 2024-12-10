@@ -6,34 +6,16 @@ import type {
   TemperatureCompensation,
 } from './enums.ts'
 
-export interface Attrs {
-  readonly mode?: Mode
-  // Product: not 'v1'
-  readonly derog_mode?: DerogMode
-  readonly derog_time?: number
-  readonly timer_switch?: Switch
-  // Product: not 'v1', 'glow'
-  readonly lock_switch?: Switch
-  // Product: not 'v1', 'v2', 'v4'
-  readonly com_temp?: TemperatureCompensation
+export interface Attrs extends PostAttrs {
   // Product: 'glow'
-  readonly cft_tempH?: number
-  readonly cft_tempL?: number
   readonly cur_tempH?: number
   readonly cur_tempL?: number
-  readonly eco_tempH?: number
-  readonly eco_tempL?: number
-  readonly lock_c?: Switch
   // Product: 'pro'
-  readonly cft_temp?: number
   readonly cur_humi?: number
   readonly cur_mode?: Mode
   readonly cur_signal?: Mode
   readonly cur_temp?: number
-  readonly eco_temp?: number
   readonly heating_state?: Switch
-  readonly temp_set_step?: Switch
-  readonly window_switch?: Switch
 }
 
 export interface Bindings {
@@ -52,7 +34,7 @@ export interface DeviceData {
 }
 
 export interface DevicePostData {
-  readonly attrs: Attrs
+  readonly attrs: PostAttrs
 }
 
 export interface ErrorData {
@@ -72,6 +54,29 @@ export interface LoginData {
 export interface LoginPostData {
   readonly password: string
   readonly username: string
+}
+
+export interface PostAttrs {
+  readonly mode?: Mode
+  // Product: not 'v1'
+  readonly derog_mode?: DerogMode
+  readonly derog_time?: number
+  readonly timer_switch?: Switch
+  // Product: not 'v1', 'glow'
+  readonly lock_switch?: Switch
+  // Product: not 'v1', 'v2', 'v4'
+  readonly com_temp?: TemperatureCompensation
+  // Product: 'glow'
+  readonly cft_tempH?: number
+  readonly cft_tempL?: number
+  readonly eco_tempH?: number
+  readonly eco_tempL?: number
+  readonly lock_c?: Switch
+  // Product: 'pro'
+  readonly cft_temp?: number
+  readonly eco_temp?: number
+  readonly temp_set_step?: Switch
+  readonly window_switch?: Switch
 }
 
 export type Data = Record<string, never>

@@ -32,17 +32,17 @@ export interface IDeviceProFacade extends IDeviceGlowFacade {
   currentHumidity: number
   currentMode: Mode
   currentSignal: Mode
-  heatingState: boolean
+  isDetectingOpenWindow: boolean
+  isHeating: boolean
   supportsPro: true
   temperatureStep: boolean
-  windowSwitch: boolean
 }
 
 export interface IDeviceV2Facade extends IDeviceFacade {
   derogSettings: DerogSettings
-  lockSwitch: boolean
+  isLocked: boolean
+  isTimer: boolean
   supportsV2: true
-  timerSwitch: boolean
 }
 
 export interface IFacadeManager {

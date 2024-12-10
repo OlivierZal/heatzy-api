@@ -49,11 +49,11 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
     }
   }
 
-  public get lockSwitch(): boolean {
+  public get isLocked(): boolean {
     return Boolean(this.getValue('lock_switch'))
   }
 
-  public get timerSwitch(): boolean {
+  public get isTimer(): boolean {
     return Boolean(this.getValue('timer_switch'))
   }
 

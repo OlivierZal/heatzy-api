@@ -34,15 +34,15 @@ export class DeviceProFacade
     return this.getValue('cur_signal')
   }
 
-  public get heatingState(): boolean {
+  public get isDetectingOpenWindow(): boolean {
+    return Boolean(this.getValue('window_switch'))
+  }
+
+  public get isHeating(): boolean {
     return Boolean(this.getValue('heating_state'))
   }
 
   public get temperatureStep(): boolean {
     return Boolean(this.getValue('temp_set_step'))
-  }
-
-  public get windowSwitch(): boolean {
-    return Boolean(this.getValue('window_switch'))
   }
 }
