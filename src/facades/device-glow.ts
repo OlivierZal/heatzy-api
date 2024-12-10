@@ -17,18 +17,24 @@ export class DeviceGlowFacade
 
   public get comfortTemperature(): number {
     return Math.max(
-      Math.min(this.#getCombinedTemperature('cft'), temperatureRange.cft.max),
+      Math.min(
+        this.#getCombinedTemperature('cft_temp'),
+        temperatureRange.cft.max,
+      ),
       temperatureRange.cft.min,
     )
   }
 
   public get currentTemperature(): number {
-    return this.#getCombinedTemperature('cur')
+    return this.#getCombinedTemperature('cur_temp')
   }
 
   public get ecoTemperature(): number {
     return Math.max(
-      Math.min(this.#getCombinedTemperature('eco'), temperatureRange.eco.max),
+      Math.min(
+        this.#getCombinedTemperature('eco_temp'),
+        temperatureRange.eco.max,
+      ),
       temperatureRange.eco.min,
     )
   }
@@ -37,10 +43,12 @@ export class DeviceGlowFacade
     return this.getValue('com_temp')
   }
 
-  #getCombinedTemperature(prefix: 'cft' | 'cur' | 'eco'): number {
+  #getCombinedTemperature(
+    temperature: 'cft_temp' | 'cur_temp' | 'eco_temp',
+  ): number {
     return (
-      this.getValue(`${prefix}_tempH`) * TEMPERATURE_SCALE +
-      this.getValue(`${prefix}_tempL`) / TEMPERATURE_SCALE
+      this.getValue(`${temperature}H`) * TEMPERATURE_SCALE +
+      this.getValue(`${temperature}L`) / TEMPERATURE_SCALE
     )
   }
 }
