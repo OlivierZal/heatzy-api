@@ -4,12 +4,20 @@ import type { IDeviceGlowFacade } from './interfaces.ts'
 
 const TEMPERATURE_SCALE = 0x0a
 
+const temperatureRange = {
+  cft: { max: 30, min: 15 },
+  eco: { max: 19, min: 10 },
+}
+
 export class DeviceGlowFacade
   extends DeviceV2Facade
   implements IDeviceGlowFacade
 {
   public get comfortTemperature(): number {
-    return this.#getCombinedTemperature('cft')
+    return Math.max(
+      Math.min(this.#getCombinedTemperature('cft'), temperatureRange.cft.max),
+      temperatureRange.cft.min,
+    )
   }
 
   public get currentTemperature(): number {
@@ -17,7 +25,10 @@ export class DeviceGlowFacade
   }
 
   public get ecoTemperature(): number {
-    return this.#getCombinedTemperature('eco')
+    return Math.max(
+      Math.min(this.#getCombinedTemperature('eco'), temperatureRange.eco.max),
+      temperatureRange.eco.min,
+    )
   }
 
   public get temperatureCompensation(): number {
@@ -25,8 +36,9 @@ export class DeviceGlowFacade
   }
 
   #getCombinedTemperature(prefix: 'cft' | 'cur' | 'eco'): number {
-    const high = this.getValue(`${prefix}_tempH`)
-    const low = this.getValue(`${prefix}_tempL`)
-    return high * TEMPERATURE_SCALE + low / TEMPERATURE_SCALE
+    return (
+      this.getValue(`${prefix}_tempH`) * TEMPERATURE_SCALE +
+      this.getValue(`${prefix}_tempL`) / TEMPERATURE_SCALE
+    )
   }
 }
