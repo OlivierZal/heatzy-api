@@ -63,8 +63,8 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
     return this.getValue('derog_time')
   }
 
-  @syncDevice
   @updateDevice
+  @syncDevice
   public override async setValues(attrs: Attrs): Promise<Attrs> {
     if (Object.keys(attrs).length) {
       await this.api.control({

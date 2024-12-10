@@ -60,8 +60,8 @@ export class DeviceFacade implements IDeviceFacade {
     await this.api.onSync?.({ ids: [this.id] })
   }
 
-  @syncDevice
   @updateDevice
+  @syncDevice
   public async setValues(attrs: Attrs): Promise<Attrs> {
     const { mode } = attrs
     if (mode !== undefined) {
@@ -73,8 +73,8 @@ export class DeviceFacade implements IDeviceFacade {
     return attrs
   }
 
-  @syncDevice
   @updateDevice
+  @syncDevice
   public async values(): Promise<Attrs> {
     return (await this.api.deviceData({ id: this.id })).data.attr
   }
