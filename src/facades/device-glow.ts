@@ -2,7 +2,7 @@ import { DeviceV2Facade } from './device-v2.ts'
 
 import type { IDeviceGlowFacade } from './interfaces.ts'
 
-const TEMPERATURE_SCALE = 0x0a
+const TEMPERATURE_SCALE = 10
 
 const temperatureRange = {
   cft: { max: 30, min: 15 },
