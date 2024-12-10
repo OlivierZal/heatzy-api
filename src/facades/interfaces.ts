@@ -1,9 +1,5 @@
 import type { Mode, TemperatureCompensation } from '../enums.ts'
-import type {
-  IBaseDeviceModel,
-  IDeviceModel,
-  Product,
-} from '../models/interfaces.ts'
+import type { IBaseDeviceModel, IDeviceModel } from '../models/interfaces.ts'
 import type { Attrs } from '../types.ts'
 
 export interface DerogSettings {
@@ -16,7 +12,6 @@ export interface IDeviceFacade extends IBaseDeviceModel {
   device: IDeviceModel
   isOn: boolean
   mode: Mode
-  product: Product
   supportsGlow: boolean
   supportsPro: boolean
   supportsV2: boolean

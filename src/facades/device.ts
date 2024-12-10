@@ -4,7 +4,7 @@ import { updateDevice } from '../decorators/update-device.ts'
 import { Mode } from '../enums.ts'
 import { DeviceModel } from '../models/device.ts'
 
-import type { IDeviceModel, Product } from '../models/interfaces.ts'
+import type { IDeviceModel } from '../models/interfaces.ts'
 import type { IAPI } from '../services/interfaces.ts'
 import type { Attrs } from '../types.ts'
 
@@ -14,8 +14,6 @@ export class DeviceFacade implements IDeviceFacade {
   public readonly doesNotSupportExtendedMode: boolean
 
   public readonly id: string
-
-  public readonly product: Product = 'v1'
 
   public readonly supportsGlow: boolean = false
 
