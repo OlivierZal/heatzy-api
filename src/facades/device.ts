@@ -15,7 +15,7 @@ export class DeviceFacade implements IDeviceFacade {
 
   public readonly id: string
 
-  public product: Product
+  public readonly product: Product = 'v1'
 
   protected readonly api: IAPI
 
@@ -24,7 +24,6 @@ export class DeviceFacade implements IDeviceFacade {
     ;({
       doesNotSupportExtendedMode: this.doesNotSupportExtendedMode,
       id: this.id,
-      product: this.product,
     } = instance)
   }
 

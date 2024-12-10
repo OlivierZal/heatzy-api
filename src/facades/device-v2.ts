@@ -6,6 +6,7 @@ import { DerogMode } from '../enums.ts'
 
 import { DeviceFacade } from './device.ts'
 
+import type { Product } from '../models/interfaces.ts'
 import type { Attrs } from '../types.ts'
 
 import type { DerogSettings, IDeviceV2Facade } from './interfaces.ts'
@@ -23,6 +24,8 @@ const getBoostEnd = (minutes: number): string =>
   DateTime.now().plus({ minutes }).toLocaleString(DateTime.TIME_24_SIMPLE)
 
 export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
+  public override readonly product: Exclude<Product, 'v1'> = 'v2'
+
   public get derogSettings(): DerogSettings {
     switch (this.#derogMode) {
       case DerogMode.boost:
