@@ -1,7 +1,5 @@
 import { DeviceV2Facade } from './device-v2.ts'
 
-import type { Product } from '../main.ts'
-
 import type { IDeviceGlowFacade } from './interfaces.ts'
 
 const TEMPERATURE_SCALE = 0x0a
@@ -15,8 +13,7 @@ export class DeviceGlowFacade
   extends DeviceV2Facade
   implements IDeviceGlowFacade
 {
-  public override readonly product: Exclude<Product, 'v1' | 'v2' | 'v4'> =
-    'glow'
+  public override readonly supportsGlow = true
 
   public get comfortTemperature(): number {
     return Math.max(

@@ -17,6 +17,9 @@ export interface IDeviceFacade extends IBaseDeviceModel {
   isOn: boolean
   mode: Mode
   product: Product
+  supportsGlow: boolean
+  supportsPro: boolean
+  supportsV2: boolean
   onSync: () => Promise<void>
   setValues: (data: Attrs) => Promise<Attrs>
   values: () => Promise<Attrs>
@@ -26,7 +29,7 @@ export interface IDeviceGlowFacade extends IDeviceV2Facade {
   comfortTemperature: number
   currentTemperature: number
   ecoTemperature: number
-  product: Exclude<Product, 'v1' | 'v2' | 'v4'>
+  supportsGlow: true
   temperatureCompensation: TemperatureCompensation
 }
 
@@ -35,7 +38,7 @@ export interface IDeviceProFacade extends IDeviceGlowFacade {
   currentMode: Mode
   currentSignal: Mode
   heatingState: boolean
-  product: Exclude<Product, 'glow' | 'v1' | 'v2' | 'v4'>
+  supportsPro: true
   temperatureStep: boolean
   windowSwitch: boolean
 }
@@ -43,7 +46,7 @@ export interface IDeviceProFacade extends IDeviceGlowFacade {
 export interface IDeviceV2Facade extends IDeviceFacade {
   derogSettings: DerogSettings
   lockSwitch: boolean
-  product: Exclude<Product, 'v1'>
+  supportsV2: true
   timerSwitch: boolean
 }
 

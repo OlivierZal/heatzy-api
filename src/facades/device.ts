@@ -17,6 +17,12 @@ export class DeviceFacade implements IDeviceFacade {
 
   public readonly product: Product = 'v1'
 
+  public readonly supportsGlow: boolean = false
+
+  public readonly supportsPro: boolean = false
+
+  public readonly supportsV2: boolean = false
+
   protected readonly api: IAPI
 
   public constructor(api: IAPI, instance: IDeviceModel) {
