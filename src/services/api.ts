@@ -9,7 +9,7 @@ import axios, {
 } from 'axios'
 import { DateTime, Duration, Settings as LuxonSettings } from 'luxon'
 
-import { syncDevices } from '../decorators/sync-devices.ts'
+import { syncDevice } from '../decorators/sync-devices.ts'
 import { createAPICallErrorData } from '../logging/error.ts'
 import { APICallRequestData } from '../logging/request.ts'
 import { APICallResponseData } from '../logging/response.ts'
@@ -125,7 +125,7 @@ export class API implements IAPI {
     return api
   }
 
-  @syncDevices
+  @syncDevice
   public async fetch(): Promise<readonly Device[]> {
     this.clearSync()
     try {

@@ -1,5 +1,5 @@
 import { UNIT } from '../constants.ts'
-import { syncDevices } from '../decorators/sync-devices.ts'
+import { syncDevice } from '../decorators/sync-devices.ts'
 import { updateDevice } from '../decorators/update-device.ts'
 import { Mode } from '../enums.ts'
 import { DeviceModel } from '../models/device.ts'
@@ -60,7 +60,7 @@ export class DeviceFacade implements IDeviceFacade {
     await this.api.onSync?.({ ids: [this.id] })
   }
 
-  @syncDevices
+  @syncDevice
   @updateDevice
   public async setValues(attrs: Attrs): Promise<Attrs> {
     const { mode } = attrs
@@ -73,7 +73,7 @@ export class DeviceFacade implements IDeviceFacade {
     return attrs
   }
 
-  @syncDevices
+  @syncDevice
   @updateDevice
   public async values(): Promise<Attrs> {
     return (await this.api.deviceData({ id: this.id })).data.attr

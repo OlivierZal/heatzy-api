@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { syncDevices } from '../decorators/sync-devices.ts'
+import { syncDevice } from '../decorators/sync-devices.ts'
 import { updateDevice } from '../decorators/update-device.ts'
 import { DerogMode } from '../enums.ts'
 
@@ -63,7 +63,7 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
     return this.getValue('derog_time')
   }
 
-  @syncDevices
+  @syncDevice
   @updateDevice
   public override async setValues(attrs: Attrs): Promise<Attrs> {
     if (Object.keys(attrs).length) {

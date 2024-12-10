@@ -2,7 +2,7 @@ import type { IDeviceFacade } from '../facades/interfaces.ts'
 import type { IAPI } from '../services/interfaces.ts'
 import type { Attrs, Device } from '../types.ts'
 
-export const syncDevices = <T extends Attrs | readonly Device[]>(
+export const syncDevice = <T extends Attrs | readonly Device[]>(
   target: (...args: any[]) => Promise<T>,
   _context: ClassMethodDecoratorContext,
 ): ((...args: unknown[]) => Promise<T>) =>
