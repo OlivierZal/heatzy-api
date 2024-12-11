@@ -2,16 +2,25 @@ export enum DerogMode {
   boost = 2,
   off = 0,
   vacation = 1,
+  // Product: 'pro'
+  presence = 3,
 }
 
 export enum Mode {
+  cft = 'cft',
+  eco = 'eco',
+  fro = 'fro',
+  stop = 'stop',
+  // Product: not 'v1', 'v2'
+  cft1 = 'cft1',
+  cft2 = 'cft2',
+}
+
+export enum ModeV1 {
   cft = 0,
   eco = 1,
   fro = 2,
   stop = 3,
-  // Product: not 'v1' or 'v2'
-  cft1 = 4,
-  cft2 = 5,
 }
 
 export enum Switch {

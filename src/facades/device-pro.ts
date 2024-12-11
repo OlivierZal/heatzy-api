@@ -1,6 +1,6 @@
-import { DeviceGlowFacade } from './device-glow.ts'
+import { DerogMode, Mode } from '../enums.ts'
 
-import type { Mode } from '../enums.ts'
+import { DeviceGlowFacade } from './device-glow.ts'
 
 import type { IDeviceProFacade } from './interfaces.ts'
 
@@ -39,10 +39,13 @@ export class DeviceProFacade
   }
 
   public get isHeating(): boolean {
-    return Boolean(this.getValue('heating_state'))
+    return Boolean(this.getValue('Heating_state'))
   }
 
-  public get temperatureStep(): boolean {
-    return Boolean(this.getValue('temp_set_step'))
+  public get isPresence(): boolean {
+    return (
+      this.getValue('derog_mode') === DerogMode.presence &&
+      this.currentMode === Mode.cft
+    )
   }
 }

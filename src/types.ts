@@ -2,11 +2,13 @@ import type { UNIT } from './constants.ts'
 import type {
   DerogMode,
   Mode,
+  ModeV1,
   Switch,
   TemperatureCompensation,
 } from './enums.ts'
 
 export interface Attrs extends PostAttrs {
+  readonly mode: Mode
   // Product: 'glow'
   readonly cur_tempH?: number
   readonly cur_tempL?: number
@@ -15,7 +17,7 @@ export interface Attrs extends PostAttrs {
   readonly cur_mode?: Mode
   readonly cur_signal?: Mode
   readonly cur_temp?: number
-  readonly heating_state?: Switch
+  readonly Heating_state?: Switch
 }
 
 export interface Bindings {
@@ -37,13 +39,13 @@ export interface DevicePostData {
   readonly attrs: PostAttrs
 }
 
+export interface DeviceV1PostData {
+  readonly raw: [typeof UNIT, typeof UNIT, mode: ModeV1]
+}
+
 export interface ErrorData {
   readonly detail_message: string | null
   readonly error_message: string | null
-}
-
-export interface FirstGenDevicePostData {
-  readonly raw: [typeof UNIT, typeof UNIT, Mode]
 }
 
 export interface LoginData {
@@ -75,10 +77,9 @@ export interface PostAttrs {
   // Product: 'pro'
   readonly cft_temp?: number
   readonly eco_temp?: number
-  readonly temp_set_step?: Switch
   readonly window_switch?: Switch
 }
 
 export type Data = Record<string, never>
 
-export type DevicePostDataAny = DevicePostData | FirstGenDevicePostData
+export type DevicePostDataAny = DevicePostData | DeviceV1PostData

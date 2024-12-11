@@ -11,7 +11,7 @@ export interface IDeviceModel extends IBaseDeviceModel {
   product: Product
   productKey: string
   productName: string
-  update: (data: Attrs) => void
+  update: (data: Partial<Attrs>) => void
 }
 
 export type Product = 'glow' | 'pro' | 'v1' | 'v2' | 'v4'

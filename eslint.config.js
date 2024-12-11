@@ -11,11 +11,10 @@ import { classGroups } from './eslint-utils/class-groups.js'
 
 const decoratorGroups = {
   customGroups: {
-    'fetch-decorator': '^fetchDevices$',
     'sync-decorator': '^syncDevices$',
     'update-decorator': '^updateDevice(s)?$',
   },
-  groups: ['sync-decorator', 'update-decorator', 'unknown', 'fetch-decorator'],
+  groups: ['sync-decorator', 'update-decorator', 'unknown'],
 }
 
 const importGroups = {
@@ -160,7 +159,7 @@ const config = [
           {
             filter: {
               match: true,
-              regex: '^(eco|cft|cur)_temp(H|L)$',
+              regex: '^(Heating_state|.+_temp(H|L))$',
             },
             format: null,
             selector: 'typeProperty',

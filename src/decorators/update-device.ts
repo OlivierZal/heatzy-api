@@ -1,7 +1,7 @@
 import type { IDeviceFacade } from '../facades/interfaces.ts'
 import type { Attrs } from '../types.ts'
 
-export const updateDevice = <T extends Attrs>(
+export const updateDevice = <T extends Partial<Attrs>>(
   target: (...args: any[]) => Promise<T>,
   _context: ClassMethodDecoratorContext,
 ): ((...args: unknown[]) => Promise<T>) =>

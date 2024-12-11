@@ -1,14 +1,17 @@
 import { UNIT } from '../constants.ts'
 import { syncDevices } from '../decorators/sync-devices.ts'
 import { updateDevice } from '../decorators/update-device.ts'
-import { Mode } from '../enums.ts'
+import { Mode, ModeV1 } from '../enums.ts'
 import { DeviceModel } from '../models/device.ts'
 
 import type { IDeviceModel } from '../models/interfaces.ts'
 import type { IAPI } from '../services/interfaces.ts'
-import type { Attrs } from '../types.ts'
+import type { Attrs, PostAttrs } from '../types.ts'
 
 import type { IDeviceFacade } from './interfaces.ts'
+
+const isModeV1 = (mode?: string): mode is keyof typeof ModeV1 =>
+  mode !== undefined && mode in ModeV1
 
 export class DeviceFacade implements IDeviceFacade {
   public readonly doesNotSupportExtendedMode: boolean
@@ -65,15 +68,15 @@ export class DeviceFacade implements IDeviceFacade {
 
   @syncDevices
   @updateDevice
-  public async setValues(attrs: Attrs): Promise<Attrs> {
-    const { mode } = attrs
-    if (mode !== undefined) {
+  public async setValues({ mode }: PostAttrs): Promise<Partial<Attrs>> {
+    if (isModeV1(mode)) {
       await this.api.control({
         id: this.id,
-        postData: { raw: [UNIT, UNIT, mode] },
+        postData: { raw: [UNIT, UNIT, ModeV1[mode]] },
       })
+      return { mode }
     }
-    return attrs
+    return {}
   }
 
   @syncDevices
