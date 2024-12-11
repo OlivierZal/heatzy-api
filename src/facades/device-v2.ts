@@ -97,10 +97,7 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
             this.derogEndDate = null
         }
       }
-      await this.api.control({
-        id: this.id,
-        postData: { attrs },
-      })
+      await this.api.control({ id: this.id, postData: { attrs } })
     }
     return attrs
   }
