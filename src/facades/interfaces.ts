@@ -8,6 +8,7 @@ export interface DerogSettings {
   derogEndDate: DateTime | null
   derogEndString: string | null
   derogMode: DerogMode
+  derogModeString: string
 }
 
 export interface IDeviceFacade extends IBaseDeviceModel {
@@ -41,6 +42,8 @@ export interface IDeviceProFacade extends IDeviceGlowFacade {
 }
 
 export interface IDeviceV2Facade extends IDeviceFacade {
+  derogEndDate: DateTime | null
+  derogMode: DerogMode
   derogSettings: DerogSettings
   isLocked: boolean
   isTimer: boolean

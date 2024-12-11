@@ -22,6 +22,26 @@ export class DeviceProFacade
     return this.getValue('eco_temp')
   }
 
+  protected override get derogModeString():
+    | 'boost'
+    | 'off'
+    | 'vacation'
+    | Mode.cft
+    | Mode.cft1
+    | Mode.cft2
+    | Mode.eco {
+    if (
+      this.derogMode === DerogMode.presence &&
+      (this.currentMode === Mode.cft ||
+        this.currentMode === Mode.cft1 ||
+        this.currentMode === Mode.cft2 ||
+        this.currentMode === Mode.eco)
+    ) {
+      return this.currentMode
+    }
+    return super.derogModeString
+  }
+
   public get currentHumidity(): number {
     return this.getValue('cur_humi')
   }

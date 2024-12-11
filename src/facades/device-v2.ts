@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 
 import { syncDevices } from '../decorators/sync-devices.ts'
 import { updateDevice } from '../decorators/update-device.ts'
-import { DerogMode } from '../enums.ts'
+import { DerogMode, type Mode } from '../enums.ts'
 
 import { DeviceFacade } from './device.ts'
 
@@ -10,21 +10,31 @@ import type { Attrs, PostAttrs } from '../types.ts'
 
 import type { DerogSettings, IDeviceV2Facade } from './interfaces.ts'
 
-const getVacationEnd = (days: number): DateTime => DateTime.now().plus({ days })
-
-const getBoostEnd = (minutes: number): DateTime =>
-  DateTime.now().plus({ minutes })
-
 export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
   public override readonly supportsV2 = true
 
   #derogEndDate: DateTime | null = null
 
+  public get derogEndDate(): DateTime | null {
+    return this.#derogEndDate && this.#derogEndDate > DateTime.now() ?
+        this.#derogEndDate
+      : null
+  }
+
+  public set derogEndDate(date: DateTime | null) {
+    this.#derogEndDate = date
+  }
+
+  public get derogMode(): DerogMode {
+    return this.getValue('derog_mode')
+  }
+
   public get derogSettings(): DerogSettings {
     return {
       derogEndDate: this.derogEndDate,
       derogEndString: this.#derogEndString,
-      derogMode: this.#derogMode,
+      derogMode: this.derogMode,
+      derogModeString: this.derogModeString,
     }
   }
 
@@ -36,11 +46,34 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
     return Boolean(this.getValue('timer_switch'))
   }
 
+  protected get derogModeString():
+    | 'boost'
+    | 'off'
+    | 'vacation'
+    | Mode.cft
+    | Mode.cft1
+    | Mode.cft2
+    | Mode.eco {
+    switch (this.derogMode) {
+      case DerogMode.boost:
+        return 'boost'
+      case DerogMode.vacation:
+        return 'vacation'
+      case DerogMode.off:
+      case DerogMode.presence:
+      default:
+        return 'off'
+    }
+  }
+
   get #derogEndString(): string | null {
     const { derogEndDate } = this
     if (derogEndDate) {
-      switch (this.#derogMode) {
+      switch (this.derogMode) {
         case DerogMode.boost:
+        case DerogMode.presence:
+          return derogEndDate.toLocaleString(DateTime.TIME_24_SIMPLE)
+        case DerogMode.vacation:
           return derogEndDate.toLocaleString({
             day: 'numeric',
             hour: '2-digit',
@@ -48,32 +81,15 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
             minute: '2-digit',
             month: 'short',
           })
-        case DerogMode.vacation:
-          return derogEndDate.toLocaleString(DateTime.TIME_24_SIMPLE)
         case DerogMode.off:
-        case DerogMode.presence:
         default:
       }
     }
     return null
   }
 
-  get #derogMode(): DerogMode {
-    return this.getValue('derog_mode')
-  }
-
   get #derogTime(): number {
     return this.getValue('derog_time')
-  }
-
-  private get derogEndDate(): DateTime | null {
-    return this.#derogEndDate && this.#derogEndDate > DateTime.now() ?
-        this.#derogEndDate
-      : null
-  }
-
-  private set derogEndDate(date: DateTime | null) {
-    this.#derogEndDate = date
   }
 
   @syncDevices
@@ -82,14 +98,15 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
     if (Object.keys(attrs).length) {
       const { derog_mode: derogMode, derog_time: derogTime } = attrs
       if (derogMode !== undefined || derogTime !== undefined) {
-        const newDerogMode = derogMode ?? this.#derogMode
+        const newDerogMode = derogMode ?? this.derogMode
         const newDerogTime = derogTime ?? this.#derogTime
+        const now = DateTime.now()
         switch (newDerogMode) {
           case DerogMode.boost:
-            this.derogEndDate = getBoostEnd(newDerogTime)
+            this.derogEndDate = now.plus({ minutes: newDerogTime })
             break
           case DerogMode.vacation:
-            this.derogEndDate = getVacationEnd(newDerogTime)
+            this.derogEndDate = now.plus({ days: newDerogTime })
             break
           case DerogMode.off:
           case DerogMode.presence:
