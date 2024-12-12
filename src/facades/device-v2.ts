@@ -16,7 +16,11 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
   #derogEndDate: DateTime | null = null
 
   public get derogEndDate(): DateTime | null {
-    return this.#derogEndDate && this.#derogEndDate > DateTime.now() ?
+    return (
+        this.derogMode !== DerogMode.off &&
+          this.#derogEndDate &&
+          this.#derogEndDate > DateTime.now()
+      ) ?
         this.#derogEndDate
       : null
   }
