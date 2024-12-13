@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
 
+import { syncDevices } from '../decorators/sync-devices.ts'
+import { updateDevice } from '../decorators/update-device.ts'
 import { DerogMode, Mode } from '../enums.ts'
-import { syncDevices, updateDevice } from '../main.ts'
 
 import { DeviceGlowFacade } from './device-glow.ts'
 

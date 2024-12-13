@@ -24,9 +24,9 @@ export {
 } from './facades/interfaces.ts'
 export { FacadeManager } from './facades/manager.ts'
 export { DeviceModel } from './models/device.ts'
+export { Product, type IDeviceModel } from './models/interfaces.ts'
 export { API as HeatzyAPI } from './services/api.ts'
 export { getTargetTemperature } from './utils.ts'
-export type { IDeviceModel, Product } from './models/interfaces.ts'
 export type {
   APIConfig,
   APISettings,
