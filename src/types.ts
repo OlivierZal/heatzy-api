@@ -15,9 +15,7 @@ export interface Attrs extends PostAttrs {
   // Product: 'pro'
   readonly cur_humi?: number
   readonly cur_mode?: Mode
-  readonly cur_signal?: Mode
   readonly cur_temp?: number
-  readonly Heating_state?: Switch
 }
 
 export interface Bindings {
@@ -74,6 +72,7 @@ export interface PostAttrs {
   readonly eco_tempH?: number
   readonly eco_tempL?: number
   readonly lock_c?: Switch
+  readonly on_off?: Switch
   // Product: 'pro'
   readonly cft_temp?: number
   readonly eco_temp?: number

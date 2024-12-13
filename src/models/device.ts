@@ -1,4 +1,4 @@
-import { getProduct, type IDeviceModel, type Product } from './interfaces.ts'
+import { getProduct, Product, type IDeviceModel } from './interfaces.ts'
 
 import type { Attrs, Device } from '../types.ts'
 
@@ -28,7 +28,9 @@ export class DeviceModel implements IDeviceModel {
     } = device)
     this.#data = data
     this.product = getProduct(this.productKey)
-    this.doesNotSupportExtendedMode = ['v1', 'v2'].includes(this.product)
+    this.doesNotSupportExtendedMode = [Product.v1, Product.v2].includes(
+      this.product,
+    )
   }
 
   public get data(): Attrs {

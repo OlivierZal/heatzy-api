@@ -15,6 +15,10 @@ export class DeviceGlowFacade
 {
   public override readonly supportsGlow = true
 
+  public override get isOn(): boolean {
+    return Boolean(this.getValue('on_off'))
+  }
+
   public get comfortTemperature(): number {
     return Math.max(
       Math.min(

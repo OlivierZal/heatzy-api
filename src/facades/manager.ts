@@ -1,9 +1,10 @@
+import { Product, type IDeviceModel } from '../models/interfaces.ts'
+
 import { DeviceGlowFacade } from './device-glow.ts'
 import { DeviceProFacade } from './device-pro.ts'
 import { DeviceV2Facade } from './device-v2.ts'
 import { DeviceFacade } from './device.ts'
 
-import type { IDeviceModel } from '../models/interfaces.ts'
 import type { IAPI } from '../services/interfaces.ts'
 
 import type { IDeviceFacadeAny, IFacadeManager } from './interfaces.ts'
@@ -24,17 +25,17 @@ export class FacadeManager implements IFacadeManager {
       const { id, product } = instance
       if (!this.#facades.has(id)) {
         switch (product) {
-          case 'glow':
+          case Product.glow:
             this.#facades.set(id, new DeviceGlowFacade(this.api, instance))
             break
-          case 'pro':
+          case Product.pro:
             this.#facades.set(id, new DeviceProFacade(this.api, instance))
             break
-          case 'v1':
+          case Product.v1:
             this.#facades.set(id, new DeviceFacade(this.api, instance))
             break
-          case 'v2':
-          case 'v4':
+          case Product.v2:
+          case Product.v4:
             this.#facades.set(id, new DeviceV2Facade(this.api, instance))
             break
           default:

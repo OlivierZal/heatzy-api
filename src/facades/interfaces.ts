@@ -34,9 +34,7 @@ export interface IDeviceGlowFacade extends IDeviceV2Facade {
 export interface IDeviceProFacade extends IDeviceGlowFacade {
   currentHumidity: number
   currentMode: Mode
-  currentSignal: Mode
   isDetectingOpenWindow: boolean
-  isHeating: boolean
   isPresence: boolean
   supportsPro: true
 }

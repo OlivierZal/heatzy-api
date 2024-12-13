@@ -22,6 +22,10 @@ export class DeviceProFacade
     return this.getValue('eco_temp')
   }
 
+  public override get isOn(): boolean {
+    return this.mode === Mode.stop
+  }
+
   protected override get derogModeString():
     | 'boost'
     | 'off'
@@ -50,16 +54,8 @@ export class DeviceProFacade
     return this.getValue('cur_mode')
   }
 
-  public get currentSignal(): Mode {
-    return this.getValue('cur_signal')
-  }
-
   public get isDetectingOpenWindow(): boolean {
     return Boolean(this.getValue('window_switch'))
-  }
-
-  public get isHeating(): boolean {
-    return Boolean(this.getValue('Heating_state'))
   }
 
   public get isPresence(): boolean {
