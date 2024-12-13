@@ -31,13 +31,15 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
     return this.getValue('derog_mode')
   }
 
-  public get derogSettings(): DerogSettings {
-    return {
-      derogEndDate: this.derogEndDate,
-      derogEndString: this.#derogEndString,
-      derogMode: this.derogMode,
-      derogModeString: this.derogModeString,
-    }
+  public get derogSettings(): DerogSettings | null {
+    const derogEnd = this.#derogEndString
+    return derogEnd === null ? null : (
+        { derogEnd, derogMode: this.derogModeString }
+      )
+  }
+
+  public get derogTime(): number {
+    return this.getValue('derog_time')
   }
 
   public get isLocked(): boolean {
@@ -91,10 +93,6 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
     return null
   }
 
-  get #derogTime(): number {
-    return this.getValue('derog_time')
-  }
-
   @syncDevices
   @updateDevice
   public override async setValues(attrs: PostAttrs): Promise<Partial<Attrs>> {
@@ -102,7 +100,7 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
       const { derog_mode: derogMode, derog_time: derogTime } = attrs
       if (derogMode !== undefined || derogTime !== undefined) {
         const newDerogMode = derogMode ?? this.derogMode
-        const newDerogTime = derogTime ?? this.#derogTime
+        const newDerogTime = derogTime ?? this.derogTime
         const now = DateTime.now()
         switch (newDerogMode) {
           case DerogMode.boost:

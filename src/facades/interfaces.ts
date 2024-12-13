@@ -10,10 +10,8 @@ import type { DerogMode, Mode, TemperatureCompensation } from '../enums.ts'
 import type { Attrs, PostAttrs } from '../types.ts'
 
 export interface DerogSettings {
-  derogEndDate: DateTime | null
-  derogEndString: string | null
-  derogMode: DerogMode
-  derogModeString:
+  derogEnd: string
+  derogMode:
     | 'boost'
     | 'off'
     | 'presence'
@@ -49,7 +47,8 @@ export interface IDeviceProFacade extends IDeviceGlowFacade {
 export interface IDeviceV2Facade extends IDeviceFacade {
   derogEndDate: DateTime | null
   derogMode: DerogMode
-  derogSettings: DerogSettings
+  derogSettings: DerogSettings | null
+  derogTime: number
   isLocked: boolean
   isTimer: boolean
 }

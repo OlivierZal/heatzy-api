@@ -10,23 +10,21 @@ export {
   Switch,
   TemperatureCompensation,
 } from './enums.ts'
-export {
-  supportsGlow,
-  supportsPro,
-  supportsV2,
-  type DerogSettings,
-  type IDeviceFacade,
-  type IDeviceFacadeAny,
-  type IDeviceGlowFacade,
-  type IDeviceProFacade,
-  type IDeviceV2Facade,
-  type IFacadeManager,
-} from './facades/interfaces.ts'
+export { supportsGlow, supportsPro, supportsV2 } from './facades/interfaces.ts'
 export { FacadeManager } from './facades/manager.ts'
 export { DeviceModel } from './models/device.ts'
 export { Product, type IDeviceModel } from './models/interfaces.ts'
 export { API as HeatzyAPI } from './services/api.ts'
 export { getTargetTemperature } from './utils.ts'
+export type {
+  DerogSettings,
+  IDeviceFacade,
+  IDeviceFacadeAny,
+  IDeviceGlowFacade,
+  IDeviceProFacade,
+  IDeviceV2Facade,
+  IFacadeManager,
+} from './facades/interfaces.ts'
 export type {
   APIConfig,
   APISettings,
