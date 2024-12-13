@@ -13,8 +13,6 @@ export class DeviceGlowFacade
   extends DeviceV2Facade
   implements IDeviceGlowFacade
 {
-  public override readonly supportsGlow = true
-
   public override get isOn(): boolean {
     return Boolean(this.getValue('on_off'))
   }

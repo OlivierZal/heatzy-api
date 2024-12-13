@@ -1,28 +1,28 @@
 import type { Attrs } from '../types.ts'
 
 export enum Product {
-  glow = 'glow',
-  pro = 'pro',
-  v1 = 'v1',
-  v2 = 'v2',
-  v4 = 'v4',
+  glow = 5,
+  pro = 6,
+  v1 = 1,
+  v2 = 2,
+  v4 = 4,
 }
 
 export interface IBaseDeviceModel {
   doesNotSupportExtendedMode: boolean
   id: string
   name: string
+  product: Product
+  update: (data: Partial<Attrs>) => void
 }
 
 export interface IDeviceModel extends IBaseDeviceModel {
   data: Attrs
-  product: Product
   productKey: string
   productName: string
-  update: (data: Partial<Attrs>) => void
 }
 
-const productMapping: Record<Product, string[]> = {
+const productMapping: Record<keyof typeof Product, string[]> = {
   glow: [
     'cffa0df68a52449085c5d1e72c2f6bb0',
     '2fd622e45283470f9e27e8e6167d7533',
@@ -51,7 +51,7 @@ export const getProduct = (productKey: string): Product => {
   if (entry) {
     const [product] = entry
     if (isProduct(product)) {
-      return product
+      return Product[product]
     }
   }
   throw new Error(`Invalid product: ${productKey}`)

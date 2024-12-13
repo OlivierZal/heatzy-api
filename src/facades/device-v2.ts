@@ -11,8 +11,6 @@ import type { Attrs, PostAttrs } from '../types.ts'
 import type { DerogSettings, IDeviceV2Facade } from './interfaces.ts'
 
 export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
-  public override readonly supportsV2 = true
-
   #derogEndDate: DateTime | null = null
 
   public get derogEndDate(): DateTime | null {
@@ -53,18 +51,19 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
   protected get derogModeString():
     | 'boost'
     | 'off'
+    | 'presence'
     | 'vacation'
-    | Mode.cft
     | Mode.cft1
     | Mode.cft2
     | Mode.eco {
     switch (this.derogMode) {
       case DerogMode.boost:
         return 'boost'
+      case DerogMode.presence:
+        return 'presence'
       case DerogMode.vacation:
         return 'vacation'
       case DerogMode.off:
-      case DerogMode.presence:
       default:
         return 'off'
     }

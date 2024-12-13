@@ -4,7 +4,7 @@ import { updateDevice } from '../decorators/update-device.ts'
 import { Mode, ModeV1 } from '../enums.ts'
 import { DeviceModel } from '../models/device.ts'
 
-import type { IDeviceModel } from '../models/interfaces.ts'
+import type { IDeviceModel, Product } from '../models/interfaces.ts'
 import type { IAPI } from '../services/interfaces.ts'
 import type { Attrs, PostAttrs } from '../types.ts'
 
@@ -18,11 +18,7 @@ export class DeviceFacade implements IDeviceFacade {
 
   public readonly id: string
 
-  public readonly supportsGlow: boolean = false
-
-  public readonly supportsPro: boolean = false
-
-  public readonly supportsV2: boolean = false
+  public readonly product: Product
 
   protected readonly api: IAPI
 
@@ -31,11 +27,8 @@ export class DeviceFacade implements IDeviceFacade {
     ;({
       doesNotSupportExtendedMode: this.doesNotSupportExtendedMode,
       id: this.id,
+      product: this.product,
     } = instance)
-  }
-
-  public get device(): IDeviceModel {
-    return this.instance
   }
 
   public get isOn(): boolean {
@@ -83,6 +76,10 @@ export class DeviceFacade implements IDeviceFacade {
   @updateDevice
   public async values(): Promise<Attrs> {
     return (await this.api.deviceData({ id: this.id })).data.attr
+  }
+
+  public update(data: Partial<Attrs>): void {
+    this.instance.update(data)
   }
 
   protected getValue<T extends keyof Attrs>(key: T): NonNullable<Attrs[T]> {

@@ -1,6 +1,11 @@
+import { DateTime } from 'luxon'
+
 import { DerogMode, Mode } from '../enums.ts'
+import { syncDevices, updateDevice } from '../main.ts'
 
 import { DeviceGlowFacade } from './device-glow.ts'
+
+import type { Attrs } from '../types.ts'
 
 import type { IDeviceProFacade } from './interfaces.ts'
 
@@ -8,7 +13,7 @@ export class DeviceProFacade
   extends DeviceGlowFacade
   implements IDeviceProFacade
 {
-  public override readonly supportsPro = true
+  public previousMode?: Mode
 
   public override get comfortTemperature(): number {
     return this.getValue('cft_temp')
@@ -29,15 +34,14 @@ export class DeviceProFacade
   protected override get derogModeString():
     | 'boost'
     | 'off'
+    | 'presence'
     | 'vacation'
-    | Mode.cft
     | Mode.cft1
     | Mode.cft2
     | Mode.eco {
     if (
       this.derogMode === DerogMode.presence &&
-      (this.currentMode === Mode.cft ||
-        this.currentMode === Mode.cft1 ||
+      (this.currentMode === Mode.cft1 ||
         this.currentMode === Mode.cft2 ||
         this.currentMode === Mode.eco)
     ) {
@@ -63,5 +67,26 @@ export class DeviceProFacade
       this.getValue('derog_mode') === DerogMode.presence &&
       this.currentMode === Mode.cft
     )
+  }
+
+  @syncDevices
+  @updateDevice
+  public override async values(): Promise<Attrs> {
+    ;({
+      instance: {
+        data: { cur_mode: this.previousMode },
+      },
+    } = this)
+    const data = await super.values()
+    if (this.derogMode === DerogMode.presence) {
+      const { cur_mode: currentMode } = data
+      if (currentMode !== undefined && currentMode !== this.previousMode) {
+        this.derogEndDate =
+          [Mode.cft1, Mode.cft2, Mode.eco].includes(currentMode) ?
+            DateTime.now().plus({ minutes: 15 })
+          : null
+      }
+    }
+    return data
   }
 }
