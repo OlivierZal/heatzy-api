@@ -15,7 +15,7 @@ export interface APISettings {
   username?: string | null
 }
 
-export const isAPISetting = (key: string): key is keyof APISettings =>
+export const isKeyofAPISetting = (key: string): key is keyof APISettings =>
   (
     [
       'expireAt',

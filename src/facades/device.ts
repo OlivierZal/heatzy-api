@@ -10,7 +10,7 @@ import type { Attrs, PostAttrs } from '../types.ts'
 
 import type { IDeviceFacade } from './interfaces.ts'
 
-const isModeV1 = (value?: string): value is keyof typeof ModeV1 =>
+const isKeyofModeV1 = (value?: string): value is keyof typeof ModeV1 =>
   value !== undefined && value in ModeV1
 
 export class DeviceFacade implements IDeviceFacade {
@@ -62,7 +62,7 @@ export class DeviceFacade implements IDeviceFacade {
   @syncDevices
   @updateDevice
   public async setValues({ mode }: PostAttrs): Promise<Partial<Attrs>> {
-    if (isModeV1(mode)) {
+    if (isKeyofModeV1(mode)) {
       await this.api.control({
         id: this.id,
         postData: { raw: [UNIT, UNIT, ModeV1[mode]] },
