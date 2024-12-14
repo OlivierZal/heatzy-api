@@ -10,11 +10,11 @@ import type { Attrs, PostAttrs } from '../types.ts'
 
 import type { IDeviceFacade } from './interfaces.ts'
 
-const isModeV1 = (mode?: string): mode is keyof typeof ModeV1 =>
-  mode !== undefined && mode in ModeV1
+const isModeV1 = (value?: string): value is keyof typeof ModeV1 =>
+  value !== undefined && value in ModeV1
 
 export class DeviceFacade implements IDeviceFacade {
-  public readonly doesNotSupportExtendedMode: boolean
+  public readonly hasRestrictedModes: boolean
 
   public readonly id: string
 
@@ -25,7 +25,7 @@ export class DeviceFacade implements IDeviceFacade {
   public constructor(api: IAPI, instance: IDeviceModel) {
     this.api = api
     ;({
-      doesNotSupportExtendedMode: this.doesNotSupportExtendedMode,
+      hasRestrictedModes: this.hasRestrictedModes,
       id: this.id,
       product: this.product,
     } = instance)

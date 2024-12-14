@@ -5,7 +5,7 @@ import type { Attrs, Device } from '../types.ts'
 export class DeviceModel implements IDeviceModel {
   static #instances = new Map<string, DeviceModel>()
 
-  public readonly doesNotSupportExtendedMode: boolean
+  public readonly hasRestrictedModes: boolean
 
   public readonly id: string
 
@@ -28,9 +28,7 @@ export class DeviceModel implements IDeviceModel {
     } = device)
     this.#data = data
     this.product = getProduct(this.productKey)
-    this.doesNotSupportExtendedMode = [Product.v1, Product.v2].includes(
-      this.product,
-    )
+    this.hasRestrictedModes = [Product.v1, Product.v2].includes(this.product)
   }
 
   public get data(): Attrs {

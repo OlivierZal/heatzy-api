@@ -9,7 +9,7 @@ export enum Product {
 }
 
 export interface IBaseDeviceModel {
-  doesNotSupportExtendedMode: boolean
+  hasRestrictedModes: boolean
   id: string
   name: string
   product: Product
@@ -41,8 +41,8 @@ const productMapping: Record<keyof typeof Product, string[]> = {
   v4: ['46409c7f29d4411c85a3a46e5ee3703e', '9dacde7ef459421eaf8dc4bea9385634'],
 } as const
 
-const isProduct = (product: string): product is keyof typeof productMapping =>
-  Object.keys(productMapping).includes(product)
+const isProduct = (value: string): value is keyof typeof productMapping =>
+  Object.keys(productMapping).includes(value)
 
 export const getProduct = (productKey: string): Product => {
   const entry = Object.entries(productMapping).find(([, productKeys]) =>
