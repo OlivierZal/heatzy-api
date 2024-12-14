@@ -32,7 +32,7 @@ export class DeviceFacade implements IDeviceFacade {
   }
 
   public get isOn(): boolean {
-    return this.mode === Mode.stop
+    return this.mode !== Mode.stop
   }
 
   public get mode(): Mode {

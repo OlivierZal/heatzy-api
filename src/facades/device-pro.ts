@@ -29,7 +29,7 @@ export class DeviceProFacade
   }
 
   public override get isOn(): boolean {
-    return this.mode === Mode.stop
+    return this.mode !== Mode.stop
   }
 
   protected override get derogModeString():
