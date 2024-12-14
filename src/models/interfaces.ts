@@ -41,7 +41,7 @@ const productMapping: Record<keyof typeof Product, string[]> = {
   v4: ['46409c7f29d4411c85a3a46e5ee3703e', '9dacde7ef459421eaf8dc4bea9385634'],
 } as const
 
-const isKeyofProduct = (value: string): value is keyof typeof Product =>
+const isProduct = (value: string): value is keyof typeof Product =>
   value in Product
 
 export const getProduct = (productKey: string): Product => {
@@ -50,7 +50,7 @@ export const getProduct = (productKey: string): Product => {
   )
   if (entry) {
     const [product] = entry
-    if (isKeyofProduct(product)) {
+    if (isProduct(product)) {
       return Product[product]
     }
   }

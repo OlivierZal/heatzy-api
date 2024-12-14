@@ -16,7 +16,7 @@ import { APICallResponseData } from '../logging/response.ts'
 import { DeviceModel } from '../models/device.ts'
 
 import {
-  isKeyofAPISetting,
+  isAPISetting,
   type APIConfig,
   type IAPI,
   type Logger,
@@ -47,14 +47,14 @@ const setting = <This extends API>(
 ): ClassAccessorDecoratorResult<This, string> => ({
   get(this: This): string {
     const key = String(context.name)
-    if (!isKeyofAPISetting(key)) {
+    if (!isAPISetting(key)) {
       throw new Error(`Invalid setting: ${key}`)
     }
     return this.settingManager?.get(key) ?? target.get.call(this)
   },
   set(this: This, value: string): void {
     const key = String(context.name)
-    if (!isKeyofAPISetting(key)) {
+    if (!isAPISetting(key)) {
       throw new Error(`Invalid setting: ${key}`)
     }
     if (this.settingManager) {
