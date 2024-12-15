@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
 
+import { TEMPERATURE_SCALE } from '../constants.ts'
 import { syncDevices } from '../decorators/sync-devices.ts'
 import { updateDevice } from '../decorators/update-device.ts'
 import { DerogMode, Mode } from '../enums.ts'
@@ -17,15 +18,15 @@ export class DeviceProFacade
   public previousMode?: Mode
 
   public override get comfortTemperature(): number {
-    return this.getValue('cft_temp')
+    return this.getValue('cft_temp') / TEMPERATURE_SCALE
   }
 
   public override get currentTemperature(): number {
-    return this.getValue('cur_temp')
+    return this.getValue('cur_temp') / TEMPERATURE_SCALE
   }
 
   public override get ecoTemperature(): number {
-    return this.getValue('eco_temp')
+    return this.getValue('eco_temp') / TEMPERATURE_SCALE
   }
 
   public override get isOn(): boolean {
