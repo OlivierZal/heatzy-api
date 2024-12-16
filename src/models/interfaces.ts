@@ -1,3 +1,6 @@
+import type { DateTime } from 'luxon'
+
+import type { Mode } from '../enums.ts'
 import type { Attrs } from '../types.ts'
 
 export enum Product {
@@ -9,9 +12,11 @@ export enum Product {
 }
 
 export interface IBaseDeviceModel {
+  derogEndDate: DateTime | null
   hasRestrictedModes: boolean
   id: string
   name: string
+  previousMode: PreviousMode
   product: Product
   update: (data: Partial<Attrs>) => void
 }
@@ -21,6 +26,8 @@ export interface IDeviceModel extends IBaseDeviceModel {
   productKey: string
   productName: string
 }
+
+export type PreviousMode = Exclude<Mode, Mode.stop>
 
 const productMapping: Record<keyof typeof Product, string[]> = {
   glow: [

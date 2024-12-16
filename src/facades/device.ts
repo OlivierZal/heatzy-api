@@ -4,7 +4,13 @@ import { updateDevice } from '../decorators/update-device.ts'
 import { Mode, ModeV1 } from '../enums.ts'
 import { DeviceModel } from '../models/device.ts'
 
-import type { IDeviceModel, Product } from '../models/interfaces.ts'
+import type { DateTime } from 'luxon'
+
+import type {
+  IDeviceModel,
+  PreviousMode,
+  Product,
+} from '../models/interfaces.ts'
 import type { IAPI } from '../services/interfaces.ts'
 import type { Attrs, PostAttrs } from '../types.ts'
 
@@ -31,6 +37,10 @@ export class DeviceFacade implements IDeviceFacade {
     } = instance)
   }
 
+  public get derogEndDate(): DateTime | null {
+    return this.instance.derogEndDate
+  }
+
   public get isOn(): boolean {
     return this.mode !== Mode.stop
   }
@@ -41,6 +51,10 @@ export class DeviceFacade implements IDeviceFacade {
 
   public get name(): string {
     return this.instance.name
+  }
+
+  public get previousMode(): PreviousMode {
+    return this.instance.previousMode ?? Mode.eco
   }
 
   protected get data(): Attrs {
@@ -61,15 +75,8 @@ export class DeviceFacade implements IDeviceFacade {
 
   @syncDevices
   @updateDevice
-  public async setValues({ mode }: PostAttrs): Promise<Partial<Attrs>> {
-    if (isModeV1(mode)) {
-      await this.api.control({
-        id: this.id,
-        postData: { raw: [UNIT, UNIT, ModeV1[mode]] },
-      })
-      return { mode }
-    }
-    return {}
+  public async setValues(attrs: PostAttrs): Promise<Partial<Attrs>> {
+    return this.control(attrs)
   }
 
   @syncDevices
@@ -80,6 +87,17 @@ export class DeviceFacade implements IDeviceFacade {
 
   public update(data: Partial<Attrs>): void {
     this.instance.update(data)
+  }
+
+  protected async control({ mode }: PostAttrs): Promise<Partial<Attrs>> {
+    if (isModeV1(mode)) {
+      await this.api.control({
+        id: this.id,
+        postData: { raw: [UNIT, UNIT, ModeV1[mode]] },
+      })
+      return { mode }
+    }
+    return {}
   }
 
   protected getValue<T extends keyof Attrs>(key: T): NonNullable<Attrs[T]> {

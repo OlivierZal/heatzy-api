@@ -1,16 +1,16 @@
-import { supportsGlow, type IDeviceFacadeAny } from './facades/interfaces.ts'
+import { TEMPERATURE_SCALE } from './constants.ts'
+import { Product } from './models/interfaces.ts'
 
 import type { PostAttrs } from './types.ts'
 
 const BYTE_MAX_VALUE = 255
-const TEMPERATURE_SCALE = 10
 
 export const getTargetTemperature = (
-  device: IDeviceFacadeAny,
+  product: Product,
   temperature: 'cft_temp' | 'eco_temp',
   value: number,
 ): PostAttrs => {
-  if (supportsGlow(device)) {
+  if (product === Product.glow) {
     const tempH =
       Math.floor((value * TEMPERATURE_SCALE) / BYTE_MAX_VALUE) *
       TEMPERATURE_SCALE
@@ -19,5 +19,5 @@ export const getTargetTemperature = (
       [`${temperature}L`]: (value - tempH) * TEMPERATURE_SCALE,
     }
   }
-  return { [temperature]: value }
+  return { [temperature]: value * TEMPERATURE_SCALE }
 }

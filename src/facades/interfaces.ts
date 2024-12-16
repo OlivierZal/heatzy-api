@@ -9,18 +9,6 @@ import type { DateTime } from 'luxon'
 import type { DerogMode, Mode, TemperatureCompensation } from '../enums.ts'
 import type { Attrs, PostAttrs } from '../types.ts'
 
-export interface DerogSettings {
-  derogEnd: string
-  derogMode:
-    | 'boost'
-    | 'off'
-    | 'presence'
-    | 'vacation'
-    | Mode.cft1
-    | Mode.cft2
-    | Mode.eco
-}
-
 export interface IDeviceFacade extends IBaseDeviceModel {
   isOn: boolean
   mode: Mode
@@ -41,13 +29,12 @@ export interface IDeviceProFacade extends IDeviceGlowFacade {
   currentMode: Mode
   isDetectingOpenWindow: boolean
   isPresence: boolean
-  previousMode?: Mode
 }
 
 export interface IDeviceV2Facade extends IDeviceFacade {
   derogEndDate: DateTime | null
+  derogEndString: string | null
   derogMode: DerogMode
-  derogSettings: DerogSettings | null
   derogTime: number
   isLocked: boolean
   isTimer: boolean
