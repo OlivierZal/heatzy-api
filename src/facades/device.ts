@@ -54,7 +54,7 @@ export class DeviceFacade implements IDeviceFacade {
   }
 
   public get previousMode(): PreviousMode {
-    return this.instance.previousMode ?? Mode.eco
+    return this.instance.previousMode
   }
 
   protected get data(): Attrs {
