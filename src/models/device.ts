@@ -80,7 +80,17 @@ export class DeviceModel implements IDeviceModel {
         this.#instances.get(id)?.update(data[id])
         return
       }
-      this.#instances.set(id, new this(device, data[id]))
+      const newDevice = new this(device, data[id])
+      this.#instances.set(id, newDevice)
+      const {
+        id: {
+          cur_mode: currentMode,
+          derog_mode: derogMode,
+          derog_time: derogTime,
+          mode,
+        },
+      } = data
+      newDevice.#handle({ currentMode, derogMode, derogTime, mode })
     })
     ;[...this.#instances.keys()].forEach((id) => {
       if (!devices.map(({ did }) => did).includes(id)) {
@@ -91,63 +101,90 @@ export class DeviceModel implements IDeviceModel {
 
   public update(data: Partial<Attrs>): void {
     const {
-      cur_mode: oldCurrentMode,
-      derog_mode: oldDerogMode,
-      derog_time: oldDerogTime,
-      mode: oldMode,
+      cur_mode: currentMode,
+      derog_mode: derogMode,
+      derog_time: derogTime,
+      mode,
     } = this.#data
     const {
       cur_mode: newCurrentMode,
       derog_mode: newDerogMode,
       derog_time: newDerogTime,
-      mode: newMode,
     } = data
-    this.#handlePreviousMode({ newMode, oldMode })
-    this.#handleDerogModeEndDate({
+    this.#handle({
+      currentMode,
+      derogMode,
+      derogTime,
+      mode,
       newCurrentMode,
       newDerogMode,
       newDerogTime,
-      oldCurrentMode,
-      oldDerogMode,
-      oldDerogTime,
     })
     this.#data = { ...this.#data, ...data }
   }
 
-  #handleDerogModeEndDate({
+  #handle({
+    currentMode,
+    derogMode,
+    derogTime,
+    mode,
     newCurrentMode,
     newDerogMode,
     newDerogTime,
-    oldCurrentMode,
-    oldDerogMode,
-    oldDerogTime,
   }: {
+    mode: Mode
+    currentMode?: Mode
+    derogMode?: DerogMode
+    derogTime?: number
     newCurrentMode?: Mode
     newDerogMode?: DerogMode
     newDerogTime?: number
-    oldCurrentMode?: Mode
-    oldDerogMode?: DerogMode
-    oldDerogTime?: number
+  }): void {
+    this.#handlePreviousMode(mode)
+    this.#handleDerogModeEndDate({
+      currentMode,
+      derogMode,
+      derogTime,
+      newCurrentMode,
+      newDerogMode,
+      newDerogTime,
+    })
+  }
+
+  #handleDerogModeEndDate({
+    currentMode,
+    derogMode,
+    derogTime,
+    newCurrentMode,
+    newDerogMode,
+    newDerogTime,
+  }: {
+    currentMode?: Mode
+    derogMode?: DerogMode
+    derogTime?: number
+    newCurrentMode?: Mode
+    newDerogMode?: DerogMode
+    newDerogTime?: number
   }): void {
     if (
-      (newDerogMode !== undefined && newDerogMode !== oldDerogMode) ||
-      (newDerogTime !== undefined && newDerogTime !== oldDerogTime)
+      (newDerogMode !== undefined && newDerogMode !== derogMode) ||
+      (newDerogTime !== undefined && newDerogTime !== derogTime)
     ) {
-      const derogMode = newDerogMode ?? oldDerogMode
-      const derogTime = newDerogTime ?? oldDerogTime
+      const time = newDerogTime ?? derogTime
       const now = DateTime.now()
-      switch (derogMode) {
+      switch (newDerogMode ?? derogMode) {
         case DerogMode.boost:
-          this.#derogEndDate = now.plus({ minutes: derogTime })
+          this.#derogEndDate = now.plus({ minutes: time })
           break
         case DerogMode.presence:
-          this.#handlePresenceDerogEndDate({ newCurrentMode, oldCurrentMode })
+          this.#handlePresenceDerogEndDate({ currentMode, newCurrentMode })
           break
         case DerogMode.vacation:
-          this.#derogEndDate = now.plus({ days: derogTime })
+          this.#derogEndDate = now.plus({ days: time })
+          break
+        case undefined:
           break
         case DerogMode.off:
-        case undefined:
         default:
           this.#derogEndDate = null
       }
@@ -155,13 +192,13 @@ export class DeviceModel implements IDeviceModel {
   }
 
   #handlePresenceDerogEndDate({
+    currentMode,
     newCurrentMode,
-    oldCurrentMode,
   }: {
+    currentMode?: Mode
     newCurrentMode?: Mode
-    oldCurrentMode?: Mode
   }): void {
-    if (newCurrentMode !== undefined && newCurrentMode !== oldCurrentMode) {
+    if (newCurrentMode !== currentMode) {
       switch (newCurrentMode) {
         case Mode.cft:
           this.#derogEndDate = DateTime.now().plus({ minutes: 90 })
@@ -172,6 +209,8 @@ export class DeviceModel implements IDeviceModel {
         case Mode.cft2:
           this.#derogEndDate = DateTime.now().plus({ minutes: 30 })
           break
+        case undefined:
+          break
         case Mode.eco:
         case Mode.fro:
         case Mode.stop:
@@ -181,15 +220,9 @@ export class DeviceModel implements IDeviceModel {
     }
   }
 
-  #handlePreviousMode({
-    newMode,
-    oldMode,
-  }: {
-    oldMode: Mode
-    newMode?: Mode
-  }): void {
-    if (newMode !== undefined && oldMode !== Mode.stop) {
-      this.#previousMode = oldMode
+  #handlePreviousMode(mode: Mode): void {
+    if (mode !== Mode.stop) {
+      this.#previousMode = mode
     }
   }
 }
