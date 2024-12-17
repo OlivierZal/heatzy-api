@@ -20,8 +20,6 @@ const isModeV1 = (value?: string): value is keyof typeof ModeV1 =>
   value !== undefined && value in ModeV1
 
 export class DeviceFacade implements IDeviceFacade {
-  public readonly hasRestrictedModes: boolean
-
   public readonly id: string
 
   public readonly product: Product
@@ -30,11 +28,7 @@ export class DeviceFacade implements IDeviceFacade {
 
   public constructor(api: IAPI, instance: IDeviceModel) {
     this.api = api
-    ;({
-      hasRestrictedModes: this.hasRestrictedModes,
-      id: this.id,
-      product: this.product,
-    } = instance)
+    ;({ id: this.id, product: this.product } = instance)
   }
 
   public get derogEndDate(): DateTime | null {

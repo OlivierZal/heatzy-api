@@ -13,7 +13,6 @@ export enum Product {
 
 export interface IBaseDeviceModel {
   derogEndDate: DateTime | null
-  hasRestrictedModes: boolean
   id: string
   name: string
   previousMode: PreviousMode

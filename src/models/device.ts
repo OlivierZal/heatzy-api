@@ -4,17 +4,15 @@ import { DerogMode, Mode } from '../enums.ts'
 
 import {
   getProduct,
-  Product,
   type IDeviceModel,
   type PreviousMode,
+  type Product,
 } from './interfaces.ts'
 
 import type { Attrs, Device } from '../types.ts'
 
 export class DeviceModel implements IDeviceModel {
   static readonly #instances = new Map<string, DeviceModel>()
-
-  public readonly hasRestrictedModes: boolean
 
   public readonly id: string
 
@@ -41,7 +39,6 @@ export class DeviceModel implements IDeviceModel {
     } = device)
     this.#data = data
     this.product = getProduct(this.productKey)
-    this.hasRestrictedModes = [Product.v1, Product.v2].includes(this.product)
   }
 
   public get data(): Attrs {
