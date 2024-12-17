@@ -166,23 +166,24 @@ export class DeviceModel implements IDeviceModel {
     newDerogMode?: DerogMode
     newDerogTime?: number
   }): void {
+    const currentDerogMode = newDerogMode ?? derogMode
+    if (currentDerogMode === DerogMode.presence) {
+      this.#handlePresenceDerogEndDate({ currentMode, newCurrentMode })
+      return
+    }
     if (
-      (newDerogMode !== undefined && newDerogMode !== derogMode) ||
-      (newDerogTime !== undefined && newDerogTime !== derogTime)
+      currentDerogMode !== undefined &&
+      ((newDerogMode !== undefined && newDerogMode !== derogMode) ||
+        (newDerogTime !== undefined && newDerogTime !== derogTime))
     ) {
-      const time = newDerogTime ?? derogTime
+      const currentDerogTime = newDerogTime ?? derogTime
       const now = DateTime.now()
-      switch (newDerogMode ?? derogMode) {
+      switch (currentDerogMode) {
         case DerogMode.boost:
-          this.#derogEndDate = now.plus({ minutes: time })
-          break
-        case DerogMode.presence:
-          this.#handlePresenceDerogEndDate({ currentMode, newCurrentMode })
+          this.#derogEndDate = now.plus({ minutes: currentDerogTime })
           break
         case DerogMode.vacation:
-          this.#derogEndDate = now.plus({ days: time })
-          break
-        case undefined:
+          this.#derogEndDate = now.plus({ days: currentDerogTime })
           break
         case DerogMode.off:
         default:
@@ -198,7 +199,7 @@ export class DeviceModel implements IDeviceModel {
     currentMode?: Mode
     newCurrentMode?: Mode
   }): void {
-    if (newCurrentMode !== currentMode) {
+    if (newCurrentMode !== undefined && newCurrentMode !== currentMode) {
       switch (newCurrentMode) {
         case Mode.cft:
           this.#derogEndDate = DateTime.now().plus({ minutes: 90 })
@@ -208,8 +209,6 @@ export class DeviceModel implements IDeviceModel {
           break
         case Mode.cft2:
           this.#derogEndDate = DateTime.now().plus({ minutes: 30 })
-          break
-        case undefined:
           break
         case Mode.eco:
         case Mode.fro:

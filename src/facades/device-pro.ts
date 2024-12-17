@@ -21,6 +21,10 @@ export class DeviceProFacade
     return this.getValue('eco_temp') / TEMPERATURE_SCALE
   }
 
+  public override get isLocked(): boolean {
+    return Boolean(this.getValue('lock_switch'))
+  }
+
   public override get isOn(): boolean {
     return this.mode !== Mode.stop
   }
