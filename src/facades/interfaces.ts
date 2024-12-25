@@ -41,7 +41,7 @@ export interface IDeviceV2Facade extends IDeviceFacade {
 }
 
 export interface IFacadeManager {
-  get: (instance?: IDeviceModel) => IDeviceFacade | undefined
+  get: (instance?: IDeviceModel) => IDeviceFacade | null
 }
 
 export type IDeviceFacadeAny =

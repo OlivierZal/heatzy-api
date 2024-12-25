@@ -18,9 +18,9 @@ export class FacadeManager implements IFacadeManager {
     this.api = api
   }
 
-  public get(): undefined
+  public get(): null
   public get(instance: IDeviceModel): IDeviceFacadeAny
-  public get(instance?: IDeviceModel): IDeviceFacadeAny | undefined {
+  public get(instance?: IDeviceModel): IDeviceFacadeAny | null {
     if (instance) {
       const { id, product } = instance
       if (!this.#facades.has(id)) {
@@ -41,7 +41,8 @@ export class FacadeManager implements IFacadeManager {
           default:
         }
       }
-      return this.#facades.get(id)
+      return this.#facades.get(id) ?? null
     }
+    return null
   }
 }

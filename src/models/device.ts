@@ -73,21 +73,22 @@ export class DeviceModel implements IDeviceModel {
   ): void {
     devices.forEach((device) => {
       const { did: id } = device
-      if (this.#instances.has(id)) {
-        this.#instances.get(id)?.update(data[id])
-        return
-      }
-      const newDevice = new this(device, data[id])
-      this.#instances.set(id, newDevice)
-      const {
-        id: {
+      const attrs = data[id]
+      if (attrs) {
+        if (this.#instances.has(id)) {
+          this.#instances.get(id)?.update(attrs)
+          return
+        }
+        const newDevice = new this(device, attrs)
+        this.#instances.set(id, newDevice)
+        const {
           cur_mode: currentMode,
           derog_mode: derogMode,
           derog_time: derogTime,
           mode,
-        },
-      } = data
-      newDevice.#handle({ currentMode, derogMode, derogTime, mode })
+        } = attrs
+        newDevice.#handle({ currentMode, derogMode, derogTime, mode })
+      }
     })
     ;[...this.#instances.keys()].forEach((id) => {
       if (!devices.map(({ did }) => did).includes(id)) {
