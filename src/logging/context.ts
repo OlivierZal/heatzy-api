@@ -33,7 +33,7 @@ export abstract class APICallContextData {
         if (key in this) {
           const { [key]: value } = this
           if (value !== undefined) {
-            return JSON.stringify({ [key]: value }, null, SPACE)
+            return `${key}: ${JSON.stringify(value, null, SPACE)}`
           }
         }
         return null
