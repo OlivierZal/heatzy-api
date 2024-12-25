@@ -3,6 +3,8 @@ import type { InternalAxiosRequestConfig } from 'axios'
 const SPACE = 2
 
 export abstract class APICallContextData {
+  [key: string]: unknown
+
   public readonly method: InternalAxiosRequestConfig['method']
 
   public readonly params: InternalAxiosRequestConfig['params']
@@ -29,7 +31,7 @@ export abstract class APICallContextData {
     ]
       .map((key) => {
         if (key in this) {
-          const { [key as keyof this]: value } = this
+          const { [key]: value } = this
           if (value !== undefined) {
             return `${key}: ${
               typeof value === 'object' ?

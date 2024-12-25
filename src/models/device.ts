@@ -73,7 +73,7 @@ export class DeviceModel implements IDeviceModel {
   ): void {
     devices.forEach((device) => {
       const { did: id } = device
-      const attrs = data[id]
+      const { id: attrs } = data
       if (attrs) {
         if (this.#instances.has(id)) {
           this.#instances.get(id)?.update(attrs)
