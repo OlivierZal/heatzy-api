@@ -6,7 +6,7 @@ import {
 
 import type { DateTime } from 'luxon'
 
-import type { DerogMode, Mode, TemperatureCompensation } from '../enums.ts'
+import type { DerogationMode, Mode, TemperatureCompensation } from '../enums.ts'
 import type { Attrs, PostAttrs } from '../types.ts'
 
 export interface IDeviceFacade extends IBaseDeviceModel {
@@ -32,10 +32,10 @@ export interface IDeviceProFacade extends IDeviceGlowFacade {
 }
 
 export interface IDeviceV2Facade extends IDeviceFacade {
-  derogEndDate: DateTime | null
-  derogEndString: string | null
-  derogMode: DerogMode
-  derogTime: number
+  derogationEndDate: DateTime | null
+  derogationEndString: string | null
+  derogationMode: DerogationMode
+  derogationTime: number
   isLocked: boolean
   isTimer: boolean
 }

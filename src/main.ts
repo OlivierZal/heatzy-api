@@ -4,7 +4,7 @@ export { UNIT } from './constants.ts'
 export { syncDevices } from './decorators/sync-devices.ts'
 export { updateDevice } from './decorators/update-device.ts'
 export {
-  DerogMode,
+  DerogationMode,
   Mode,
   ModeV1,
   Switch,

@@ -31,8 +31,8 @@ export class DeviceFacade implements IDeviceFacade {
     ;({ id: this.id, product: this.product } = instance)
   }
 
-  public get derogEndDate(): DateTime | null {
-    return this.instance.derogEndDate
+  public get derogationEndDate(): DateTime | null {
+    return this.instance.derogationEndDate
   }
 
   public get isOn(): boolean {

@@ -1,6 +1,6 @@
 import type { UNIT } from './constants.ts'
 import type {
-  DerogMode,
+  DerogationMode,
   Mode,
   ModeV1,
   Switch,
@@ -59,7 +59,7 @@ export interface LoginPostData {
 export interface PostAttrs {
   readonly mode?: Mode
   // Product: not 'v1'
-  readonly derog_mode?: DerogMode
+  readonly derog_mode?: DerogationMode
   readonly derog_time?: number
   readonly timer_switch?: Switch
   // Product: not 'v1', 'glow'

@@ -12,7 +12,7 @@ export enum Product {
 }
 
 export interface IBaseDeviceModel {
-  derogEndDate: DateTime | null
+  derogationEndDate: DateTime | null
   id: string
   name: string
   previousMode: PreviousMode

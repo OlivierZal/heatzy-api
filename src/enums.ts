@@ -1,4 +1,4 @@
-export enum DerogMode {
+export enum DerogationMode {
   boost = 2,
   off = 0,
   vacation = 1,

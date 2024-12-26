@@ -1,5 +1,5 @@
 import { TEMPERATURE_SCALE } from '../constants.ts'
-import { DerogMode, Mode } from '../enums.ts'
+import { DerogationMode, Mode } from '../enums.ts'
 
 import { DeviceGlowFacade } from './device-glow.ts'
 
@@ -43,7 +43,7 @@ export class DeviceProFacade
 
   public get isPresence(): boolean {
     return (
-      this.getValue('derog_mode') === DerogMode.presence &&
+      this.getValue('derog_mode') === DerogationMode.presence &&
       this.currentMode === Mode.cft
     )
   }

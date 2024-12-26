@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { DerogMode, Mode } from '../enums.ts'
+import { DerogationMode, Mode } from '../enums.ts'
 
 import {
   getProduct,
@@ -26,7 +26,7 @@ export class DeviceModel implements IDeviceModel {
 
   #data: Attrs
 
-  #derogEndDate: DateTime | null = null
+  #derogationEndDate: DateTime | null = null
 
   #previousMode?: PreviousMode
 
@@ -45,9 +45,9 @@ export class DeviceModel implements IDeviceModel {
     return this.#data
   }
 
-  public get derogEndDate(): DateTime | null {
-    return this.#derogEndDate && this.#derogEndDate > DateTime.now() ?
-        this.#derogEndDate
+  public get derogationEndDate(): DateTime | null {
+    return this.#derogationEndDate && this.#derogationEndDate > DateTime.now() ?
+        this.#derogationEndDate
       : null
   }
 
@@ -83,11 +83,11 @@ export class DeviceModel implements IDeviceModel {
         this.#instances.set(id, newDevice)
         const {
           cur_mode: currentMode,
-          derog_mode: derogMode,
-          derog_time: derogTime,
+          derog_mode: derogationMode,
+          derog_time: derogationTime,
           mode,
         } = attrs
-        newDevice.#handle({ currentMode, derogMode, derogTime, mode })
+        newDevice.#handle({ currentMode, derogationMode, derogationTime, mode })
       }
     })
     ;[...this.#instances.keys()].forEach((id) => {
@@ -100,97 +100,99 @@ export class DeviceModel implements IDeviceModel {
   public update(data: Partial<Attrs>): void {
     const {
       cur_mode: currentMode,
-      derog_mode: derogMode,
-      derog_time: derogTime,
+      derog_mode: derogationMode,
+      derog_time: derogationTime,
       mode,
     } = this.#data
     const {
       cur_mode: newCurrentMode,
-      derog_mode: newDerogMode,
-      derog_time: newDerogTime,
+      derog_mode: newDerogationMode,
+      derog_time: newDerogationTime,
     } = data
     this.#handle({
       currentMode,
-      derogMode,
-      derogTime,
+      derogationMode,
+      derogationTime,
       mode,
       newCurrentMode,
-      newDerogMode,
-      newDerogTime,
+      newDerogationMode,
+      newDerogationTime,
     })
     this.#data = { ...this.#data, ...data }
   }
 
   #handle({
     currentMode,
-    derogMode,
-    derogTime,
+    derogationMode,
+    derogationTime,
     mode,
     newCurrentMode,
-    newDerogMode,
-    newDerogTime,
+    newDerogationMode,
+    newDerogationTime,
   }: {
     mode: Mode
     currentMode?: Mode
-    derogMode?: DerogMode
-    derogTime?: number
+    derogationMode?: DerogationMode
+    derogationTime?: number
     newCurrentMode?: Mode
-    newDerogMode?: DerogMode
-    newDerogTime?: number
+    newDerogationMode?: DerogationMode
+    newDerogationTime?: number
   }): void {
     this.#handlePreviousMode(mode)
-    this.#handleDerogModeEndDate({
+    this.#handleDerogationModeEndDate({
       currentMode,
-      derogMode,
-      derogTime,
+      derogationMode,
+      derogationTime,
       newCurrentMode,
-      newDerogMode,
-      newDerogTime,
+      newDerogationMode,
+      newDerogationTime,
     })
   }
 
-  #handleDerogModeEndDate({
+  #handleDerogationModeEndDate({
     currentMode,
-    derogMode,
-    derogTime,
+    derogationMode,
+    derogationTime,
     newCurrentMode,
-    newDerogMode,
-    newDerogTime,
+    newDerogationMode,
+    newDerogationTime,
   }: {
     currentMode?: Mode
-    derogMode?: DerogMode
-    derogTime?: number
+    derogationMode?: DerogationMode
+    derogationTime?: number
     newCurrentMode?: Mode
-    newDerogMode?: DerogMode
-    newDerogTime?: number
+    newDerogationMode?: DerogationMode
+    newDerogationTime?: number
   }): void {
-    const currentDerogMode = newDerogMode ?? derogMode
-    if (currentDerogMode === DerogMode.presence) {
-      this.#handlePresenceDerogEndDate({ currentMode, newCurrentMode })
+    const currentDerogationMode = newDerogationMode ?? derogationMode
+    if (currentDerogationMode === DerogationMode.presence) {
+      this.#handlePresenceDerogationEndDate({ currentMode, newCurrentMode })
       return
     }
     if (
-      currentDerogMode !== undefined &&
-      ((newDerogMode !== undefined && newDerogMode !== derogMode) ||
-        (newDerogTime !== undefined && newDerogTime !== derogTime))
+      currentDerogationMode !== undefined &&
+      ((newDerogationMode !== undefined &&
+        newDerogationMode !== derogationMode) ||
+        (newDerogationTime !== undefined &&
+          newDerogationTime !== derogationTime))
     ) {
-      const currentDerogTime = newDerogTime ?? derogTime
+      const currentDerogationTime = newDerogationTime ?? derogationTime
       const now = DateTime.now()
-      switch (currentDerogMode) {
-        case DerogMode.boost:
-          this.#derogEndDate = now.plus({ minutes: currentDerogTime })
+      switch (currentDerogationMode) {
+        case DerogationMode.boost:
+          this.#derogationEndDate = now.plus({ minutes: currentDerogationTime })
           break
-        case DerogMode.vacation:
-          this.#derogEndDate = now.plus({ days: currentDerogTime })
+        case DerogationMode.vacation:
+          this.#derogationEndDate = now.plus({ days: currentDerogationTime })
           break
-        case DerogMode.off:
+        case DerogationMode.off:
         default:
-          this.#derogEndDate = null
+          this.#derogationEndDate = null
       }
     }
   }
 
-  #handlePresenceDerogEndDate({
+  #handlePresenceDerogationEndDate({
     currentMode,
     newCurrentMode,
   }: {
@@ -200,19 +202,19 @@ export class DeviceModel implements IDeviceModel {
     if (newCurrentMode !== undefined && newCurrentMode !== currentMode) {
       switch (newCurrentMode) {
         case Mode.cft:
-          this.#derogEndDate = DateTime.now().plus({ minutes: 90 })
+          this.#derogationEndDate = DateTime.now().plus({ minutes: 90 })
           break
         case Mode.cft1:
-          this.#derogEndDate = DateTime.now().plus({ minutes: 60 })
+          this.#derogationEndDate = DateTime.now().plus({ minutes: 60 })
           break
         case Mode.cft2:
-          this.#derogEndDate = DateTime.now().plus({ minutes: 30 })
+          this.#derogationEndDate = DateTime.now().plus({ minutes: 30 })
           break
         case Mode.eco:
         case Mode.fro:
         case Mode.stop:
         default:
-          this.#derogEndDate = null
+          this.#derogationEndDate = null
       }
     }
   }
