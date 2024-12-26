@@ -72,15 +72,15 @@ export class DeviceModel implements IDeviceModel {
     data: Record<string, Attrs>,
   ): void {
     devices.forEach((device) => {
-      const { did: id } = device
-      const { id: attrs } = data
+      const { did } = device
+      const { [did]: attrs } = data
       if (attrs) {
-        if (this.#instances.has(id)) {
-          this.#instances.get(id)?.update(attrs)
+        if (this.#instances.has(did)) {
+          this.#instances.get(did)?.update(attrs)
           return
         }
         const newDevice = new this(device, attrs)
-        this.#instances.set(id, newDevice)
+        this.#instances.set(did, newDevice)
         const {
           cur_mode: currentMode,
           derog_mode: derogationMode,
