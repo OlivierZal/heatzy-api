@@ -352,17 +352,7 @@ const config = [
       },
     },
   ),
-  {
-    files: ['**/*.md'],
-    language: 'markdown/gfm',
-    plugins: {
-      markdown,
-    },
-    rules: {
-      ...markdown.configs.recommended.rules,
-      'markdown/no-html': 'error',
-    },
-  },
+  ...markdown.configs.recommended,
   packageJson,
 ]
 
