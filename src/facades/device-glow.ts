@@ -1,4 +1,5 @@
 import { TEMPERATURE_SCALE } from '../constants.ts'
+import { Mode } from '../enums.ts'
 
 import { DeviceV2Facade } from './device-v2.ts'
 
@@ -22,39 +23,32 @@ export class DeviceGlowFacade
   }
 
   public get comfortTemperature(): number {
-    return Math.max(
-      Math.min(
-        this.#getCombinedTemperature('cft_temp'),
-        temperatureRange.cft.max,
-      ),
-      temperatureRange.cft.min,
-    )
+    return this.getTargetTemperature(Mode.cft)
   }
 
   public get currentTemperature(): number {
-    return this.#getCombinedTemperature('cur_temp')
+    return this.getTemperature()
   }
 
   public get ecoTemperature(): number {
-    return Math.max(
-      Math.min(
-        this.#getCombinedTemperature('eco_temp'),
-        temperatureRange.eco.max,
-      ),
-      temperatureRange.eco.min,
-    )
+    return this.getTargetTemperature(Mode.eco)
   }
 
   public get temperatureCompensation(): number {
     return this.getValue('com_temp')
   }
 
-  #getCombinedTemperature(
-    temperature: 'cft_temp' | 'cur_temp' | 'eco_temp',
-  ): number {
+  protected getTargetTemperature(mode: Mode.cft | Mode.eco): number {
+    const {
+      [mode]: { max, min },
+    } = temperatureRange
+    return Math.max(Math.min(this.getTemperature(mode), max), min)
+  }
+
+  protected getTemperature(mode: 'cur' | Mode.cft | Mode.eco = 'cur'): number {
     return (
-      this.getValue(`${temperature}H`) * TEMPERATURE_SCALE +
-      this.getValue(`${temperature}L`) / TEMPERATURE_SCALE
+      this.getValue(`${mode}_tempH`) * TEMPERATURE_SCALE +
+      this.getValue(`${mode}_tempL`) / TEMPERATURE_SCALE
     )
   }
 }

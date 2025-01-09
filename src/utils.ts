@@ -1,23 +1,29 @@
 import { TEMPERATURE_SCALE } from './constants.ts'
 import { Product } from './models/interfaces.ts'
 
+import type { Mode } from './enums.ts'
 import type { PostAttrs } from './types.ts'
 
-const BYTE_MAX_VALUE = 255
+enum Bit {
+  off = 0,
+  on = 1,
+}
+
+const BYTE_MAX = 255
 
 export const getTargetTemperature = (
   product: Product,
-  temperature: 'cft_temp' | 'eco_temp',
+  mode: Mode.cft | Mode.eco,
   value: number,
 ): PostAttrs => {
+  const newValue = value * TEMPERATURE_SCALE
   if (product === Product.glow) {
-    const tempH =
-      Math.floor((value * TEMPERATURE_SCALE) / BYTE_MAX_VALUE) *
-      TEMPERATURE_SCALE
+    const tempH = newValue > BYTE_MAX ? Bit.on : Bit.off
     return {
-      [`${temperature}H`]: tempH / TEMPERATURE_SCALE,
-      [`${temperature}L`]: (value - tempH) * TEMPERATURE_SCALE,
+      [`${mode}_tempH`]: tempH,
+      [`${mode}_tempL`]:
+        newValue - tempH * TEMPERATURE_SCALE * TEMPERATURE_SCALE,
     }
   }
-  return { [temperature]: value * TEMPERATURE_SCALE }
+  return { [`${mode}_temp`]: newValue }
 }

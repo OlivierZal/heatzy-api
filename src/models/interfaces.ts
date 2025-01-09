@@ -32,6 +32,8 @@ const productMapping: Record<keyof typeof Product, string[]> = {
   glow: [
     'cffa0df68a52449085c5d1e72c2f6bb0',
     '2fd622e45283470f9e27e8e6167d7533',
+    // Onyx
+    '',
     // Shine
     '2884feb88e0b4f30b75ea5572276a102',
   ],
