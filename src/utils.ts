@@ -4,7 +4,7 @@ import { Product } from './models/interfaces.ts'
 import type { Mode } from './enums.ts'
 import type { PostAttrs } from './types.ts'
 
-enum Bit {
+enum BitHigh {
   off = 0,
   on = 1,
 }
@@ -18,7 +18,7 @@ export const getTargetTemperature = (
 ): PostAttrs => {
   const newValue = value * TEMPERATURE_SCALE
   if (product === Product.glow) {
-    const tempH = newValue > BYTE_MAX ? Bit.on : Bit.off
+    const tempH = newValue > BYTE_MAX ? BitHigh.on : BitHigh.off
     return {
       [`${mode}_tempH`]: tempH,
       [`${mode}_tempL`]:
