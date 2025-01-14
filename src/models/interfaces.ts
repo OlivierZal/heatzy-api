@@ -30,7 +30,6 @@ export type PreviousMode = Exclude<Mode, Mode.stop>
 
 const productMapping: Record<keyof typeof Product, string[]> = {
   glow: [
-    // Glow
     'cffa0df68a52449085c5d1e72c2f6bb0',
     '2fd622e45283470f9e27e8e6167d7533',
     // Onyx

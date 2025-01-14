@@ -2,7 +2,7 @@ export enum DerogationMode {
   boost = 2,
   off = 0,
   vacation = 1,
-  // Product: 'pro'
+  // Pro
   presence = 3,
 }
 
@@ -11,7 +11,7 @@ export enum Mode {
   eco = 'eco',
   fro = 'fro',
   stop = 'stop',
-  // Product: not 'v1', 'v2'
+  // Not V1, V2
   cft1 = 'cft1',
   cft2 = 'cft2',
 }

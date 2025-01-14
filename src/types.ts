@@ -9,10 +9,10 @@ import type {
 
 export interface Attrs extends PostAttrs {
   readonly mode: Mode
-  // Product: 'glow'
+  // Glow
   readonly cur_tempH?: number
   readonly cur_tempL?: number
-  // Product: 'pro'
+  // Pro
   readonly cur_humi?: number
   readonly cur_mode?: Mode
   readonly cur_temp?: number
@@ -58,22 +58,22 @@ export interface LoginPostData {
 
 export interface PostAttrs {
   readonly mode?: Mode
-  // Product: not 'v1'
+  // Not V1
   readonly derog_mode?: DerogationMode
   readonly derog_time?: number
   readonly timer_switch?: Switch
-  // Product: not 'v1', 'glow'
+  // Not V1, Glow
   readonly lock_switch?: Switch
-  // Product: not 'v1', 'v2', 'v4'
+  // Not V1, V2, V4
   readonly com_temp?: TemperatureCompensation
-  // Product: 'glow'
+  // Glow
   readonly cft_tempH?: number
   readonly cft_tempL?: number
   readonly eco_tempH?: number
   readonly eco_tempL?: number
   readonly lock_c?: Switch
   readonly on_off?: Switch
-  // Product: 'pro'
+  // Pro
   readonly cft_temp?: number
   readonly eco_temp?: number
   readonly window_switch?: Switch
