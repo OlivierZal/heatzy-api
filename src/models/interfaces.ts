@@ -12,18 +12,18 @@ export enum Product {
 }
 
 export interface IBaseDeviceModel {
-  derogationEndDate: DateTime | null
-  id: string
-  name: string
-  previousMode: PreviousMode
-  product: Product
-  update: (data: Partial<Attrs>) => void
+  readonly derogationEndDate: DateTime | null
+  readonly id: string
+  readonly name: string
+  readonly previousMode: PreviousMode
+  readonly product: Product
+  readonly update: (data: Partial<Attrs>) => void
 }
 
 export interface IDeviceModel extends IBaseDeviceModel {
-  data: Attrs
-  productKey: string
-  productName: string
+  readonly data: Attrs
+  readonly productKey: string
+  readonly productName: string
 }
 
 export type PreviousMode = Exclude<Mode, Mode.stop>
@@ -47,7 +47,7 @@ const productMapping: Record<keyof typeof Product, string[]> = {
     'b8c6657b66c34148b4dee64d615cefc7',
   ],
   v4: ['46409c7f29d4411c85a3a46e5ee3703e', '9dacde7ef459421eaf8dc4bea9385634'],
-} as const
+}
 
 const isProduct = (value: string): value is keyof typeof Product =>
   value in Product

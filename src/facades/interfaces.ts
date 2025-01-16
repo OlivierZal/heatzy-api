@@ -10,38 +10,38 @@ import type { DerogationMode, Mode, TemperatureCompensation } from '../enums.ts'
 import type { Attrs, PostAttrs } from '../types.ts'
 
 export interface IDeviceFacade extends IBaseDeviceModel {
-  isOn: boolean
-  mode: Mode
-  onSync: () => Promise<void>
-  setValues: (data: PostAttrs) => Promise<Partial<Attrs>>
-  values: () => Promise<Attrs>
+  readonly isOn: boolean
+  readonly mode: Mode
+  readonly onSync: () => Promise<void>
+  readonly setValues: (data: PostAttrs) => Promise<Partial<Attrs>>
+  readonly values: () => Promise<Attrs>
 }
 
 export interface IDeviceGlowFacade extends IDeviceV2Facade {
-  comfortTemperature: number
-  currentTemperature: number
-  ecoTemperature: number
-  temperatureCompensation: TemperatureCompensation
+  readonly comfortTemperature: number
+  readonly currentTemperature: number
+  readonly ecoTemperature: number
+  readonly temperatureCompensation: TemperatureCompensation
 }
 
 export interface IDeviceProFacade extends IDeviceGlowFacade {
-  currentHumidity: number
-  currentMode: Mode
-  isDetectingOpenWindow: boolean
-  isPresence: boolean
+  readonly currentHumidity: number
+  readonly currentMode: Mode
+  readonly isDetectingOpenWindow: boolean
+  readonly isPresence: boolean
 }
 
 export interface IDeviceV2Facade extends IDeviceFacade {
-  derogationEndDate: DateTime | null
-  derogationEndString: string | null
-  derogationMode: DerogationMode
-  derogationTime: number
-  isLocked: boolean
-  isTimer: boolean
+  readonly derogationEndDate: DateTime | null
+  readonly derogationEndString: string | null
+  readonly derogationMode: DerogationMode
+  readonly derogationTime: number
+  readonly isLocked: boolean
+  readonly isTimer: boolean
 }
 
 export interface IFacadeManager {
-  get: (instance?: IDeviceModel) => IDeviceFacade | null
+  readonly get: (instance?: IDeviceModel) => IDeviceFacade | null
 }
 
 export type IDeviceFacadeAny =
