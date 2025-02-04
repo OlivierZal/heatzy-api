@@ -21,7 +21,11 @@ const classSortOptions = {
 }
 
 const decoratorSortOptions = {
-  groups: ['unknown'],
+  customGroups: {
+    'sync-decorator': '^syncDevices$',
+    'update-decorator': '^updateDevice(s)?$',
+  },
+  groups: ['sync-decorator', 'update-decorator', 'unknown'],
 }
 
 const enumSortOptions = {
