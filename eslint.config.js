@@ -10,19 +10,30 @@ import ts, { configs as tsConfigs } from 'typescript-eslint'
 
 import { classGroups } from './eslint-utils/class-groups.js'
 
-const arrayLikeGroups = {
+const arrayLikeSortOptions = {
   groups: ['literal', 'spread'],
+  newlinesBetween: 'never',
 }
 
-const decoratorGroups = {
-  customGroups: {
-    'sync-decorator': '^syncDevices$',
-    'update-decorator': '^updateDevice(s)?$',
-  },
-  groups: ['sync-decorator', 'update-decorator', 'unknown'],
+const classSortOptions = {
+  ...classGroups,
+  newlinesBetween: 'ignore',
 }
 
-const importGroups = {
+const decoratorSortOptions = {
+  groups: ['unknown'],
+}
+
+const enumSortOptions = {
+  groups: ['unknown'],
+  newlinesBetween: 'never',
+}
+
+const exportGroupKind = {
+  groupKind: 'values-first',
+}
+
+const importSortOptions = {
   groups: [
     'side-effect',
     'side-effect-style',
@@ -43,35 +54,46 @@ const importGroups = {
     'index-type',
     'type',
   ],
+  newlinesBetween: 'always',
 }
 
-const moduleGroups = {
+const mapSortOptions = {
+  groups: ['unknown'],
+  newlinesBetween: 'never',
+}
+
+const moduleSortOptions = {
   groups: [
     'declare-enum',
-    'enum',
-    'export-enum',
     'declare-interface',
-    'interface',
-    'export-interface',
     'declare-type',
-    'type',
-    'export-type',
     'declare-class',
-    'class',
-    'export-class',
     'declare-function',
+    'enum',
+    'interface',
+    'type',
+    'class',
     'function',
+    'export-enum',
+    'export-interface',
+    'export-type',
+    'export-class',
     'export-function',
-    [
-      'export-default-interface',
-      'export-default-class',
-      'export-default-function',
-    ],
+    'export-default-interface',
+    'export-default-class',
+    'export-default-function',
   ],
+  newlinesBetween: 'ignore',
 }
 
-const objectGroups = {
+const namedSortOptions = {
+  ...exportGroupKind,
+  ignoreAlias: true,
+}
+
+const objectSortOptions = {
   groups: ['property', 'method'],
+  newlinesBetween: 'never',
 }
 
 const typeGroups = {
@@ -90,9 +112,10 @@ const typeGroups = {
     'unknown',
     'nullish',
   ],
+  newlinesBetween: 'never',
 }
 
-const typeLikeGroups = {
+const typeLikeSortOptions = {
   groups: [
     'required-index-signature',
     'optional-index-signature',
@@ -101,10 +124,7 @@ const typeLikeGroups = {
     'required-method',
     'optional-method',
   ],
-}
-
-const valuesFirst = {
-  groupKind: 'values-first',
+  newlinesBetween: 'never',
 }
 
 const config = [
@@ -123,6 +143,7 @@ const config = [
       ],
       files: ['**/*.{ts,js}'],
       languageOptions: {
+        ecmaVersion: 'latest',
         parserOptions: {
           projectService: {
             allowDefaultProject: ['*.js'],
@@ -130,6 +151,7 @@ const config = [
           tsconfigRootDir: import.meta.dirname,
           warnOnUnsupportedTypeScriptVersion: false,
         },
+        sourceType: 'module',
       },
       linterOptions: {
         reportUnusedDisableDirectives: true,
@@ -306,22 +328,22 @@ const config = [
         'no-ternary': 'off',
         'no-undefined': 'off',
         'one-var': ['error', 'never'],
-        'perfectionist/sort-array-includes': ['error', arrayLikeGroups],
-        'perfectionist/sort-classes': ['error', classGroups],
-        'perfectionist/sort-decorators': ['error', decoratorGroups],
-        'perfectionist/sort-enums': 'error',
-        'perfectionist/sort-exports': ['error', valuesFirst],
+        'perfectionist/sort-array-includes': ['error', arrayLikeSortOptions],
+        'perfectionist/sort-classes': ['error', classSortOptions],
+        'perfectionist/sort-decorators': ['error', decoratorSortOptions],
+        'perfectionist/sort-enums': ['error', enumSortOptions],
+        'perfectionist/sort-exports': ['error', exportGroupKind],
         'perfectionist/sort-heritage-clauses': 'error',
-        'perfectionist/sort-imports': ['error', importGroups],
-        'perfectionist/sort-interfaces': ['error', typeLikeGroups],
+        'perfectionist/sort-imports': ['error', importSortOptions],
+        'perfectionist/sort-interfaces': ['error', typeLikeSortOptions],
         'perfectionist/sort-intersection-types': ['error', typeGroups],
-        'perfectionist/sort-maps': 'error',
-        'perfectionist/sort-modules': ['error', moduleGroups],
-        'perfectionist/sort-named-exports': ['error', valuesFirst],
-        'perfectionist/sort-named-imports': ['error', valuesFirst],
-        'perfectionist/sort-object-types': ['error', typeLikeGroups],
-        'perfectionist/sort-objects': ['error', objectGroups],
-        'perfectionist/sort-sets': ['error', arrayLikeGroups],
+        'perfectionist/sort-maps': ['error', mapSortOptions],
+        'perfectionist/sort-modules': ['error', moduleSortOptions],
+        'perfectionist/sort-named-exports': ['error', namedSortOptions],
+        'perfectionist/sort-named-imports': ['error', namedSortOptions],
+        'perfectionist/sort-object-types': ['error', typeLikeSortOptions],
+        'perfectionist/sort-objects': ['error', objectSortOptions],
+        'perfectionist/sort-sets': ['error', arrayLikeSortOptions],
         'perfectionist/sort-switch-case': 'error',
         'perfectionist/sort-union-types': ['error', typeGroups],
         'sort-imports': 'off',
@@ -333,12 +355,13 @@ const config = [
           locales: 'en_US',
           order: 'asc',
           partitionByComment: true,
+          partitionByNewLine: false,
           type: 'natural',
         },
         ...importPlugin.flatConfigs.typescript.settings,
         'import/resolver': {
           ...importPlugin.flatConfigs.typescript.settings['import/resolver'],
-          '@helljs/eslint-import-resolver-x': {
+          typescript: {
             alwaysTryTypes: true,
           },
         },
