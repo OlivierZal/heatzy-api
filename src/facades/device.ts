@@ -1,6 +1,5 @@
 import { UNIT } from '../constants.ts'
-import { syncDevices } from '../decorators/sync-devices.ts'
-import { updateDevice } from '../decorators/update-device.ts'
+import { syncDevices, updateDevice } from '../decorators/index.ts'
 import { Mode, ModeV1 } from '../enums.ts'
 import { DeviceModel } from '../models/device.ts'
 

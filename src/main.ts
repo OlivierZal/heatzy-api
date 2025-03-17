@@ -1,8 +1,7 @@
 import 'source-map-support/register.js'
 
 export { UNIT } from './constants.ts'
-export { syncDevices } from './decorators/sync-devices.ts'
-export { updateDevice } from './decorators/update-device.ts'
+export { syncDevices, updateDevice } from './decorators/index.ts'
 export {
   DerogationMode,
   Mode,
