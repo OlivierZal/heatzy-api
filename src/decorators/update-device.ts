@@ -1,4 +1,4 @@
-import type { IDeviceFacadeAny } from '../facades/interfaces.ts'
+import type { IDeviceFacadeAny } from '../facades/index.ts'
 import type { Attrs } from '../types.ts'
 
 export const updateDevice = <T extends Partial<Attrs>>(

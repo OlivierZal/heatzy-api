@@ -15,7 +15,7 @@ import {
   APICallResponseData,
   createAPICallErrorData,
 } from '../logging/index.ts'
-import { DeviceModel } from '../models/device.ts'
+import { DeviceModel } from '../models/index.ts'
 
 import {
   isAPISetting,

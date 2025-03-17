@@ -1,11 +1,11 @@
-import { Product, type IDeviceModel } from '../models/interfaces.ts'
+import { Product, type IDeviceModel } from '../models/index.ts'
 
 import { DeviceGlowFacade } from './device-glow.ts'
 import { DeviceProFacade } from './device-pro.ts'
 import { DeviceV2Facade } from './device-v2.ts'
 import { DeviceFacade } from './device.ts'
 
-import type { IAPI } from '../services/interfaces.ts'
+import type { IAPI } from '../services/index.ts'
 
 import type { IDeviceFacadeAny, IFacadeManager } from './interfaces.ts'
 

@@ -1,5 +1,5 @@
-import type { IDeviceFacade } from '../facades/interfaces.ts'
-import type { IAPI } from '../services/interfaces.ts'
+import type { IDeviceFacade } from '../facades/index.ts'
+import type { IAPI } from '../services/index.ts'
 import type { Attrs, Device } from '../types.ts'
 
 export const syncDevices = <T extends Partial<Attrs> | readonly Device[]>(

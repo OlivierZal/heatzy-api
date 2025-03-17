@@ -1,16 +1,16 @@
 import { UNIT } from '../constants.ts'
 import { syncDevices, updateDevice } from '../decorators/index.ts'
 import { Mode, ModeV1 } from '../enums.ts'
-import { DeviceModel } from '../models/device.ts'
+import {
+  DeviceModel,
+  type IDeviceModel,
+  type PreviousMode,
+  type Product,
+} from '../models/index.ts'
 
 import type { DateTime } from 'luxon'
 
-import type {
-  IDeviceModel,
-  PreviousMode,
-  Product,
-} from '../models/interfaces.ts'
-import type { IAPI } from '../services/interfaces.ts'
+import type { IAPI } from '../services/index.ts'
 import type { Attrs, PostAttrs } from '../types.ts'
 
 import type { IDeviceFacade } from './interfaces.ts'

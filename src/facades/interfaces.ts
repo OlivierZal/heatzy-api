@@ -2,7 +2,7 @@ import {
   Product,
   type IBaseDeviceModel,
   type IDeviceModel,
-} from '../models/interfaces.ts'
+} from '../models/index.ts'
 
 import type { DateTime } from 'luxon'
 
