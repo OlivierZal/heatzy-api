@@ -4,97 +4,97 @@
 
 ### DerogationMode
 
-Defined in: [src/enums.ts:1](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L1)
+Defined in: [src/enums.ts:1](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L1)
 
 #### Enumeration Members
 
 | Enumeration Member               | Value | Defined in                                                                                                               |
 | -------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------ |
-| <a id="boost"></a> `boost`       | `2`   | [src/enums.ts:2](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L2) |
-| <a id="off"></a> `off`           | `0`   | [src/enums.ts:3](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L3) |
-| <a id="presence"></a> `presence` | `3`   | [src/enums.ts:6](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L6) |
-| <a id="vacation"></a> `vacation` | `1`   | [src/enums.ts:4](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L4) |
+| <a id="boost"></a> `boost`       | `2`   | [src/enums.ts:2](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L2) |
+| <a id="off"></a> `off`           | `0`   | [src/enums.ts:3](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L3) |
+| <a id="presence"></a> `presence` | `3`   | [src/enums.ts:6](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L6) |
+| <a id="vacation"></a> `vacation` | `1`   | [src/enums.ts:4](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L4) |
 
 ---
 
 ### Mode
 
-Defined in: [src/enums.ts:9](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L9)
+Defined in: [src/enums.ts:9](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L9)
 
 #### Enumeration Members
 
 | Enumeration Member       | Value    | Defined in                                                                                                                 |
 | ------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="cft"></a> `cft`   | `"cft"`  | [src/enums.ts:10](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L10) |
-| <a id="cft1"></a> `cft1` | `"cft1"` | [src/enums.ts:15](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L15) |
-| <a id="cft2"></a> `cft2` | `"cft2"` | [src/enums.ts:16](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L16) |
-| <a id="eco"></a> `eco`   | `"eco"`  | [src/enums.ts:11](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L11) |
-| <a id="fro"></a> `fro`   | `"fro"`  | [src/enums.ts:12](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L12) |
-| <a id="stop"></a> `stop` | `"stop"` | [src/enums.ts:13](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L13) |
+| <a id="cft"></a> `cft`   | `"cft"`  | [src/enums.ts:10](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L10) |
+| <a id="cft1"></a> `cft1` | `"cft1"` | [src/enums.ts:15](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L15) |
+| <a id="cft2"></a> `cft2` | `"cft2"` | [src/enums.ts:16](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L16) |
+| <a id="eco"></a> `eco`   | `"eco"`  | [src/enums.ts:11](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L11) |
+| <a id="fro"></a> `fro`   | `"fro"`  | [src/enums.ts:12](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L12) |
+| <a id="stop"></a> `stop` | `"stop"` | [src/enums.ts:13](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L13) |
 
 ---
 
 ### ModeV1
 
-Defined in: [src/enums.ts:19](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L19)
+Defined in: [src/enums.ts:19](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L19)
 
 #### Enumeration Members
 
 | Enumeration Member         | Value | Defined in                                                                                                                 |
 | -------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="cft-1"></a> `cft`   | `0`   | [src/enums.ts:20](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L20) |
-| <a id="eco-1"></a> `eco`   | `1`   | [src/enums.ts:21](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L21) |
-| <a id="fro-1"></a> `fro`   | `2`   | [src/enums.ts:22](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L22) |
-| <a id="stop-1"></a> `stop` | `3`   | [src/enums.ts:23](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L23) |
+| <a id="cft-1"></a> `cft`   | `0`   | [src/enums.ts:20](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L20) |
+| <a id="eco-1"></a> `eco`   | `1`   | [src/enums.ts:21](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L21) |
+| <a id="fro-1"></a> `fro`   | `2`   | [src/enums.ts:22](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L22) |
+| <a id="stop-1"></a> `stop` | `3`   | [src/enums.ts:23](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L23) |
 
 ---
 
 ### Product
 
-Defined in: [src/models/interfaces.ts:6](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L6)
+Defined in: [src/models/interfaces.ts:6](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L6)
 
 #### Enumeration Members
 
 | Enumeration Member       | Value | Defined in                                                                                                                                         |
 | ------------------------ | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <a id="glow"></a> `glow` | `5`   | [src/models/interfaces.ts:7](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L7)   |
-| <a id="pro"></a> `pro`   | `6`   | [src/models/interfaces.ts:8](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L8)   |
-| <a id="v1"></a> `v1`     | `1`   | [src/models/interfaces.ts:9](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L9)   |
-| <a id="v2"></a> `v2`     | `2`   | [src/models/interfaces.ts:10](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L10) |
-| <a id="v4"></a> `v4`     | `4`   | [src/models/interfaces.ts:11](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L11) |
+| <a id="glow"></a> `glow` | `5`   | [src/models/interfaces.ts:7](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L7)   |
+| <a id="pro"></a> `pro`   | `6`   | [src/models/interfaces.ts:8](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L8)   |
+| <a id="v1"></a> `v1`     | `1`   | [src/models/interfaces.ts:9](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L9)   |
+| <a id="v2"></a> `v2`     | `2`   | [src/models/interfaces.ts:10](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L10) |
+| <a id="v4"></a> `v4`     | `4`   | [src/models/interfaces.ts:11](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L11) |
 
 ---
 
 ### Switch
 
-Defined in: [src/enums.ts:26](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L26)
+Defined in: [src/enums.ts:26](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L26)
 
 #### Enumeration Members
 
 | Enumeration Member       | Value | Defined in                                                                                                                 |
 | ------------------------ | ----- | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="off-1"></a> `off` | `0`   | [src/enums.ts:27](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L27) |
-| <a id="on"></a> `on`     | `1`   | [src/enums.ts:28](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L28) |
+| <a id="off-1"></a> `off` | `0`   | [src/enums.ts:27](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L27) |
+| <a id="on"></a> `on`     | `1`   | [src/enums.ts:28](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L28) |
 
 ---
 
 ### TemperatureCompensation
 
-Defined in: [src/enums.ts:31](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L31)
+Defined in: [src/enums.ts:31](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L31)
 
 #### Enumeration Members
 
 | Enumeration Member               | Value | Defined in                                                                                                                 |
 | -------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="minus5c"></a> `minus5C`   | `0`   | [src/enums.ts:32](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L32) |
-| <a id="nochange"></a> `noChange` | `50`  | [src/enums.ts:33](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L33) |
-| <a id="plus5c"></a> `plus5C`     | `100` | [src/enums.ts:34](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/enums.ts#L34) |
+| <a id="minus5c"></a> `minus5C`   | `0`   | [src/enums.ts:32](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L32) |
+| <a id="nochange"></a> `noChange` | `50`  | [src/enums.ts:33](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L33) |
+| <a id="plus5c"></a> `plus5C`     | `100` | [src/enums.ts:34](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/enums.ts#L34) |
 
 ## Classes
 
 ### DeviceModel
 
-Defined in: [src/models/device.ts:14](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L14)
+Defined in: [src/models/device.ts:14](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L14)
 
 #### Implements
 
@@ -104,11 +104,11 @@ Defined in: [src/models/device.ts:14](https://github.com/OlivierZal/heatzy-api/b
 
 | Property                               | Modifier   | Type                  | Defined in                                                                                                                                 |
 | -------------------------------------- | ---------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| <a id="id"></a> `id`                   | `readonly` | `string`              | [src/models/device.ts:17](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L17) |
-| <a id="name"></a> `name`               | `readonly` | `string`              | [src/models/device.ts:19](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L19) |
-| <a id="product-1"></a> `product`       | `readonly` | [`Product`](#product) | [src/models/device.ts:21](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L21) |
-| <a id="productkey"></a> `productKey`   | `readonly` | `string`              | [src/models/device.ts:23](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L23) |
-| <a id="productname"></a> `productName` | `readonly` | `string`              | [src/models/device.ts:25](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L25) |
+| <a id="id"></a> `id`                   | `readonly` | `string`              | [src/models/device.ts:17](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L17) |
+| <a id="name"></a> `name`               | `readonly` | `string`              | [src/models/device.ts:19](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L19) |
+| <a id="product-1"></a> `product`       | `readonly` | [`Product`](#product) | [src/models/device.ts:21](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L21) |
+| <a id="productkey"></a> `productKey`   | `readonly` | `string`              | [src/models/device.ts:23](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L23) |
+| <a id="productname"></a> `productName` | `readonly` | `string`              | [src/models/device.ts:25](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L25) |
 
 #### Accessors
 
@@ -120,7 +120,7 @@ Defined in: [src/models/device.ts:14](https://github.com/OlivierZal/heatzy-api/b
 get data(): Attrs;
 ```
 
-Defined in: [src/models/device.ts:44](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L44)
+Defined in: [src/models/device.ts:44](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L44)
 
 ###### Returns
 
@@ -138,7 +138,7 @@ Defined in: [src/models/device.ts:44](https://github.com/OlivierZal/heatzy-api/b
 get derogationEndDate(): null | DateTime<boolean>;
 ```
 
-Defined in: [src/models/device.ts:48](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L48)
+Defined in: [src/models/device.ts:48](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L48)
 
 ###### Returns
 
@@ -156,7 +156,7 @@ Defined in: [src/models/device.ts:48](https://github.com/OlivierZal/heatzy-api/b
 get previousMode(): PreviousMode;
 ```
 
-Defined in: [src/models/device.ts:54](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L54)
+Defined in: [src/models/device.ts:54](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L54)
 
 ###### Returns
 
@@ -174,7 +174,7 @@ Defined in: [src/models/device.ts:54](https://github.com/OlivierZal/heatzy-api/b
 update(data: Partial<Attrs>): void;
 ```
 
-Defined in: [src/models/device.ts:100](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L100)
+Defined in: [src/models/device.ts:100](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L100)
 
 ###### Parameters
 
@@ -196,7 +196,7 @@ Defined in: [src/models/device.ts:100](https://github.com/OlivierZal/heatzy-api/
 static getAll(): DeviceModel[];
 ```
 
-Defined in: [src/models/device.ts:58](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L58)
+Defined in: [src/models/device.ts:58](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L58)
 
 ###### Returns
 
@@ -208,7 +208,7 @@ Defined in: [src/models/device.ts:58](https://github.com/OlivierZal/heatzy-api/b
 static getById(id: string): undefined | DeviceModel;
 ```
 
-Defined in: [src/models/device.ts:62](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L62)
+Defined in: [src/models/device.ts:62](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L62)
 
 ###### Parameters
 
@@ -226,7 +226,7 @@ Defined in: [src/models/device.ts:62](https://github.com/OlivierZal/heatzy-api/b
 static getByName(name: string): undefined | DeviceModel;
 ```
 
-Defined in: [src/models/device.ts:66](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L66)
+Defined in: [src/models/device.ts:66](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L66)
 
 ###### Parameters
 
@@ -244,7 +244,7 @@ Defined in: [src/models/device.ts:66](https://github.com/OlivierZal/heatzy-api/b
 static sync(devices: readonly Device[], data: Record<string, Attrs>): void;
 ```
 
-Defined in: [src/models/device.ts:70](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/device.ts#L70)
+Defined in: [src/models/device.ts:70](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/device.ts#L70)
 
 ###### Parameters
 
@@ -261,7 +261,7 @@ Defined in: [src/models/device.ts:70](https://github.com/OlivierZal/heatzy-api/b
 
 ### FacadeManager
 
-Defined in: [src/facades/manager.ts:12](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/manager.ts#L12)
+Defined in: [src/facades/manager.ts:12](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/manager.ts#L12)
 
 #### Implements
 
@@ -275,7 +275,7 @@ Defined in: [src/facades/manager.ts:12](https://github.com/OlivierZal/heatzy-api
 new FacadeManager(api: IAPI): FacadeManager;
 ```
 
-Defined in: [src/facades/manager.ts:17](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/manager.ts#L17)
+Defined in: [src/facades/manager.ts:17](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/manager.ts#L17)
 
 ###### Parameters
 
@@ -291,7 +291,7 @@ Defined in: [src/facades/manager.ts:17](https://github.com/OlivierZal/heatzy-api
 
 | Property               | Modifier   | Type            | Defined in                                                                                                                                     |
 | ---------------------- | ---------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| <a id="api"></a> `api` | `readonly` | [`IAPI`](#iapi) | [src/facades/manager.ts:13](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/manager.ts#L13) |
+| <a id="api"></a> `api` | `readonly` | [`IAPI`](#iapi) | [src/facades/manager.ts:13](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/manager.ts#L13) |
 
 #### Methods
 
@@ -303,7 +303,7 @@ Defined in: [src/facades/manager.ts:17](https://github.com/OlivierZal/heatzy-api
 get(): null;
 ```
 
-Defined in: [src/facades/manager.ts:21](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/manager.ts#L21)
+Defined in: [src/facades/manager.ts:21](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/manager.ts#L21)
 
 ###### Returns
 
@@ -319,7 +319,7 @@ Defined in: [src/facades/manager.ts:21](https://github.com/OlivierZal/heatzy-api
 get(instance: IDeviceModel): IDeviceFacadeAny;
 ```
 
-Defined in: [src/facades/manager.ts:22](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/manager.ts#L22)
+Defined in: [src/facades/manager.ts:22](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/manager.ts#L22)
 
 ###### Parameters
 
@@ -341,7 +341,7 @@ IFacadeManager.get
 
 ### HeatzyAPI
 
-Defined in: [src/services/api.ts:70](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/api.ts#L70)
+Defined in: [src/services/api.ts:70](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/api.ts#L70)
 
 #### Implements
 
@@ -355,7 +355,7 @@ Defined in: [src/services/api.ts:70](https://github.com/OlivierZal/heatzy-api/bl
 new HeatzyAPI(config: APIConfig): HeatzyAPI;
 ```
 
-Defined in: [src/services/api.ts:85](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/api.ts#L85)
+Defined in: [src/services/api.ts:85](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/api.ts#L85)
 
 ###### Parameters
 
@@ -371,8 +371,8 @@ Defined in: [src/services/api.ts:85](https://github.com/OlivierZal/heatzy-api/bl
 
 | Property                                      | Modifier   | Type                                  | Defined in                                                                                                                               |
 | --------------------------------------------- | ---------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| <a id="onsync"></a> `onSync?`                 | `readonly` | () => `Promise`\<`void`\>             | [src/services/api.ts:71](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/api.ts#L71) |
-| <a id="settingmanager"></a> `settingManager?` | `readonly` | [`SettingManager`](#settingmanager-2) | [src/services/api.ts:73](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/api.ts#L73) |
+| <a id="onsync"></a> `onSync?`                 | `readonly` | () => `Promise`\<`void`\>             | [src/services/api.ts:71](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/api.ts#L71) |
+| <a id="settingmanager"></a> `settingManager?` | `readonly` | [`SettingManager`](#settingmanager-2) | [src/services/api.ts:73](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/api.ts#L73) |
 
 #### Methods
 
@@ -382,7 +382,7 @@ Defined in: [src/services/api.ts:85](https://github.com/OlivierZal/heatzy-api/bl
 authenticate(data?: LoginPostData): Promise<boolean>;
 ```
 
-Defined in: [src/services/api.ts:146](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/api.ts#L146)
+Defined in: [src/services/api.ts:146](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/api.ts#L146)
 
 ###### Parameters
 
@@ -406,7 +406,7 @@ bindings(): Promise<{
 }>;
 ```
 
-Defined in: [src/services/api.ts:160](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/api.ts#L160)
+Defined in: [src/services/api.ts:160](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/api.ts#L160)
 
 ###### Returns
 
@@ -424,7 +424,7 @@ Defined in: [src/services/api.ts:160](https://github.com/OlivierZal/heatzy-api/b
 clearSync(): void;
 ```
 
-Defined in: [src/services/api.ts:164](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/api.ts#L164)
+Defined in: [src/services/api.ts:164](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/api.ts#L164)
 
 ###### Returns
 
@@ -445,7 +445,7 @@ control(__namedParameters: {
 }>;
 ```
 
-Defined in: [src/services/api.ts:171](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/api.ts#L171)
+Defined in: [src/services/api.ts:171](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/api.ts#L171)
 
 ###### Parameters
 
@@ -475,7 +475,7 @@ deviceData(__namedParameters: {
 }>;
 ```
 
-Defined in: [src/services/api.ts:181](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/api.ts#L181)
+Defined in: [src/services/api.ts:181](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/api.ts#L181)
 
 ###### Parameters
 
@@ -500,7 +500,7 @@ Defined in: [src/services/api.ts:181](https://github.com/OlivierZal/heatzy-api/b
 fetch(): Promise<readonly Device[]>;
 ```
 
-Defined in: [src/services/api.ts:131](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/api.ts#L131)
+Defined in: [src/services/api.ts:131](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/api.ts#L131)
 
 ###### Returns
 
@@ -520,7 +520,7 @@ login(__namedParameters: {
 }>;
 ```
 
-Defined in: [src/services/api.ts:189](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/api.ts#L189)
+Defined in: [src/services/api.ts:189](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/api.ts#L189)
 
 ###### Parameters
 
@@ -545,7 +545,7 @@ Defined in: [src/services/api.ts:189](https://github.com/OlivierZal/heatzy-api/b
 static create(config: APIConfig): Promise<HeatzyAPI>;
 ```
 
-Defined in: [src/services/api.ts:124](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/api.ts#L124)
+Defined in: [src/services/api.ts:124](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/api.ts#L124)
 
 ###### Parameters
 
@@ -561,7 +561,7 @@ Defined in: [src/services/api.ts:124](https://github.com/OlivierZal/heatzy-api/b
 
 ### APIConfig
 
-Defined in: [src/services/interfaces.ts:11](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L11)
+Defined in: [src/services/interfaces.ts:11](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L11)
 
 #### Extends
 
@@ -571,36 +571,36 @@ Defined in: [src/services/interfaces.ts:11](https://github.com/OlivierZal/heatzy
 
 | Property                                          | Modifier   | Type                                  | Inherited from     | Defined in                                                                                                                                             |
 | ------------------------------------------------- | ---------- | ------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <a id="autosyncinterval"></a> `autoSyncInterval?` | `readonly` | `null` \| `number`                    | -                  | [src/services/interfaces.ts:12](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L12) |
-| <a id="language"></a> `language?`                 | `readonly` | `string`                              | -                  | [src/services/interfaces.ts:13](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L13) |
-| <a id="logger"></a> `logger?`                     | `readonly` | [`Logger`](#logger-1)                 | -                  | [src/services/interfaces.ts:14](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L14) |
-| <a id="onsync-1"></a> `onSync?`                   | `readonly` | [`OnSyncFunction`](#onsyncfunction)   | -                  | [src/services/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L15) |
-| <a id="password"></a> `password?`                 | `readonly` | `string`                              | `Partial.password` | [src/types.ts:55](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L55)                             |
-| <a id="settingmanager-1"></a> `settingManager?`   | `readonly` | [`SettingManager`](#settingmanager-2) | -                  | [src/services/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L16) |
-| <a id="shouldverifyssl"></a> `shouldVerifySSL?`   | `readonly` | `boolean`                             | -                  | [src/services/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L17) |
-| <a id="timezone"></a> `timezone?`                 | `readonly` | `string`                              | -                  | [src/services/interfaces.ts:18](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L18) |
-| <a id="username"></a> `username?`                 | `readonly` | `string`                              | `Partial.username` | [src/types.ts:56](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L56)                             |
+| <a id="autosyncinterval"></a> `autoSyncInterval?` | `readonly` | `null` \| `number`                    | -                  | [src/services/interfaces.ts:12](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L12) |
+| <a id="language"></a> `language?`                 | `readonly` | `string`                              | -                  | [src/services/interfaces.ts:13](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L13) |
+| <a id="logger"></a> `logger?`                     | `readonly` | [`Logger`](#logger-1)                 | -                  | [src/services/interfaces.ts:14](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L14) |
+| <a id="onsync-1"></a> `onSync?`                   | `readonly` | [`OnSyncFunction`](#onsyncfunction)   | -                  | [src/services/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L15) |
+| <a id="password"></a> `password?`                 | `readonly` | `string`                              | `Partial.password` | [src/types.ts:55](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L55)                             |
+| <a id="settingmanager-1"></a> `settingManager?`   | `readonly` | [`SettingManager`](#settingmanager-2) | -                  | [src/services/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L16) |
+| <a id="shouldverifyssl"></a> `shouldVerifySSL?`   | `readonly` | `boolean`                             | -                  | [src/services/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L17) |
+| <a id="timezone"></a> `timezone?`                 | `readonly` | `string`                              | -                  | [src/services/interfaces.ts:18](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L18) |
+| <a id="username"></a> `username?`                 | `readonly` | `string`                              | `Partial.username` | [src/types.ts:56](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L56)                             |
 
 ---
 
 ### APISettings
 
-Defined in: [src/services/interfaces.ts:21](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L21)
+Defined in: [src/services/interfaces.ts:21](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L21)
 
 #### Properties
 
 | Property                            | Modifier   | Type               | Defined in                                                                                                                                             |
 | ----------------------------------- | ---------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <a id="expireat"></a> `expireAt?`   | `readonly` | `null` \| `string` | [src/services/interfaces.ts:22](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L22) |
-| <a id="password-1"></a> `password?` | `readonly` | `null` \| `string` | [src/services/interfaces.ts:23](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L23) |
-| <a id="token"></a> `token?`         | `readonly` | `null` \| `string` | [src/services/interfaces.ts:24](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L24) |
-| <a id="username-1"></a> `username?` | `readonly` | `null` \| `string` | [src/services/interfaces.ts:25](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L25) |
+| <a id="expireat"></a> `expireAt?`   | `readonly` | `null` \| `string` | [src/services/interfaces.ts:22](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L22) |
+| <a id="password-1"></a> `password?` | `readonly` | `null` \| `string` | [src/services/interfaces.ts:23](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L23) |
+| <a id="token"></a> `token?`         | `readonly` | `null` \| `string` | [src/services/interfaces.ts:24](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L24) |
+| <a id="username-1"></a> `username?` | `readonly` | `null` \| `string` | [src/services/interfaces.ts:25](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L25) |
 
 ---
 
 ### Attrs
 
-Defined in: [src/types.ts:10](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L10)
+Defined in: [src/types.ts:10](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L10)
 
 #### Extends
 
@@ -610,127 +610,127 @@ Defined in: [src/types.ts:10](https://github.com/OlivierZal/heatzy-api/blob/d792
 
 | Property                                    | Modifier   | Type                                                  | Overrides                                   | Inherited from                                                | Defined in                                                                                                                 |
 | ------------------------------------------- | ---------- | ----------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="cft_temp"></a> `cft_temp?`           | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`cft_temp`](#cft_temp-1)           | [src/types.ts:77](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L77) |
-| <a id="cft_temph"></a> `cft_tempH?`         | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`cft_tempH`](#cft_temph-1)         | [src/types.ts:70](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L70) |
-| <a id="cft_templ"></a> `cft_tempL?`         | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`cft_tempL`](#cft_templ-1)         | [src/types.ts:71](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L71) |
-| <a id="com_temp"></a> `com_temp?`           | `readonly` | [`TemperatureCompensation`](#temperaturecompensation) | -                                           | [`PostAttrs`](#postattrs).[`com_temp`](#com_temp-1)           | [src/types.ts:68](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L68) |
-| <a id="cur_humi"></a> `cur_humi?`           | `readonly` | `number`                                              | -                                           | -                                                             | [src/types.ts:16](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L16) |
-| <a id="cur_mode"></a> `cur_mode?`           | `readonly` | [`Mode`](#mode)                                       | -                                           | -                                                             | [src/types.ts:17](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L17) |
-| <a id="cur_temp"></a> `cur_temp?`           | `readonly` | `number`                                              | -                                           | -                                                             | [src/types.ts:18](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L18) |
-| <a id="cur_temph"></a> `cur_tempH?`         | `readonly` | `number`                                              | -                                           | -                                                             | [src/types.ts:13](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L13) |
-| <a id="cur_templ"></a> `cur_tempL?`         | `readonly` | `number`                                              | -                                           | -                                                             | [src/types.ts:14](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L14) |
-| <a id="derog_mode"></a> `derog_mode?`       | `readonly` | [`DerogationMode`](#derogationmode)                   | -                                           | [`PostAttrs`](#postattrs).[`derog_mode`](#derog_mode-1)       | [src/types.ts:62](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L62) |
-| <a id="derog_time"></a> `derog_time?`       | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`derog_time`](#derog_time-1)       | [src/types.ts:63](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L63) |
-| <a id="eco_temp"></a> `eco_temp?`           | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`eco_temp`](#eco_temp-1)           | [src/types.ts:78](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L78) |
-| <a id="eco_temph"></a> `eco_tempH?`         | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`eco_tempH`](#eco_temph-1)         | [src/types.ts:72](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L72) |
-| <a id="eco_templ"></a> `eco_tempL?`         | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`eco_tempL`](#eco_templ-1)         | [src/types.ts:73](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L73) |
-| <a id="lock_c"></a> `lock_c?`               | `readonly` | [`Switch`](#switch)                                   | -                                           | [`PostAttrs`](#postattrs).[`lock_c`](#lock_c-1)               | [src/types.ts:74](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L74) |
-| <a id="lock_switch"></a> `lock_switch?`     | `readonly` | [`Switch`](#switch)                                   | -                                           | [`PostAttrs`](#postattrs).[`lock_switch`](#lock_switch-1)     | [src/types.ts:66](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L66) |
-| <a id="mode-1"></a> `mode`                  | `readonly` | [`Mode`](#mode)                                       | [`PostAttrs`](#postattrs).[`mode`](#mode-6) | -                                                             | [src/types.ts:11](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L11) |
-| <a id="on_off"></a> `on_off?`               | `readonly` | [`Switch`](#switch)                                   | -                                           | [`PostAttrs`](#postattrs).[`on_off`](#on_off-1)               | [src/types.ts:75](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L75) |
-| <a id="timer_switch"></a> `timer_switch?`   | `readonly` | [`Switch`](#switch)                                   | -                                           | [`PostAttrs`](#postattrs).[`timer_switch`](#timer_switch-1)   | [src/types.ts:64](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L64) |
-| <a id="window_switch"></a> `window_switch?` | `readonly` | [`Switch`](#switch)                                   | -                                           | [`PostAttrs`](#postattrs).[`window_switch`](#window_switch-1) | [src/types.ts:79](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L79) |
+| <a id="cft_temp"></a> `cft_temp?`           | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`cft_temp`](#cft_temp-1)           | [src/types.ts:77](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L77) |
+| <a id="cft_temph"></a> `cft_tempH?`         | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`cft_tempH`](#cft_temph-1)         | [src/types.ts:70](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L70) |
+| <a id="cft_templ"></a> `cft_tempL?`         | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`cft_tempL`](#cft_templ-1)         | [src/types.ts:71](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L71) |
+| <a id="com_temp"></a> `com_temp?`           | `readonly` | [`TemperatureCompensation`](#temperaturecompensation) | -                                           | [`PostAttrs`](#postattrs).[`com_temp`](#com_temp-1)           | [src/types.ts:68](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L68) |
+| <a id="cur_humi"></a> `cur_humi?`           | `readonly` | `number`                                              | -                                           | -                                                             | [src/types.ts:16](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L16) |
+| <a id="cur_mode"></a> `cur_mode?`           | `readonly` | [`Mode`](#mode)                                       | -                                           | -                                                             | [src/types.ts:17](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L17) |
+| <a id="cur_temp"></a> `cur_temp?`           | `readonly` | `number`                                              | -                                           | -                                                             | [src/types.ts:18](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L18) |
+| <a id="cur_temph"></a> `cur_tempH?`         | `readonly` | `number`                                              | -                                           | -                                                             | [src/types.ts:13](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L13) |
+| <a id="cur_templ"></a> `cur_tempL?`         | `readonly` | `number`                                              | -                                           | -                                                             | [src/types.ts:14](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L14) |
+| <a id="derog_mode"></a> `derog_mode?`       | `readonly` | [`DerogationMode`](#derogationmode)                   | -                                           | [`PostAttrs`](#postattrs).[`derog_mode`](#derog_mode-1)       | [src/types.ts:62](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L62) |
+| <a id="derog_time"></a> `derog_time?`       | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`derog_time`](#derog_time-1)       | [src/types.ts:63](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L63) |
+| <a id="eco_temp"></a> `eco_temp?`           | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`eco_temp`](#eco_temp-1)           | [src/types.ts:78](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L78) |
+| <a id="eco_temph"></a> `eco_tempH?`         | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`eco_tempH`](#eco_temph-1)         | [src/types.ts:72](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L72) |
+| <a id="eco_templ"></a> `eco_tempL?`         | `readonly` | `number`                                              | -                                           | [`PostAttrs`](#postattrs).[`eco_tempL`](#eco_templ-1)         | [src/types.ts:73](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L73) |
+| <a id="lock_c"></a> `lock_c?`               | `readonly` | [`Switch`](#switch)                                   | -                                           | [`PostAttrs`](#postattrs).[`lock_c`](#lock_c-1)               | [src/types.ts:74](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L74) |
+| <a id="lock_switch"></a> `lock_switch?`     | `readonly` | [`Switch`](#switch)                                   | -                                           | [`PostAttrs`](#postattrs).[`lock_switch`](#lock_switch-1)     | [src/types.ts:66](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L66) |
+| <a id="mode-1"></a> `mode`                  | `readonly` | [`Mode`](#mode)                                       | [`PostAttrs`](#postattrs).[`mode`](#mode-6) | -                                                             | [src/types.ts:11](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L11) |
+| <a id="on_off"></a> `on_off?`               | `readonly` | [`Switch`](#switch)                                   | -                                           | [`PostAttrs`](#postattrs).[`on_off`](#on_off-1)               | [src/types.ts:75](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L75) |
+| <a id="timer_switch"></a> `timer_switch?`   | `readonly` | [`Switch`](#switch)                                   | -                                           | [`PostAttrs`](#postattrs).[`timer_switch`](#timer_switch-1)   | [src/types.ts:64](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L64) |
+| <a id="window_switch"></a> `window_switch?` | `readonly` | [`Switch`](#switch)                                   | -                                           | [`PostAttrs`](#postattrs).[`window_switch`](#window_switch-1) | [src/types.ts:79](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L79) |
 
 ---
 
 ### Bindings
 
-Defined in: [src/types.ts:21](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L21)
+Defined in: [src/types.ts:21](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L21)
 
 #### Properties
 
 | Property                       | Modifier   | Type                           | Defined in                                                                                                                 |
 | ------------------------------ | ---------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="devices"></a> `devices` | `readonly` | readonly [`Device`](#device)[] | [src/types.ts:22](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L22) |
+| <a id="devices"></a> `devices` | `readonly` | readonly [`Device`](#device)[] | [src/types.ts:22](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L22) |
 
 ---
 
 ### Device
 
-Defined in: [src/types.ts:25](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L25)
+Defined in: [src/types.ts:25](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L25)
 
 #### Properties
 
 | Property                                 | Modifier   | Type     | Defined in                                                                                                                 |
 | ---------------------------------------- | ---------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="dev_alias"></a> `dev_alias`       | `readonly` | `string` | [src/types.ts:26](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L26) |
-| <a id="did"></a> `did`                   | `readonly` | `string` | [src/types.ts:27](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L27) |
-| <a id="product_key"></a> `product_key`   | `readonly` | `string` | [src/types.ts:28](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L28) |
-| <a id="product_name"></a> `product_name` | `readonly` | `string` | [src/types.ts:29](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L29) |
+| <a id="dev_alias"></a> `dev_alias`       | `readonly` | `string` | [src/types.ts:26](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L26) |
+| <a id="did"></a> `did`                   | `readonly` | `string` | [src/types.ts:27](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L27) |
+| <a id="product_key"></a> `product_key`   | `readonly` | `string` | [src/types.ts:28](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L28) |
+| <a id="product_name"></a> `product_name` | `readonly` | `string` | [src/types.ts:29](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L29) |
 
 ---
 
 ### DeviceData
 
-Defined in: [src/types.ts:32](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L32)
+Defined in: [src/types.ts:32](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L32)
 
 #### Properties
 
 | Property                 | Modifier   | Type              | Defined in                                                                                                                 |
 | ------------------------ | ---------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="attr"></a> `attr` | `readonly` | [`Attrs`](#attrs) | [src/types.ts:33](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L33) |
+| <a id="attr"></a> `attr` | `readonly` | [`Attrs`](#attrs) | [src/types.ts:33](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L33) |
 
 ---
 
 ### DevicePostData
 
-Defined in: [src/types.ts:36](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L36)
+Defined in: [src/types.ts:36](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L36)
 
 #### Properties
 
 | Property                     | Modifier   | Type                      | Defined in                                                                                                                 |
 | ---------------------------- | ---------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="attrs-1"></a> `attrs` | `readonly` | [`PostAttrs`](#postattrs) | [src/types.ts:37](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L37) |
+| <a id="attrs-1"></a> `attrs` | `readonly` | [`PostAttrs`](#postattrs) | [src/types.ts:37](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L37) |
 
 ---
 
 ### DeviceV1PostData
 
-Defined in: [src/types.ts:40](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L40)
+Defined in: [src/types.ts:40](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L40)
 
 #### Properties
 
 | Property               | Modifier   | Type                              | Defined in                                                                                                                 |
 | ---------------------- | ---------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="raw"></a> `raw` | `readonly` | \[`1`, `1`, [`ModeV1`](#modev1)\] | [src/types.ts:41](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L41) |
+| <a id="raw"></a> `raw` | `readonly` | \[`1`, `1`, [`ModeV1`](#modev1)\] | [src/types.ts:41](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L41) |
 
 ---
 
 ### ErrorData
 
-Defined in: [src/types.ts:44](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L44)
+Defined in: [src/types.ts:44](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L44)
 
 #### Properties
 
 | Property                                     | Modifier   | Type               | Defined in                                                                                                                 |
 | -------------------------------------------- | ---------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="detail_message"></a> `detail_message` | `readonly` | `null` \| `string` | [src/types.ts:45](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L45) |
-| <a id="error_message"></a> `error_message`   | `readonly` | `null` \| `string` | [src/types.ts:46](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L46) |
+| <a id="detail_message"></a> `detail_message` | `readonly` | `null` \| `string` | [src/types.ts:45](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L45) |
+| <a id="error_message"></a> `error_message`   | `readonly` | `null` \| `string` | [src/types.ts:46](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L46) |
 
 ---
 
 ### IAPI
 
-Defined in: [src/services/interfaces.ts:28](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L28)
+Defined in: [src/services/interfaces.ts:28](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L28)
 
 #### Properties
 
 | Property                                   | Modifier   | Type                                                                                                                                                 | Defined in                                                                                                                                             |
 | ------------------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <a id="authenticate-2"></a> `authenticate` | `readonly` | (`data?`: [`LoginPostData`](#loginpostdata)) => `Promise`\<`boolean`\>                                                                               | [src/services/interfaces.ts:30](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L30) |
-| <a id="bindings-3"></a> `bindings`         | `readonly` | () => `Promise`\<\{ `data`: [`Bindings`](#bindings-2); \}\>                                                                                          | [src/services/interfaces.ts:31](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L31) |
-| <a id="clearsync-2"></a> `clearSync`       | `readonly` | () => `void`                                                                                                                                         | [src/services/interfaces.ts:32](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L32) |
-| <a id="control-2"></a> `control`           | `readonly` | (`__namedParameters`: \{ `id`: `string`; `postData`: [`DevicePostDataAny`](#devicepostdataany); \}) => `Promise`\<\{ `data`: [`Data`](#data-2); \}\> | [src/services/interfaces.ts:33](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L33) |
-| <a id="devicedata-3"></a> `deviceData`     | `readonly` | (`__namedParameters`: \{ `id`: `string`; \}) => `Promise`\<\{ `data`: [`DeviceData`](#devicedata-2); \}\>                                            | [src/services/interfaces.ts:40](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L40) |
-| <a id="fetch-2"></a> `fetch`               | `readonly` | () => `Promise`\<readonly [`Device`](#device)[]\>                                                                                                    | [src/services/interfaces.ts:41](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L41) |
-| <a id="login-2"></a> `login`               | `readonly` | (`__namedParameters`: \{ `postData`: [`LoginPostData`](#loginpostdata); \}) => `Promise`\<\{ `data`: [`LoginData`](#logindata); \}\>                 | [src/services/interfaces.ts:42](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L42) |
-| <a id="onsync-2"></a> `onSync?`            | `readonly` | [`OnSyncFunction`](#onsyncfunction)                                                                                                                  | [src/services/interfaces.ts:29](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L29) |
+| <a id="authenticate-2"></a> `authenticate` | `readonly` | (`data?`: [`LoginPostData`](#loginpostdata)) => `Promise`\<`boolean`\>                                                                               | [src/services/interfaces.ts:30](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L30) |
+| <a id="bindings-3"></a> `bindings`         | `readonly` | () => `Promise`\<\{ `data`: [`Bindings`](#bindings-2); \}\>                                                                                          | [src/services/interfaces.ts:31](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L31) |
+| <a id="clearsync-2"></a> `clearSync`       | `readonly` | () => `void`                                                                                                                                         | [src/services/interfaces.ts:32](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L32) |
+| <a id="control-2"></a> `control`           | `readonly` | (`__namedParameters`: \{ `id`: `string`; `postData`: [`DevicePostDataAny`](#devicepostdataany); \}) => `Promise`\<\{ `data`: [`Data`](#data-2); \}\> | [src/services/interfaces.ts:33](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L33) |
+| <a id="devicedata-3"></a> `deviceData`     | `readonly` | (`__namedParameters`: \{ `id`: `string`; \}) => `Promise`\<\{ `data`: [`DeviceData`](#devicedata-2); \}\>                                            | [src/services/interfaces.ts:40](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L40) |
+| <a id="fetch-2"></a> `fetch`               | `readonly` | () => `Promise`\<readonly [`Device`](#device)[]\>                                                                                                    | [src/services/interfaces.ts:41](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L41) |
+| <a id="login-2"></a> `login`               | `readonly` | (`__namedParameters`: \{ `postData`: [`LoginPostData`](#loginpostdata); \}) => `Promise`\<\{ `data`: [`LoginData`](#logindata); \}\>                 | [src/services/interfaces.ts:42](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L42) |
+| <a id="onsync-2"></a> `onSync?`            | `readonly` | [`OnSyncFunction`](#onsyncfunction)                                                                                                                  | [src/services/interfaces.ts:29](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L29) |
 
 ---
 
 ### IDeviceFacade
 
-Defined in: [src/facades/interfaces.ts:12](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L12)
+Defined in: [src/facades/interfaces.ts:12](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L12)
 
 #### Extends
 
@@ -744,23 +744,23 @@ Defined in: [src/facades/interfaces.ts:12](https://github.com/OlivierZal/heatzy-
 
 | Property                                             | Modifier   | Type                                                                               | Inherited from                       | Defined in                                                                                                                                           |
 | ---------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <a id="derogationenddate-1"></a> `derogationEndDate` | `readonly` | `null` \| `DateTime`\<`boolean`\>                                                  | `IBaseDeviceModel.derogationEndDate` | [src/models/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L15)   |
-| <a id="id-1"></a> `id`                               | `readonly` | `string`                                                                           | `IBaseDeviceModel.id`                | [src/models/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L16)   |
-| <a id="ison"></a> `isOn`                             | `readonly` | `boolean`                                                                          | -                                    | [src/facades/interfaces.ts:13](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L13) |
-| <a id="mode-2"></a> `mode`                           | `readonly` | [`Mode`](#mode)                                                                    | -                                    | [src/facades/interfaces.ts:14](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L14) |
-| <a id="name-1"></a> `name`                           | `readonly` | `string`                                                                           | `IBaseDeviceModel.name`              | [src/models/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L17)   |
-| <a id="onsync-3"></a> `onSync`                       | `readonly` | () => `Promise`\<`void`\>                                                          | -                                    | [src/facades/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L15) |
-| <a id="previousmode-1"></a> `previousMode`           | `readonly` | [`PreviousMode`](#previousmode-6)                                                  | `IBaseDeviceModel.previousMode`      | [src/models/interfaces.ts:18](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L18)   |
-| <a id="product-2"></a> `product`                     | `readonly` | [`Product`](#product)                                                              | `IBaseDeviceModel.product`           | [src/models/interfaces.ts:19](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L19)   |
-| <a id="setvalues"></a> `setValues`                   | `readonly` | (`data`: [`PostAttrs`](#postattrs)) => `Promise`\<`Partial`\<[`Attrs`](#attrs)\>\> | -                                    | [src/facades/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L16) |
-| <a id="update-2"></a> `update`                       | `readonly` | (`data`: `Partial`\<[`Attrs`](#attrs)\>) => `void`                                 | `IBaseDeviceModel.update`            | [src/models/interfaces.ts:20](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L20)   |
-| <a id="values"></a> `values`                         | `readonly` | () => `Promise`\<[`Attrs`](#attrs)\>                                               | -                                    | [src/facades/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L17) |
+| <a id="derogationenddate-1"></a> `derogationEndDate` | `readonly` | `null` \| `DateTime`\<`boolean`\>                                                  | `IBaseDeviceModel.derogationEndDate` | [src/models/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L15)   |
+| <a id="id-1"></a> `id`                               | `readonly` | `string`                                                                           | `IBaseDeviceModel.id`                | [src/models/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L16)   |
+| <a id="ison"></a> `isOn`                             | `readonly` | `boolean`                                                                          | -                                    | [src/facades/interfaces.ts:13](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L13) |
+| <a id="mode-2"></a> `mode`                           | `readonly` | [`Mode`](#mode)                                                                    | -                                    | [src/facades/interfaces.ts:14](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L14) |
+| <a id="name-1"></a> `name`                           | `readonly` | `string`                                                                           | `IBaseDeviceModel.name`              | [src/models/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L17)   |
+| <a id="onsync-3"></a> `onSync`                       | `readonly` | () => `Promise`\<`void`\>                                                          | -                                    | [src/facades/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L15) |
+| <a id="previousmode-1"></a> `previousMode`           | `readonly` | [`PreviousMode`](#previousmode-6)                                                  | `IBaseDeviceModel.previousMode`      | [src/models/interfaces.ts:18](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L18)   |
+| <a id="product-2"></a> `product`                     | `readonly` | [`Product`](#product)                                                              | `IBaseDeviceModel.product`           | [src/models/interfaces.ts:19](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L19)   |
+| <a id="setvalues"></a> `setValues`                   | `readonly` | (`data`: [`PostAttrs`](#postattrs)) => `Promise`\<`Partial`\<[`Attrs`](#attrs)\>\> | -                                    | [src/facades/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L16) |
+| <a id="update-2"></a> `update`                       | `readonly` | (`data`: `Partial`\<[`Attrs`](#attrs)\>) => `void`                                 | `IBaseDeviceModel.update`            | [src/models/interfaces.ts:20](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L20)   |
+| <a id="values"></a> `values`                         | `readonly` | () => `Promise`\<[`Attrs`](#attrs)\>                                               | -                                    | [src/facades/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L17) |
 
 ---
 
 ### IDeviceGlowFacade
 
-Defined in: [src/facades/interfaces.ts:20](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L20)
+Defined in: [src/facades/interfaces.ts:20](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L20)
 
 #### Extends
 
@@ -774,32 +774,32 @@ Defined in: [src/facades/interfaces.ts:20](https://github.com/OlivierZal/heatzy-
 
 | Property                                                         | Modifier   | Type                                                                               | Inherited from                                                                        | Defined in                                                                                                                                           |
 | ---------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <a id="comforttemperature"></a> `comfortTemperature`             | `readonly` | `number`                                                                           | -                                                                                     | [src/facades/interfaces.ts:21](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L21) |
-| <a id="currenttemperature"></a> `currentTemperature`             | `readonly` | `number`                                                                           | -                                                                                     | [src/facades/interfaces.ts:22](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L22) |
-| <a id="derogationenddate-2"></a> `derogationEndDate`             | `readonly` | `null` \| `DateTime`\<`boolean`\>                                                  | [`IDeviceV2Facade`](#idevicev2facade).[`derogationEndDate`](#derogationenddate-5)     | [src/facades/interfaces.ts:35](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L35) |
-| <a id="derogationendstring"></a> `derogationEndString`           | `readonly` | `null` \| `string`                                                                 | [`IDeviceV2Facade`](#idevicev2facade).[`derogationEndString`](#derogationendstring-2) | [src/facades/interfaces.ts:36](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L36) |
-| <a id="derogationmode-1"></a> `derogationMode`                   | `readonly` | [`DerogationMode`](#derogationmode)                                                | [`IDeviceV2Facade`](#idevicev2facade).[`derogationMode`](#derogationmode-3)           | [src/facades/interfaces.ts:37](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L37) |
-| <a id="derogationtime"></a> `derogationTime`                     | `readonly` | `number`                                                                           | [`IDeviceV2Facade`](#idevicev2facade).[`derogationTime`](#derogationtime-2)           | [src/facades/interfaces.ts:38](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L38) |
-| <a id="ecotemperature"></a> `ecoTemperature`                     | `readonly` | `number`                                                                           | -                                                                                     | [src/facades/interfaces.ts:23](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L23) |
-| <a id="id-2"></a> `id`                                           | `readonly` | `string`                                                                           | [`IDeviceV2Facade`](#idevicev2facade).[`id`](#id-5)                                   | [src/models/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L16)   |
-| <a id="islocked"></a> `isLocked`                                 | `readonly` | `boolean`                                                                          | [`IDeviceV2Facade`](#idevicev2facade).[`isLocked`](#islocked-2)                       | [src/facades/interfaces.ts:39](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L39) |
-| <a id="ison-1"></a> `isOn`                                       | `readonly` | `boolean`                                                                          | [`IDeviceV2Facade`](#idevicev2facade).[`isOn`](#ison-3)                               | [src/facades/interfaces.ts:13](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L13) |
-| <a id="istimer"></a> `isTimer`                                   | `readonly` | `boolean`                                                                          | [`IDeviceV2Facade`](#idevicev2facade).[`isTimer`](#istimer-2)                         | [src/facades/interfaces.ts:40](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L40) |
-| <a id="mode-3"></a> `mode`                                       | `readonly` | [`Mode`](#mode)                                                                    | [`IDeviceV2Facade`](#idevicev2facade).[`mode`](#mode-5)                               | [src/facades/interfaces.ts:14](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L14) |
-| <a id="name-2"></a> `name`                                       | `readonly` | `string`                                                                           | [`IDeviceV2Facade`](#idevicev2facade).[`name`](#name-5)                               | [src/models/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L17)   |
-| <a id="onsync-4"></a> `onSync`                                   | `readonly` | () => `Promise`\<`void`\>                                                          | [`IDeviceV2Facade`](#idevicev2facade).[`onSync`](#onsync-6)                           | [src/facades/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L15) |
-| <a id="previousmode-2"></a> `previousMode`                       | `readonly` | [`PreviousMode`](#previousmode-6)                                                  | [`IDeviceV2Facade`](#idevicev2facade).[`previousMode`](#previousmode-5)               | [src/models/interfaces.ts:18](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L18)   |
-| <a id="product-3"></a> `product`                                 | `readonly` | [`Product`](#product)                                                              | [`IDeviceV2Facade`](#idevicev2facade).[`product`](#product-6)                         | [src/models/interfaces.ts:19](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L19)   |
-| <a id="setvalues-1"></a> `setValues`                             | `readonly` | (`data`: [`PostAttrs`](#postattrs)) => `Promise`\<`Partial`\<[`Attrs`](#attrs)\>\> | [`IDeviceV2Facade`](#idevicev2facade).[`setValues`](#setvalues-3)                     | [src/facades/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L16) |
-| <a id="temperaturecompensation-1"></a> `temperatureCompensation` | `readonly` | [`TemperatureCompensation`](#temperaturecompensation)                              | -                                                                                     | [src/facades/interfaces.ts:24](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L24) |
-| <a id="update-3"></a> `update`                                   | `readonly` | (`data`: `Partial`\<[`Attrs`](#attrs)\>) => `void`                                 | [`IDeviceV2Facade`](#idevicev2facade).[`update`](#update-6)                           | [src/models/interfaces.ts:20](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L20)   |
-| <a id="values-1"></a> `values`                                   | `readonly` | () => `Promise`\<[`Attrs`](#attrs)\>                                               | [`IDeviceV2Facade`](#idevicev2facade).[`values`](#values-3)                           | [src/facades/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L17) |
+| <a id="comforttemperature"></a> `comfortTemperature`             | `readonly` | `number`                                                                           | -                                                                                     | [src/facades/interfaces.ts:21](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L21) |
+| <a id="currenttemperature"></a> `currentTemperature`             | `readonly` | `number`                                                                           | -                                                                                     | [src/facades/interfaces.ts:22](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L22) |
+| <a id="derogationenddate-2"></a> `derogationEndDate`             | `readonly` | `null` \| `DateTime`\<`boolean`\>                                                  | [`IDeviceV2Facade`](#idevicev2facade).[`derogationEndDate`](#derogationenddate-5)     | [src/facades/interfaces.ts:35](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L35) |
+| <a id="derogationendstring"></a> `derogationEndString`           | `readonly` | `null` \| `string`                                                                 | [`IDeviceV2Facade`](#idevicev2facade).[`derogationEndString`](#derogationendstring-2) | [src/facades/interfaces.ts:36](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L36) |
+| <a id="derogationmode-1"></a> `derogationMode`                   | `readonly` | [`DerogationMode`](#derogationmode)                                                | [`IDeviceV2Facade`](#idevicev2facade).[`derogationMode`](#derogationmode-3)           | [src/facades/interfaces.ts:37](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L37) |
+| <a id="derogationtime"></a> `derogationTime`                     | `readonly` | `number`                                                                           | [`IDeviceV2Facade`](#idevicev2facade).[`derogationTime`](#derogationtime-2)           | [src/facades/interfaces.ts:38](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L38) |
+| <a id="ecotemperature"></a> `ecoTemperature`                     | `readonly` | `number`                                                                           | -                                                                                     | [src/facades/interfaces.ts:23](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L23) |
+| <a id="id-2"></a> `id`                                           | `readonly` | `string`                                                                           | [`IDeviceV2Facade`](#idevicev2facade).[`id`](#id-5)                                   | [src/models/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L16)   |
+| <a id="islocked"></a> `isLocked`                                 | `readonly` | `boolean`                                                                          | [`IDeviceV2Facade`](#idevicev2facade).[`isLocked`](#islocked-2)                       | [src/facades/interfaces.ts:39](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L39) |
+| <a id="ison-1"></a> `isOn`                                       | `readonly` | `boolean`                                                                          | [`IDeviceV2Facade`](#idevicev2facade).[`isOn`](#ison-3)                               | [src/facades/interfaces.ts:13](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L13) |
+| <a id="istimer"></a> `isTimer`                                   | `readonly` | `boolean`                                                                          | [`IDeviceV2Facade`](#idevicev2facade).[`isTimer`](#istimer-2)                         | [src/facades/interfaces.ts:40](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L40) |
+| <a id="mode-3"></a> `mode`                                       | `readonly` | [`Mode`](#mode)                                                                    | [`IDeviceV2Facade`](#idevicev2facade).[`mode`](#mode-5)                               | [src/facades/interfaces.ts:14](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L14) |
+| <a id="name-2"></a> `name`                                       | `readonly` | `string`                                                                           | [`IDeviceV2Facade`](#idevicev2facade).[`name`](#name-5)                               | [src/models/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L17)   |
+| <a id="onsync-4"></a> `onSync`                                   | `readonly` | () => `Promise`\<`void`\>                                                          | [`IDeviceV2Facade`](#idevicev2facade).[`onSync`](#onsync-6)                           | [src/facades/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L15) |
+| <a id="previousmode-2"></a> `previousMode`                       | `readonly` | [`PreviousMode`](#previousmode-6)                                                  | [`IDeviceV2Facade`](#idevicev2facade).[`previousMode`](#previousmode-5)               | [src/models/interfaces.ts:18](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L18)   |
+| <a id="product-3"></a> `product`                                 | `readonly` | [`Product`](#product)                                                              | [`IDeviceV2Facade`](#idevicev2facade).[`product`](#product-6)                         | [src/models/interfaces.ts:19](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L19)   |
+| <a id="setvalues-1"></a> `setValues`                             | `readonly` | (`data`: [`PostAttrs`](#postattrs)) => `Promise`\<`Partial`\<[`Attrs`](#attrs)\>\> | [`IDeviceV2Facade`](#idevicev2facade).[`setValues`](#setvalues-3)                     | [src/facades/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L16) |
+| <a id="temperaturecompensation-1"></a> `temperatureCompensation` | `readonly` | [`TemperatureCompensation`](#temperaturecompensation)                              | -                                                                                     | [src/facades/interfaces.ts:24](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L24) |
+| <a id="update-3"></a> `update`                                   | `readonly` | (`data`: `Partial`\<[`Attrs`](#attrs)\>) => `void`                                 | [`IDeviceV2Facade`](#idevicev2facade).[`update`](#update-6)                           | [src/models/interfaces.ts:20](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L20)   |
+| <a id="values-1"></a> `values`                                   | `readonly` | () => `Promise`\<[`Attrs`](#attrs)\>                                               | [`IDeviceV2Facade`](#idevicev2facade).[`values`](#values-3)                           | [src/facades/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L17) |
 
 ---
 
 ### IDeviceModel
 
-Defined in: [src/models/interfaces.ts:23](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L23)
+Defined in: [src/models/interfaces.ts:23](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L23)
 
 #### Extends
 
@@ -809,21 +809,21 @@ Defined in: [src/models/interfaces.ts:23](https://github.com/OlivierZal/heatzy-a
 
 | Property                                             | Modifier   | Type                                               | Inherited from                       | Defined in                                                                                                                                         |
 | ---------------------------------------------------- | ---------- | -------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <a id="data-1"></a> `data`                           | `readonly` | [`Attrs`](#attrs)                                  | -                                    | [src/models/interfaces.ts:24](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L24) |
-| <a id="derogationenddate-3"></a> `derogationEndDate` | `readonly` | `null` \| `DateTime`\<`boolean`\>                  | `IBaseDeviceModel.derogationEndDate` | [src/models/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L15) |
-| <a id="id-3"></a> `id`                               | `readonly` | `string`                                           | `IBaseDeviceModel.id`                | [src/models/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L16) |
-| <a id="name-3"></a> `name`                           | `readonly` | `string`                                           | `IBaseDeviceModel.name`              | [src/models/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L17) |
-| <a id="previousmode-3"></a> `previousMode`           | `readonly` | [`PreviousMode`](#previousmode-6)                  | `IBaseDeviceModel.previousMode`      | [src/models/interfaces.ts:18](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L18) |
-| <a id="product-4"></a> `product`                     | `readonly` | [`Product`](#product)                              | `IBaseDeviceModel.product`           | [src/models/interfaces.ts:19](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L19) |
-| <a id="productkey-1"></a> `productKey`               | `readonly` | `string`                                           | -                                    | [src/models/interfaces.ts:25](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L25) |
-| <a id="productname-1"></a> `productName`             | `readonly` | `string`                                           | -                                    | [src/models/interfaces.ts:26](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L26) |
-| <a id="update-4"></a> `update`                       | `readonly` | (`data`: `Partial`\<[`Attrs`](#attrs)\>) => `void` | `IBaseDeviceModel.update`            | [src/models/interfaces.ts:20](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L20) |
+| <a id="data-1"></a> `data`                           | `readonly` | [`Attrs`](#attrs)                                  | -                                    | [src/models/interfaces.ts:24](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L24) |
+| <a id="derogationenddate-3"></a> `derogationEndDate` | `readonly` | `null` \| `DateTime`\<`boolean`\>                  | `IBaseDeviceModel.derogationEndDate` | [src/models/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L15) |
+| <a id="id-3"></a> `id`                               | `readonly` | `string`                                           | `IBaseDeviceModel.id`                | [src/models/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L16) |
+| <a id="name-3"></a> `name`                           | `readonly` | `string`                                           | `IBaseDeviceModel.name`              | [src/models/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L17) |
+| <a id="previousmode-3"></a> `previousMode`           | `readonly` | [`PreviousMode`](#previousmode-6)                  | `IBaseDeviceModel.previousMode`      | [src/models/interfaces.ts:18](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L18) |
+| <a id="product-4"></a> `product`                     | `readonly` | [`Product`](#product)                              | `IBaseDeviceModel.product`           | [src/models/interfaces.ts:19](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L19) |
+| <a id="productkey-1"></a> `productKey`               | `readonly` | `string`                                           | -                                    | [src/models/interfaces.ts:25](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L25) |
+| <a id="productname-1"></a> `productName`             | `readonly` | `string`                                           | -                                    | [src/models/interfaces.ts:26](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L26) |
+| <a id="update-4"></a> `update`                       | `readonly` | (`data`: `Partial`\<[`Attrs`](#attrs)\>) => `void` | `IBaseDeviceModel.update`            | [src/models/interfaces.ts:20](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L20) |
 
 ---
 
 ### IDeviceProFacade
 
-Defined in: [src/facades/interfaces.ts:27](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L27)
+Defined in: [src/facades/interfaces.ts:27](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L27)
 
 #### Extends
 
@@ -833,36 +833,36 @@ Defined in: [src/facades/interfaces.ts:27](https://github.com/OlivierZal/heatzy-
 
 | Property                                                         | Modifier   | Type                                                                               | Inherited from                                                                                    | Defined in                                                                                                                                           |
 | ---------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <a id="comforttemperature-1"></a> `comfortTemperature`           | `readonly` | `number`                                                                           | [`IDeviceGlowFacade`](#ideviceglowfacade).[`comfortTemperature`](#comforttemperature)             | [src/facades/interfaces.ts:21](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L21) |
-| <a id="currenthumidity"></a> `currentHumidity`                   | `readonly` | `number`                                                                           | -                                                                                                 | [src/facades/interfaces.ts:28](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L28) |
-| <a id="currentmode"></a> `currentMode`                           | `readonly` | [`Mode`](#mode)                                                                    | -                                                                                                 | [src/facades/interfaces.ts:29](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L29) |
-| <a id="currenttemperature-1"></a> `currentTemperature`           | `readonly` | `number`                                                                           | [`IDeviceGlowFacade`](#ideviceglowfacade).[`currentTemperature`](#currenttemperature)             | [src/facades/interfaces.ts:22](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L22) |
-| <a id="derogationenddate-4"></a> `derogationEndDate`             | `readonly` | `null` \| `DateTime`\<`boolean`\>                                                  | [`IDeviceGlowFacade`](#ideviceglowfacade).[`derogationEndDate`](#derogationenddate-2)             | [src/facades/interfaces.ts:35](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L35) |
-| <a id="derogationendstring-1"></a> `derogationEndString`         | `readonly` | `null` \| `string`                                                                 | [`IDeviceGlowFacade`](#ideviceglowfacade).[`derogationEndString`](#derogationendstring)           | [src/facades/interfaces.ts:36](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L36) |
-| <a id="derogationmode-2"></a> `derogationMode`                   | `readonly` | [`DerogationMode`](#derogationmode)                                                | [`IDeviceGlowFacade`](#ideviceglowfacade).[`derogationMode`](#derogationmode-1)                   | [src/facades/interfaces.ts:37](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L37) |
-| <a id="derogationtime-1"></a> `derogationTime`                   | `readonly` | `number`                                                                           | [`IDeviceGlowFacade`](#ideviceglowfacade).[`derogationTime`](#derogationtime)                     | [src/facades/interfaces.ts:38](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L38) |
-| <a id="ecotemperature-1"></a> `ecoTemperature`                   | `readonly` | `number`                                                                           | [`IDeviceGlowFacade`](#ideviceglowfacade).[`ecoTemperature`](#ecotemperature)                     | [src/facades/interfaces.ts:23](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L23) |
-| <a id="id-4"></a> `id`                                           | `readonly` | `string`                                                                           | [`IDeviceGlowFacade`](#ideviceglowfacade).[`id`](#id-2)                                           | [src/models/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L16)   |
-| <a id="isdetectingopenwindow"></a> `isDetectingOpenWindow`       | `readonly` | `boolean`                                                                          | -                                                                                                 | [src/facades/interfaces.ts:30](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L30) |
-| <a id="islocked-1"></a> `isLocked`                               | `readonly` | `boolean`                                                                          | [`IDeviceGlowFacade`](#ideviceglowfacade).[`isLocked`](#islocked)                                 | [src/facades/interfaces.ts:39](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L39) |
-| <a id="ison-2"></a> `isOn`                                       | `readonly` | `boolean`                                                                          | [`IDeviceGlowFacade`](#ideviceglowfacade).[`isOn`](#ison-1)                                       | [src/facades/interfaces.ts:13](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L13) |
-| <a id="ispresence"></a> `isPresence`                             | `readonly` | `boolean`                                                                          | -                                                                                                 | [src/facades/interfaces.ts:31](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L31) |
-| <a id="istimer-1"></a> `isTimer`                                 | `readonly` | `boolean`                                                                          | [`IDeviceGlowFacade`](#ideviceglowfacade).[`isTimer`](#istimer)                                   | [src/facades/interfaces.ts:40](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L40) |
-| <a id="mode-4"></a> `mode`                                       | `readonly` | [`Mode`](#mode)                                                                    | [`IDeviceGlowFacade`](#ideviceglowfacade).[`mode`](#mode-3)                                       | [src/facades/interfaces.ts:14](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L14) |
-| <a id="name-4"></a> `name`                                       | `readonly` | `string`                                                                           | [`IDeviceGlowFacade`](#ideviceglowfacade).[`name`](#name-2)                                       | [src/models/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L17)   |
-| <a id="onsync-5"></a> `onSync`                                   | `readonly` | () => `Promise`\<`void`\>                                                          | [`IDeviceGlowFacade`](#ideviceglowfacade).[`onSync`](#onsync-4)                                   | [src/facades/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L15) |
-| <a id="previousmode-4"></a> `previousMode`                       | `readonly` | [`PreviousMode`](#previousmode-6)                                                  | [`IDeviceGlowFacade`](#ideviceglowfacade).[`previousMode`](#previousmode-2)                       | [src/models/interfaces.ts:18](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L18)   |
-| <a id="product-5"></a> `product`                                 | `readonly` | [`Product`](#product)                                                              | [`IDeviceGlowFacade`](#ideviceglowfacade).[`product`](#product-3)                                 | [src/models/interfaces.ts:19](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L19)   |
-| <a id="setvalues-2"></a> `setValues`                             | `readonly` | (`data`: [`PostAttrs`](#postattrs)) => `Promise`\<`Partial`\<[`Attrs`](#attrs)\>\> | [`IDeviceGlowFacade`](#ideviceglowfacade).[`setValues`](#setvalues-1)                             | [src/facades/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L16) |
-| <a id="temperaturecompensation-2"></a> `temperatureCompensation` | `readonly` | [`TemperatureCompensation`](#temperaturecompensation)                              | [`IDeviceGlowFacade`](#ideviceglowfacade).[`temperatureCompensation`](#temperaturecompensation-1) | [src/facades/interfaces.ts:24](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L24) |
-| <a id="update-5"></a> `update`                                   | `readonly` | (`data`: `Partial`\<[`Attrs`](#attrs)\>) => `void`                                 | [`IDeviceGlowFacade`](#ideviceglowfacade).[`update`](#update-3)                                   | [src/models/interfaces.ts:20](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L20)   |
-| <a id="values-2"></a> `values`                                   | `readonly` | () => `Promise`\<[`Attrs`](#attrs)\>                                               | [`IDeviceGlowFacade`](#ideviceglowfacade).[`values`](#values-1)                                   | [src/facades/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L17) |
+| <a id="comforttemperature-1"></a> `comfortTemperature`           | `readonly` | `number`                                                                           | [`IDeviceGlowFacade`](#ideviceglowfacade).[`comfortTemperature`](#comforttemperature)             | [src/facades/interfaces.ts:21](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L21) |
+| <a id="currenthumidity"></a> `currentHumidity`                   | `readonly` | `number`                                                                           | -                                                                                                 | [src/facades/interfaces.ts:28](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L28) |
+| <a id="currentmode"></a> `currentMode`                           | `readonly` | [`Mode`](#mode)                                                                    | -                                                                                                 | [src/facades/interfaces.ts:29](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L29) |
+| <a id="currenttemperature-1"></a> `currentTemperature`           | `readonly` | `number`                                                                           | [`IDeviceGlowFacade`](#ideviceglowfacade).[`currentTemperature`](#currenttemperature)             | [src/facades/interfaces.ts:22](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L22) |
+| <a id="derogationenddate-4"></a> `derogationEndDate`             | `readonly` | `null` \| `DateTime`\<`boolean`\>                                                  | [`IDeviceGlowFacade`](#ideviceglowfacade).[`derogationEndDate`](#derogationenddate-2)             | [src/facades/interfaces.ts:35](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L35) |
+| <a id="derogationendstring-1"></a> `derogationEndString`         | `readonly` | `null` \| `string`                                                                 | [`IDeviceGlowFacade`](#ideviceglowfacade).[`derogationEndString`](#derogationendstring)           | [src/facades/interfaces.ts:36](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L36) |
+| <a id="derogationmode-2"></a> `derogationMode`                   | `readonly` | [`DerogationMode`](#derogationmode)                                                | [`IDeviceGlowFacade`](#ideviceglowfacade).[`derogationMode`](#derogationmode-1)                   | [src/facades/interfaces.ts:37](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L37) |
+| <a id="derogationtime-1"></a> `derogationTime`                   | `readonly` | `number`                                                                           | [`IDeviceGlowFacade`](#ideviceglowfacade).[`derogationTime`](#derogationtime)                     | [src/facades/interfaces.ts:38](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L38) |
+| <a id="ecotemperature-1"></a> `ecoTemperature`                   | `readonly` | `number`                                                                           | [`IDeviceGlowFacade`](#ideviceglowfacade).[`ecoTemperature`](#ecotemperature)                     | [src/facades/interfaces.ts:23](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L23) |
+| <a id="id-4"></a> `id`                                           | `readonly` | `string`                                                                           | [`IDeviceGlowFacade`](#ideviceglowfacade).[`id`](#id-2)                                           | [src/models/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L16)   |
+| <a id="isdetectingopenwindow"></a> `isDetectingOpenWindow`       | `readonly` | `boolean`                                                                          | -                                                                                                 | [src/facades/interfaces.ts:30](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L30) |
+| <a id="islocked-1"></a> `isLocked`                               | `readonly` | `boolean`                                                                          | [`IDeviceGlowFacade`](#ideviceglowfacade).[`isLocked`](#islocked)                                 | [src/facades/interfaces.ts:39](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L39) |
+| <a id="ison-2"></a> `isOn`                                       | `readonly` | `boolean`                                                                          | [`IDeviceGlowFacade`](#ideviceglowfacade).[`isOn`](#ison-1)                                       | [src/facades/interfaces.ts:13](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L13) |
+| <a id="ispresence"></a> `isPresence`                             | `readonly` | `boolean`                                                                          | -                                                                                                 | [src/facades/interfaces.ts:31](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L31) |
+| <a id="istimer-1"></a> `isTimer`                                 | `readonly` | `boolean`                                                                          | [`IDeviceGlowFacade`](#ideviceglowfacade).[`isTimer`](#istimer)                                   | [src/facades/interfaces.ts:40](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L40) |
+| <a id="mode-4"></a> `mode`                                       | `readonly` | [`Mode`](#mode)                                                                    | [`IDeviceGlowFacade`](#ideviceglowfacade).[`mode`](#mode-3)                                       | [src/facades/interfaces.ts:14](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L14) |
+| <a id="name-4"></a> `name`                                       | `readonly` | `string`                                                                           | [`IDeviceGlowFacade`](#ideviceglowfacade).[`name`](#name-2)                                       | [src/models/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L17)   |
+| <a id="onsync-5"></a> `onSync`                                   | `readonly` | () => `Promise`\<`void`\>                                                          | [`IDeviceGlowFacade`](#ideviceglowfacade).[`onSync`](#onsync-4)                                   | [src/facades/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L15) |
+| <a id="previousmode-4"></a> `previousMode`                       | `readonly` | [`PreviousMode`](#previousmode-6)                                                  | [`IDeviceGlowFacade`](#ideviceglowfacade).[`previousMode`](#previousmode-2)                       | [src/models/interfaces.ts:18](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L18)   |
+| <a id="product-5"></a> `product`                                 | `readonly` | [`Product`](#product)                                                              | [`IDeviceGlowFacade`](#ideviceglowfacade).[`product`](#product-3)                                 | [src/models/interfaces.ts:19](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L19)   |
+| <a id="setvalues-2"></a> `setValues`                             | `readonly` | (`data`: [`PostAttrs`](#postattrs)) => `Promise`\<`Partial`\<[`Attrs`](#attrs)\>\> | [`IDeviceGlowFacade`](#ideviceglowfacade).[`setValues`](#setvalues-1)                             | [src/facades/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L16) |
+| <a id="temperaturecompensation-2"></a> `temperatureCompensation` | `readonly` | [`TemperatureCompensation`](#temperaturecompensation)                              | [`IDeviceGlowFacade`](#ideviceglowfacade).[`temperatureCompensation`](#temperaturecompensation-1) | [src/facades/interfaces.ts:24](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L24) |
+| <a id="update-5"></a> `update`                                   | `readonly` | (`data`: `Partial`\<[`Attrs`](#attrs)\>) => `void`                                 | [`IDeviceGlowFacade`](#ideviceglowfacade).[`update`](#update-3)                                   | [src/models/interfaces.ts:20](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L20)   |
+| <a id="values-2"></a> `values`                                   | `readonly` | () => `Promise`\<[`Attrs`](#attrs)\>                                               | [`IDeviceGlowFacade`](#ideviceglowfacade).[`values`](#values-1)                                   | [src/facades/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L17) |
 
 ---
 
 ### IDeviceV2Facade
 
-Defined in: [src/facades/interfaces.ts:34](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L34)
+Defined in: [src/facades/interfaces.ts:34](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L34)
 
 #### Extends
 
@@ -876,79 +876,79 @@ Defined in: [src/facades/interfaces.ts:34](https://github.com/OlivierZal/heatzy-
 
 | Property                                                 | Modifier   | Type                                                                               | Overrides                                                                     | Inherited from                                                      | Defined in                                                                                                                                           |
 | -------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <a id="derogationenddate-5"></a> `derogationEndDate`     | `readonly` | `null` \| `DateTime`\<`boolean`\>                                                  | [`IDeviceFacade`](#idevicefacade).[`derogationEndDate`](#derogationenddate-1) | -                                                                   | [src/facades/interfaces.ts:35](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L35) |
-| <a id="derogationendstring-2"></a> `derogationEndString` | `readonly` | `null` \| `string`                                                                 | -                                                                             | -                                                                   | [src/facades/interfaces.ts:36](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L36) |
-| <a id="derogationmode-3"></a> `derogationMode`           | `readonly` | [`DerogationMode`](#derogationmode)                                                | -                                                                             | -                                                                   | [src/facades/interfaces.ts:37](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L37) |
-| <a id="derogationtime-2"></a> `derogationTime`           | `readonly` | `number`                                                                           | -                                                                             | -                                                                   | [src/facades/interfaces.ts:38](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L38) |
-| <a id="id-5"></a> `id`                                   | `readonly` | `string`                                                                           | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`id`](#id-1)                     | [src/models/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L16)   |
-| <a id="islocked-2"></a> `isLocked`                       | `readonly` | `boolean`                                                                          | -                                                                             | -                                                                   | [src/facades/interfaces.ts:39](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L39) |
-| <a id="ison-3"></a> `isOn`                               | `readonly` | `boolean`                                                                          | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`isOn`](#ison)                   | [src/facades/interfaces.ts:13](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L13) |
-| <a id="istimer-2"></a> `isTimer`                         | `readonly` | `boolean`                                                                          | -                                                                             | -                                                                   | [src/facades/interfaces.ts:40](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L40) |
-| <a id="mode-5"></a> `mode`                               | `readonly` | [`Mode`](#mode)                                                                    | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`mode`](#mode-2)                 | [src/facades/interfaces.ts:14](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L14) |
-| <a id="name-5"></a> `name`                               | `readonly` | `string`                                                                           | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`name`](#name-1)                 | [src/models/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L17)   |
-| <a id="onsync-6"></a> `onSync`                           | `readonly` | () => `Promise`\<`void`\>                                                          | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`onSync`](#onsync-3)             | [src/facades/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L15) |
-| <a id="previousmode-5"></a> `previousMode`               | `readonly` | [`PreviousMode`](#previousmode-6)                                                  | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`previousMode`](#previousmode-1) | [src/models/interfaces.ts:18](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L18)   |
-| <a id="product-6"></a> `product`                         | `readonly` | [`Product`](#product)                                                              | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`product`](#product-2)           | [src/models/interfaces.ts:19](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L19)   |
-| <a id="setvalues-3"></a> `setValues`                     | `readonly` | (`data`: [`PostAttrs`](#postattrs)) => `Promise`\<`Partial`\<[`Attrs`](#attrs)\>\> | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`setValues`](#setvalues)         | [src/facades/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L16) |
-| <a id="update-6"></a> `update`                           | `readonly` | (`data`: `Partial`\<[`Attrs`](#attrs)\>) => `void`                                 | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`update`](#update-2)             | [src/models/interfaces.ts:20](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L20)   |
-| <a id="values-3"></a> `values`                           | `readonly` | () => `Promise`\<[`Attrs`](#attrs)\>                                               | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`values`](#values)               | [src/facades/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L17) |
+| <a id="derogationenddate-5"></a> `derogationEndDate`     | `readonly` | `null` \| `DateTime`\<`boolean`\>                                                  | [`IDeviceFacade`](#idevicefacade).[`derogationEndDate`](#derogationenddate-1) | -                                                                   | [src/facades/interfaces.ts:35](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L35) |
+| <a id="derogationendstring-2"></a> `derogationEndString` | `readonly` | `null` \| `string`                                                                 | -                                                                             | -                                                                   | [src/facades/interfaces.ts:36](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L36) |
+| <a id="derogationmode-3"></a> `derogationMode`           | `readonly` | [`DerogationMode`](#derogationmode)                                                | -                                                                             | -                                                                   | [src/facades/interfaces.ts:37](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L37) |
+| <a id="derogationtime-2"></a> `derogationTime`           | `readonly` | `number`                                                                           | -                                                                             | -                                                                   | [src/facades/interfaces.ts:38](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L38) |
+| <a id="id-5"></a> `id`                                   | `readonly` | `string`                                                                           | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`id`](#id-1)                     | [src/models/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L16)   |
+| <a id="islocked-2"></a> `isLocked`                       | `readonly` | `boolean`                                                                          | -                                                                             | -                                                                   | [src/facades/interfaces.ts:39](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L39) |
+| <a id="ison-3"></a> `isOn`                               | `readonly` | `boolean`                                                                          | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`isOn`](#ison)                   | [src/facades/interfaces.ts:13](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L13) |
+| <a id="istimer-2"></a> `isTimer`                         | `readonly` | `boolean`                                                                          | -                                                                             | -                                                                   | [src/facades/interfaces.ts:40](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L40) |
+| <a id="mode-5"></a> `mode`                               | `readonly` | [`Mode`](#mode)                                                                    | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`mode`](#mode-2)                 | [src/facades/interfaces.ts:14](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L14) |
+| <a id="name-5"></a> `name`                               | `readonly` | `string`                                                                           | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`name`](#name-1)                 | [src/models/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L17)   |
+| <a id="onsync-6"></a> `onSync`                           | `readonly` | () => `Promise`\<`void`\>                                                          | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`onSync`](#onsync-3)             | [src/facades/interfaces.ts:15](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L15) |
+| <a id="previousmode-5"></a> `previousMode`               | `readonly` | [`PreviousMode`](#previousmode-6)                                                  | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`previousMode`](#previousmode-1) | [src/models/interfaces.ts:18](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L18)   |
+| <a id="product-6"></a> `product`                         | `readonly` | [`Product`](#product)                                                              | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`product`](#product-2)           | [src/models/interfaces.ts:19](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L19)   |
+| <a id="setvalues-3"></a> `setValues`                     | `readonly` | (`data`: [`PostAttrs`](#postattrs)) => `Promise`\<`Partial`\<[`Attrs`](#attrs)\>\> | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`setValues`](#setvalues)         | [src/facades/interfaces.ts:16](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L16) |
+| <a id="update-6"></a> `update`                           | `readonly` | (`data`: `Partial`\<[`Attrs`](#attrs)\>) => `void`                                 | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`update`](#update-2)             | [src/models/interfaces.ts:20](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L20)   |
+| <a id="values-3"></a> `values`                           | `readonly` | () => `Promise`\<[`Attrs`](#attrs)\>                                               | -                                                                             | [`IDeviceFacade`](#idevicefacade).[`values`](#values)               | [src/facades/interfaces.ts:17](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L17) |
 
 ---
 
 ### IFacadeManager
 
-Defined in: [src/facades/interfaces.ts:43](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L43)
+Defined in: [src/facades/interfaces.ts:43](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L43)
 
 #### Properties
 
 | Property                 | Modifier   | Type                                                                                          | Defined in                                                                                                                                           |
 | ------------------------ | ---------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <a id="get-3"></a> `get` | `readonly` | (`instance?`: [`IDeviceModel`](#idevicemodel)) => `null` \| [`IDeviceFacade`](#idevicefacade) | [src/facades/interfaces.ts:44](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L44) |
+| <a id="get-3"></a> `get` | `readonly` | (`instance?`: [`IDeviceModel`](#idevicemodel)) => `null` \| [`IDeviceFacade`](#idevicefacade) | [src/facades/interfaces.ts:44](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L44) |
 
 ---
 
 ### Logger
 
-Defined in: [src/services/interfaces.ts:49](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L49)
+Defined in: [src/services/interfaces.ts:49](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L49)
 
 #### Properties
 
 | Property                   | Modifier   | Type                                                        | Defined in                                                                                                                                             |
 | -------------------------- | ---------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <a id="error"></a> `error` | `readonly` | (`message?`: `any`, ...`optionalParams`: `any`[]) => `void` | [src/services/interfaces.ts:50](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L50) |
-| <a id="log"></a> `log`     | `readonly` | (`message?`: `any`, ...`optionalParams`: `any`[]) => `void` | [src/services/interfaces.ts:51](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L51) |
+| <a id="error"></a> `error` | `readonly` | (`message?`: `any`, ...`optionalParams`: `any`[]) => `void` | [src/services/interfaces.ts:50](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L50) |
+| <a id="log"></a> `log`     | `readonly` | (`message?`: `any`, ...`optionalParams`: `any`[]) => `void` | [src/services/interfaces.ts:51](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L51) |
 
 ---
 
 ### LoginData
 
-Defined in: [src/types.ts:49](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L49)
+Defined in: [src/types.ts:49](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L49)
 
 #### Properties
 
 | Property                           | Modifier   | Type     | Defined in                                                                                                                 |
 | ---------------------------------- | ---------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="expire_at"></a> `expire_at` | `readonly` | `number` | [src/types.ts:50](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L50) |
-| <a id="token-1"></a> `token`       | `readonly` | `string` | [src/types.ts:51](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L51) |
+| <a id="expire_at"></a> `expire_at` | `readonly` | `number` | [src/types.ts:50](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L50) |
+| <a id="token-1"></a> `token`       | `readonly` | `string` | [src/types.ts:51](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L51) |
 
 ---
 
 ### LoginPostData
 
-Defined in: [src/types.ts:54](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L54)
+Defined in: [src/types.ts:54](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L54)
 
 #### Properties
 
 | Property                           | Modifier   | Type     | Defined in                                                                                                                 |
 | ---------------------------------- | ---------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="password-2"></a> `password` | `readonly` | `string` | [src/types.ts:55](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L55) |
-| <a id="username-2"></a> `username` | `readonly` | `string` | [src/types.ts:56](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L56) |
+| <a id="password-2"></a> `password` | `readonly` | `string` | [src/types.ts:55](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L55) |
+| <a id="username-2"></a> `username` | `readonly` | `string` | [src/types.ts:56](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L56) |
 
 ---
 
 ### PostAttrs
 
-Defined in: [src/types.ts:59](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L59)
+Defined in: [src/types.ts:59](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L59)
 
 #### Extended by
 
@@ -958,34 +958,34 @@ Defined in: [src/types.ts:59](https://github.com/OlivierZal/heatzy-api/blob/d792
 
 | Property                                      | Modifier   | Type                                                  | Defined in                                                                                                                 |
 | --------------------------------------------- | ---------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| <a id="cft_temp-1"></a> `cft_temp?`           | `readonly` | `number`                                              | [src/types.ts:77](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L77) |
-| <a id="cft_temph-1"></a> `cft_tempH?`         | `readonly` | `number`                                              | [src/types.ts:70](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L70) |
-| <a id="cft_templ-1"></a> `cft_tempL?`         | `readonly` | `number`                                              | [src/types.ts:71](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L71) |
-| <a id="com_temp-1"></a> `com_temp?`           | `readonly` | [`TemperatureCompensation`](#temperaturecompensation) | [src/types.ts:68](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L68) |
-| <a id="derog_mode-1"></a> `derog_mode?`       | `readonly` | [`DerogationMode`](#derogationmode)                   | [src/types.ts:62](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L62) |
-| <a id="derog_time-1"></a> `derog_time?`       | `readonly` | `number`                                              | [src/types.ts:63](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L63) |
-| <a id="eco_temp-1"></a> `eco_temp?`           | `readonly` | `number`                                              | [src/types.ts:78](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L78) |
-| <a id="eco_temph-1"></a> `eco_tempH?`         | `readonly` | `number`                                              | [src/types.ts:72](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L72) |
-| <a id="eco_templ-1"></a> `eco_tempL?`         | `readonly` | `number`                                              | [src/types.ts:73](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L73) |
-| <a id="lock_c-1"></a> `lock_c?`               | `readonly` | [`Switch`](#switch)                                   | [src/types.ts:74](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L74) |
-| <a id="lock_switch-1"></a> `lock_switch?`     | `readonly` | [`Switch`](#switch)                                   | [src/types.ts:66](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L66) |
-| <a id="mode-6"></a> `mode?`                   | `readonly` | [`Mode`](#mode)                                       | [src/types.ts:60](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L60) |
-| <a id="on_off-1"></a> `on_off?`               | `readonly` | [`Switch`](#switch)                                   | [src/types.ts:75](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L75) |
-| <a id="timer_switch-1"></a> `timer_switch?`   | `readonly` | [`Switch`](#switch)                                   | [src/types.ts:64](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L64) |
-| <a id="window_switch-1"></a> `window_switch?` | `readonly` | [`Switch`](#switch)                                   | [src/types.ts:79](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L79) |
+| <a id="cft_temp-1"></a> `cft_temp?`           | `readonly` | `number`                                              | [src/types.ts:77](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L77) |
+| <a id="cft_temph-1"></a> `cft_tempH?`         | `readonly` | `number`                                              | [src/types.ts:70](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L70) |
+| <a id="cft_templ-1"></a> `cft_tempL?`         | `readonly` | `number`                                              | [src/types.ts:71](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L71) |
+| <a id="com_temp-1"></a> `com_temp?`           | `readonly` | [`TemperatureCompensation`](#temperaturecompensation) | [src/types.ts:68](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L68) |
+| <a id="derog_mode-1"></a> `derog_mode?`       | `readonly` | [`DerogationMode`](#derogationmode)                   | [src/types.ts:62](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L62) |
+| <a id="derog_time-1"></a> `derog_time?`       | `readonly` | `number`                                              | [src/types.ts:63](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L63) |
+| <a id="eco_temp-1"></a> `eco_temp?`           | `readonly` | `number`                                              | [src/types.ts:78](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L78) |
+| <a id="eco_temph-1"></a> `eco_tempH?`         | `readonly` | `number`                                              | [src/types.ts:72](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L72) |
+| <a id="eco_templ-1"></a> `eco_tempL?`         | `readonly` | `number`                                              | [src/types.ts:73](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L73) |
+| <a id="lock_c-1"></a> `lock_c?`               | `readonly` | [`Switch`](#switch)                                   | [src/types.ts:74](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L74) |
+| <a id="lock_switch-1"></a> `lock_switch?`     | `readonly` | [`Switch`](#switch)                                   | [src/types.ts:66](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L66) |
+| <a id="mode-6"></a> `mode?`                   | `readonly` | [`Mode`](#mode)                                       | [src/types.ts:60](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L60) |
+| <a id="on_off-1"></a> `on_off?`               | `readonly` | [`Switch`](#switch)                                   | [src/types.ts:75](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L75) |
+| <a id="timer_switch-1"></a> `timer_switch?`   | `readonly` | [`Switch`](#switch)                                   | [src/types.ts:64](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L64) |
+| <a id="window_switch-1"></a> `window_switch?` | `readonly` | [`Switch`](#switch)                                   | [src/types.ts:79](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L79) |
 
 ---
 
 ### SettingManager
 
-Defined in: [src/services/interfaces.ts:54](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L54)
+Defined in: [src/services/interfaces.ts:54](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L54)
 
 #### Properties
 
 | Property                 | Modifier   | Type                                                                         | Defined in                                                                                                                                             |
 | ------------------------ | ---------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <a id="get-4"></a> `get` | `readonly` | \<`K`\>(`key`: `K`) => [`APISettings`](#apisettings)\[`K`\]                  | [src/services/interfaces.ts:55](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L55) |
-| <a id="set"></a> `set`   | `readonly` | \<`K`\>(`key`: `K`, `value`: [`APISettings`](#apisettings)\[`K`\]) => `void` | [src/services/interfaces.ts:56](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L56) |
+| <a id="get-4"></a> `get` | `readonly` | \<`K`\>(`key`: `K`) => [`APISettings`](#apisettings)\[`K`\]                  | [src/services/interfaces.ts:55](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L55) |
+| <a id="set"></a> `set`   | `readonly` | \<`K`\>(`key`: `K`, `value`: [`APISettings`](#apisettings)\[`K`\]) => `void` | [src/services/interfaces.ts:56](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L56) |
 
 ## Type Aliases
 
@@ -995,7 +995,7 @@ Defined in: [src/services/interfaces.ts:54](https://github.com/OlivierZal/heatzy
 type Data = Record<string, never>
 ```
 
-Defined in: [src/types.ts:82](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L82)
+Defined in: [src/types.ts:82](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L82)
 
 ---
 
@@ -1005,7 +1005,7 @@ Defined in: [src/types.ts:82](https://github.com/OlivierZal/heatzy-api/blob/d792
 type DevicePostDataAny = DevicePostData | DeviceV1PostData
 ```
 
-Defined in: [src/types.ts:84](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/types.ts#L84)
+Defined in: [src/types.ts:84](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/types.ts#L84)
 
 ---
 
@@ -1019,7 +1019,7 @@ type IDeviceFacadeAny =
   | IDeviceV2Facade
 ```
 
-Defined in: [src/facades/interfaces.ts:47](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L47)
+Defined in: [src/facades/interfaces.ts:47](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L47)
 
 ---
 
@@ -1029,7 +1029,7 @@ Defined in: [src/facades/interfaces.ts:47](https://github.com/OlivierZal/heatzy-
 type OnSyncFunction = (params?: { ids: string[] }) => Promise<void>
 ```
 
-Defined in: [src/services/interfaces.ts:62](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/services/interfaces.ts#L62)
+Defined in: [src/services/interfaces.ts:62](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/services/interfaces.ts#L62)
 
 #### Parameters
 
@@ -1050,7 +1050,7 @@ Defined in: [src/services/interfaces.ts:62](https://github.com/OlivierZal/heatzy
 type PreviousMode = Exclude<Mode, stop>
 ```
 
-Defined in: [src/models/interfaces.ts:29](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/models/interfaces.ts#L29)
+Defined in: [src/models/interfaces.ts:29](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/models/interfaces.ts#L29)
 
 ## Variables
 
@@ -1060,7 +1060,7 @@ Defined in: [src/models/interfaces.ts:29](https://github.com/OlivierZal/heatzy-a
 const UNIT: 1 = 1
 ```
 
-Defined in: [src/constants.ts:3](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/constants.ts#L3)
+Defined in: [src/constants.ts:3](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/constants.ts#L3)
 
 ## Functions
 
@@ -1074,7 +1074,7 @@ function getTargetTemperature(
 ): PostAttrs
 ```
 
-Defined in: [src/utils.ts:14](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/utils.ts#L14)
+Defined in: [src/utils.ts:14](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/utils.ts#L14)
 
 #### Parameters
 
@@ -1096,7 +1096,7 @@ Defined in: [src/utils.ts:14](https://github.com/OlivierZal/heatzy-api/blob/d792
 function supportsGlow(device: IDeviceFacadeAny): device is IDeviceGlowFacade
 ```
 
-Defined in: [src/facades/interfaces.ts:57](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L57)
+Defined in: [src/facades/interfaces.ts:57](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L57)
 
 #### Parameters
 
@@ -1116,7 +1116,7 @@ Defined in: [src/facades/interfaces.ts:57](https://github.com/OlivierZal/heatzy-
 function supportsPro(device: IDeviceFacadeAny): device is IDeviceProFacade
 ```
 
-Defined in: [src/facades/interfaces.ts:61](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L61)
+Defined in: [src/facades/interfaces.ts:61](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L61)
 
 #### Parameters
 
@@ -1136,7 +1136,7 @@ Defined in: [src/facades/interfaces.ts:61](https://github.com/OlivierZal/heatzy-
 function supportsV2(device: IDeviceFacadeAny): device is IDeviceV2Facade
 ```
 
-Defined in: [src/facades/interfaces.ts:53](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/facades/interfaces.ts#L53)
+Defined in: [src/facades/interfaces.ts:53](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/facades/interfaces.ts#L53)
 
 #### Parameters
 
@@ -1159,7 +1159,7 @@ function syncDevices<T>(
 ): (...args: unknown[]) => Promise<T>
 ```
 
-Defined in: [src/decorators/sync-devices.ts:5](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/decorators/sync-devices.ts#L5)
+Defined in: [src/decorators/sync-devices.ts:5](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/decorators/sync-devices.ts#L5)
 
 #### Type Parameters
 
@@ -1201,7 +1201,7 @@ function updateDevice<T>(
 ): (...args: unknown[]) => Promise<T>
 ```
 
-Defined in: [src/decorators/update-device.ts:4](https://github.com/OlivierZal/heatzy-api/blob/d792a7168a9c8bc9e61552f45a1ee0952eed1a8a/src/decorators/update-device.ts#L4)
+Defined in: [src/decorators/update-device.ts:4](https://github.com/OlivierZal/heatzy-api/blob/63b5513b50ce82ebcad3a7847d20066dd0cf5188/src/decorators/update-device.ts#L4)
 
 #### Type Parameters
 
