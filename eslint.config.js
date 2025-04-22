@@ -50,7 +50,6 @@ const exportSortOptions = {
 
 const importNamedSortOptions = {
   groups: buildExportImportGroup('import'),
-  newlinesBetween: 'always',
 }
 
 const importSortOptions = {
