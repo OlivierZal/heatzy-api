@@ -1,12 +1,12 @@
 import { DateTime } from 'luxon'
 
-import { DerogationMode } from '../enums.ts'
-
-import { DeviceFacade } from './device.ts'
-
 import type { Attrs, PostAttrs } from '../types.ts'
 
+import { DerogationMode } from '../enums.ts'
+
 import type { IDeviceV2Facade } from './interfaces.ts'
+
+import { DeviceFacade } from './device.ts'
 
 export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
   public get derogationEndString(): string | null {

@@ -1,9 +1,9 @@
 import { TEMPERATURE_SCALE } from '../constants.ts'
 import { Mode } from '../enums.ts'
 
-import { DeviceV2Facade } from './device-v2.ts'
-
 import type { IDeviceGlowFacade } from './interfaces.ts'
+
+import { DeviceV2Facade } from './device-v2.ts'
 
 const temperatureRange = {
   cft: { max: 30, min: 15 },

@@ -1,13 +1,13 @@
-import { Product, type IDeviceModel } from '../models/index.ts'
+import type { IAPI } from '../services/index.ts'
+
+import { type IDeviceModel, Product } from '../models/index.ts'
+
+import type { IDeviceFacadeAny, IFacadeManager } from './interfaces.ts'
 
 import { DeviceGlowFacade } from './device-glow.ts'
 import { DeviceProFacade } from './device-pro.ts'
 import { DeviceV2Facade } from './device-v2.ts'
 import { DeviceFacade } from './device.ts'
-
-import type { IAPI } from '../services/index.ts'
-
-import type { IDeviceFacadeAny, IFacadeManager } from './interfaces.ts'
 
 export class FacadeManager implements IFacadeManager {
   public readonly api: IAPI

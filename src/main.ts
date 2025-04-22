@@ -1,42 +1,5 @@
 import 'source-map-support/register.js'
 
-export { UNIT } from './constants.ts'
-export { syncDevices, updateDevice } from './decorators/index.ts'
-export {
-  DerogationMode,
-  Mode,
-  ModeV1,
-  Switch,
-  TemperatureCompensation,
-} from './enums.ts'
-export {
-  FacadeManager,
-  supportsGlow,
-  supportsPro,
-  supportsV2,
-  type IDeviceFacade,
-  type IDeviceFacadeAny,
-  type IDeviceGlowFacade,
-  type IDeviceProFacade,
-  type IDeviceV2Facade,
-  type IFacadeManager,
-} from './facades/index.ts'
-export {
-  DeviceModel,
-  Product,
-  type IDeviceModel,
-  type PreviousMode,
-} from './models/index.ts'
-export {
-  API as HeatzyAPI,
-  type APIConfig,
-  type APISettings,
-  type IAPI,
-  type Logger,
-  type OnSyncFunction,
-  type SettingManager,
-} from './services/index.ts'
-export { getTargetTemperature } from './utils.ts'
 export type {
   Attrs,
   Bindings,
@@ -51,3 +14,41 @@ export type {
   LoginPostData,
   PostAttrs,
 } from './types.ts'
+
+export { UNIT } from './constants.ts'
+export { syncDevices, updateDevice } from './decorators/index.ts'
+export {
+  DerogationMode,
+  Mode,
+  ModeV1,
+  Switch,
+  TemperatureCompensation,
+} from './enums.ts'
+export {
+  type IDeviceFacade,
+  type IDeviceFacadeAny,
+  type IDeviceGlowFacade,
+  type IDeviceProFacade,
+  type IDeviceV2Facade,
+  type IFacadeManager,
+  FacadeManager,
+  supportsGlow,
+  supportsPro,
+  supportsV2,
+} from './facades/index.ts'
+export {
+  type IDeviceModel,
+  type PreviousMode,
+  DeviceModel,
+  Product,
+} from './models/index.ts'
+export {
+  type APIConfig,
+  type APISettings,
+  type IAPI,
+  type Logger,
+  type OnSyncFunction,
+  type SettingManager,
+  API as HeatzyAPI,
+} from './services/index.ts'
+export { getTargetTemperature } from './utils.ts'

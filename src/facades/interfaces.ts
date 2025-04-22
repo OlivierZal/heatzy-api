@@ -1,13 +1,13 @@
-import {
-  Product,
-  type IBaseDeviceModel,
-  type IDeviceModel,
-} from '../models/index.ts'
-
 import type { DateTime } from 'luxon'
 
 import type { DerogationMode, Mode, TemperatureCompensation } from '../enums.ts'
 import type { Attrs, PostAttrs } from '../types.ts'
+
+import {
+  type IBaseDeviceModel,
+  type IDeviceModel,
+  Product,
+} from '../models/index.ts'
 
 export interface IDeviceFacade extends IBaseDeviceModel {
   readonly isOn: boolean

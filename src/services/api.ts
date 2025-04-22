@@ -1,29 +1,13 @@
 import https from 'https'
 
 import axios, {
-  HttpStatusCode,
   type AxiosError,
   type AxiosInstance,
   type AxiosResponse,
   type InternalAxiosRequestConfig,
+  HttpStatusCode,
 } from 'axios'
 import { DateTime, Duration, Settings as LuxonSettings } from 'luxon'
-
-import { syncDevices } from '../decorators/index.ts'
-import {
-  APICallRequestData,
-  APICallResponseData,
-  createAPICallErrorData,
-} from '../logging/index.ts'
-import { DeviceModel } from '../models/index.ts'
-
-import {
-  isAPISetting,
-  type APIConfig,
-  type IAPI,
-  type Logger,
-  type SettingManager,
-} from './interfaces.ts'
 
 import type {
   Attrs,
@@ -35,6 +19,22 @@ import type {
   LoginData,
   LoginPostData,
 } from '../types.ts'
+
+import { syncDevices } from '../decorators/index.ts'
+import {
+  APICallRequestData,
+  APICallResponseData,
+  createAPICallErrorData,
+} from '../logging/index.ts'
+import { DeviceModel } from '../models/index.ts'
+
+import {
+  type APIConfig,
+  type IAPI,
+  type Logger,
+  type SettingManager,
+  isAPISetting,
+} from './interfaces.ts'
 
 const APPLICATION_ID = 'X-Gizwits-Application-Id'
 const LOGIN_PATH = '/login'

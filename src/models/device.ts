@@ -1,15 +1,15 @@
 import { DateTime } from 'luxon'
 
+import type { Attrs, Device } from '../types.ts'
+
 import { DerogationMode, Mode } from '../enums.ts'
 
 import {
-  getProduct,
   type IDeviceModel,
   type PreviousMode,
   type Product,
+  getProduct,
 } from './interfaces.ts'
-
-import type { Attrs, Device } from '../types.ts'
 
 export class DeviceModel implements IDeviceModel {
   static readonly #instances = new Map<string, DeviceModel>()

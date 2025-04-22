@@ -1,9 +1,9 @@
 import { TEMPERATURE_SCALE } from '../constants.ts'
 import { DerogationMode, Mode } from '../enums.ts'
 
-import { DeviceGlowFacade } from './device-glow.ts'
-
 import type { IDeviceProFacade } from './interfaces.ts'
+
+import { DeviceGlowFacade } from './device-glow.ts'
 
 export class DeviceProFacade
   extends DeviceGlowFacade

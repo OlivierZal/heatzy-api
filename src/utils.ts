@@ -1,8 +1,8 @@
-import { TEMPERATURE_SCALE } from './constants.ts'
-import { Product } from './models/index.ts'
-
 import type { Mode } from './enums.ts'
 import type { PostAttrs } from './types.ts'
+
+import { TEMPERATURE_SCALE } from './constants.ts'
+import { Product } from './models/index.ts'
 
 enum BitHigh {
   off = 0,
