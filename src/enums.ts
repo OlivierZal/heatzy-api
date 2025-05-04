@@ -1,35 +1,35 @@
 export enum DerogationMode {
-  boost = 2,
-  off = 0,
-  vacation = 1,
+  Boost = 2,
+  Off = 0,
+  Vacation = 1,
   // Pro
-  presence = 3,
+  Presence = 3,
 }
 
 export enum Mode {
-  cft = 'cft',
-  eco = 'eco',
-  fro = 'fro',
-  stop = 'stop',
+  Comfort = 'cft',
+  Eco = 'eco',
+  FrostProtection = 'fro',
+  Stop = 'stop',
   // Not V1, V2
-  cft1 = 'cft1',
-  cft2 = 'cft2',
-}
-
-export enum ModeV1 {
-  cft = 0,
-  eco = 1,
-  fro = 2,
-  stop = 3,
+  ComfortMinus1 = 'cft1',
+  ComfortMinus2 = 'cft2',
 }
 
 export enum Switch {
-  off = 0,
-  on = 1,
+  Off = 0,
+  On = 1,
 }
 
 export enum TemperatureCompensation {
-  minus5C = 0,
-  noChange = 50,
-  plus5C = 100,
+  Minus5C = 0,
+  NoChange = 50,
+  Plus5C = 100,
+}
+
+export const modeToModeV1: Partial<Record<Mode, number>> = {
+  cft: 0,
+  eco: 1,
+  fro: 2,
+  stop: 3,
 }

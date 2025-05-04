@@ -23,7 +23,7 @@ export class DeviceGlowFacade
   }
 
   public get comfortTemperature(): number {
-    return this.getTargetTemperature(Mode.cft)
+    return this.getTargetTemperature(Mode.Comfort)
   }
 
   public get currentTemperature(): number {
@@ -31,21 +31,23 @@ export class DeviceGlowFacade
   }
 
   public get ecoTemperature(): number {
-    return this.getTargetTemperature(Mode.eco)
+    return this.getTargetTemperature(Mode.Eco)
   }
 
   public get temperatureCompensation(): number {
     return this.getValue('com_temp')
   }
 
-  protected getTargetTemperature(mode: Mode.cft | Mode.eco): number {
+  protected getTargetTemperature(mode: Mode.Comfort | Mode.Eco): number {
     const {
       [mode]: { max, min },
     } = temperatureRange
     return Math.max(Math.min(this.getTemperature(mode), max), min)
   }
 
-  protected getTemperature(mode: 'cur' | Mode.cft | Mode.eco = 'cur'): number {
+  protected getTemperature(
+    mode: 'cur' | Mode.Comfort | Mode.Eco = 'cur',
+  ): number {
     return (
       this.getValue(`${mode}_tempH`) * TEMPERATURE_SCALE +
       this.getValue(`${mode}_tempL`) / TEMPERATURE_SCALE

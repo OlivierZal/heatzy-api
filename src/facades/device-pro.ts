@@ -10,7 +10,7 @@ export class DeviceProFacade
   implements IDeviceProFacade
 {
   public override get comfortTemperature(): number {
-    return this.getTargetTemperature(Mode.cft)
+    return this.getTargetTemperature(Mode.Comfort)
   }
 
   public override get currentTemperature(): number {
@@ -18,7 +18,7 @@ export class DeviceProFacade
   }
 
   public override get ecoTemperature(): number {
-    return this.getTargetTemperature(Mode.eco)
+    return this.getTargetTemperature(Mode.Eco)
   }
 
   public override get isLocked(): boolean {
@@ -26,7 +26,7 @@ export class DeviceProFacade
   }
 
   public override get isOn(): boolean {
-    return this.mode !== Mode.stop
+    return this.mode !== Mode.Stop
   }
 
   public get currentHumidity(): number {
@@ -43,13 +43,13 @@ export class DeviceProFacade
 
   public get isPresence(): boolean {
     return (
-      this.getValue('derog_mode') === DerogationMode.presence &&
-      this.currentMode === Mode.cft
+      this.getValue('derog_mode') === DerogationMode.Presence &&
+      this.currentMode === Mode.Comfort
     )
   }
 
   protected override getTemperature(
-    mode: 'cur' | Mode.cft | Mode.eco = 'cur',
+    mode: 'cur' | Mode.Comfort | Mode.Eco = 'cur',
   ): number {
     return this.getValue(`${mode}_temp`) / TEMPERATURE_SCALE
   }

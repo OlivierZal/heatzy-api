@@ -20,7 +20,6 @@ export { syncDevices, updateDevice } from './decorators/index.ts'
 export {
   DerogationMode,
   Mode,
-  ModeV1,
   Switch,
   TemperatureCompensation,
 } from './enums.ts'

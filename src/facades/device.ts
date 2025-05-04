@@ -5,7 +5,7 @@ import type { Attrs, PostAttrs } from '../types.ts'
 
 import { UNIT } from '../constants.ts'
 import { syncDevices, updateDevice } from '../decorators/index.ts'
-import { Mode, ModeV1 } from '../enums.ts'
+import { Mode, modeToModeV1 } from '../enums.ts'
 import {
   type IDeviceModel,
   type PreviousMode,
@@ -15,8 +15,8 @@ import {
 
 import type { IDeviceFacade } from './interfaces.ts'
 
-const isModeV1 = (value?: string): value is keyof typeof ModeV1 =>
-  value !== undefined && value in ModeV1
+const isModeV1 = (value?: Mode): value is keyof typeof modeToModeV1 =>
+  value !== undefined && value in modeToModeV1
 
 export class DeviceFacade implements IDeviceFacade {
   public readonly id: string
@@ -35,7 +35,7 @@ export class DeviceFacade implements IDeviceFacade {
   }
 
   public get isOn(): boolean {
-    return this.mode !== Mode.stop
+    return this.mode !== Mode.Stop
   }
 
   public get mode(): Mode {
@@ -84,9 +84,10 @@ export class DeviceFacade implements IDeviceFacade {
 
   protected async control({ mode }: PostAttrs): Promise<Partial<Attrs>> {
     if (isModeV1(mode)) {
+      const { [mode]: modeV1 } = modeToModeV1
       await this.api.control({
         id: this.id,
-        postData: { raw: [UNIT, UNIT, ModeV1[mode]] },
+        postData: { raw: [UNIT, UNIT, Number(modeV1)] },
       })
       return { mode }
     }

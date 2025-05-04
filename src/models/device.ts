@@ -52,7 +52,7 @@ export class DeviceModel implements IDeviceModel {
   }
 
   public get previousMode(): PreviousMode {
-    return this.#previousMode ?? Mode.eco
+    return this.#previousMode ?? Mode.Eco
   }
 
   public static getAll(): DeviceModel[] {
@@ -165,7 +165,7 @@ export class DeviceModel implements IDeviceModel {
     newDerogationTime?: number
   }): void {
     const currentDerogationMode = newDerogationMode ?? derogationMode
-    if (currentDerogationMode === DerogationMode.presence) {
+    if (currentDerogationMode === DerogationMode.Presence) {
       this.#handlePresenceDerogationEndDate({ currentMode, newCurrentMode })
       return
     }
@@ -179,13 +179,13 @@ export class DeviceModel implements IDeviceModel {
       const currentDerogationTime = newDerogationTime ?? derogationTime
       const now = DateTime.now()
       switch (currentDerogationMode) {
-        case DerogationMode.boost:
+        case DerogationMode.Boost:
           this.#derogationEndDate = now.plus({ minutes: currentDerogationTime })
           break
-        case DerogationMode.vacation:
+        case DerogationMode.Vacation:
           this.#derogationEndDate = now.plus({ days: currentDerogationTime })
           break
-        case DerogationMode.off:
+        case DerogationMode.Off:
         default:
           this.#derogationEndDate = null
       }
@@ -201,18 +201,18 @@ export class DeviceModel implements IDeviceModel {
   }): void {
     if (newCurrentMode !== undefined && newCurrentMode !== currentMode) {
       switch (newCurrentMode) {
-        case Mode.cft:
+        case Mode.Comfort:
           this.#derogationEndDate = DateTime.now().plus({ minutes: 90 })
           break
-        case Mode.cft1:
+        case Mode.ComfortMinus1:
           this.#derogationEndDate = DateTime.now().plus({ minutes: 60 })
           break
-        case Mode.cft2:
+        case Mode.ComfortMinus2:
           this.#derogationEndDate = DateTime.now().plus({ minutes: 30 })
           break
-        case Mode.eco:
-        case Mode.fro:
-        case Mode.stop:
+        case Mode.Eco:
+        case Mode.FrostProtection:
+        case Mode.Stop:
         default:
           this.#derogationEndDate = null
       }
@@ -220,7 +220,7 @@ export class DeviceModel implements IDeviceModel {
   }
 
   #handlePreviousMode(mode: Mode): void {
-    if (mode !== Mode.stop) {
+    if (mode !== Mode.Stop) {
       this.#previousMode = mode
     }
   }

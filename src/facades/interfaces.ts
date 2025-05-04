@@ -52,12 +52,12 @@ export type IDeviceFacadeAny =
 
 export const supportsV2 = (
   device: IDeviceFacadeAny,
-): device is IDeviceV2Facade => device.product >= Product.v2
+): device is IDeviceV2Facade => device.product >= Product.V2
 
 export const supportsGlow = (
   device: IDeviceFacadeAny,
-): device is IDeviceGlowFacade => device.product >= Product.glow
+): device is IDeviceGlowFacade => device.product >= Product.Glow
 
 export const supportsPro = (
   device: IDeviceFacadeAny,
-): device is IDeviceProFacade => device.product >= Product.pro
+): device is IDeviceProFacade => device.product >= Product.Pro

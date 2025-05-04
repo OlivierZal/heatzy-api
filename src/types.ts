@@ -2,7 +2,6 @@ import type { UNIT } from './constants.ts'
 import type {
   DerogationMode,
   Mode,
-  ModeV1,
   Switch,
   TemperatureCompensation,
 } from './enums.ts'
@@ -38,7 +37,7 @@ export interface DevicePostData {
 }
 
 export interface DeviceV1PostData {
-  readonly raw: [typeof UNIT, typeof UNIT, mode: ModeV1]
+  readonly raw: [typeof UNIT, typeof UNIT, mode: number]
 }
 
 export interface ErrorData {

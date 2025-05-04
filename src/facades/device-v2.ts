@@ -13,10 +13,10 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
     const { derogationEndDate } = this
     if (derogationEndDate) {
       switch (this.derogationMode) {
-        case DerogationMode.boost:
-        case DerogationMode.presence:
+        case DerogationMode.Boost:
+        case DerogationMode.Presence:
           return derogationEndDate.toLocaleString(DateTime.TIME_24_SIMPLE)
-        case DerogationMode.vacation:
+        case DerogationMode.Vacation:
           return derogationEndDate.toLocaleString({
             day: 'numeric',
             hour: '2-digit',
@@ -24,7 +24,7 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
             minute: '2-digit',
             month: 'short',
           })
-        case DerogationMode.off:
+        case DerogationMode.Off:
         default:
       }
     }

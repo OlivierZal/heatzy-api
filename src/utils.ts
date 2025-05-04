@@ -5,20 +5,20 @@ import { TEMPERATURE_SCALE } from './constants.ts'
 import { Product } from './models/index.ts'
 
 enum BitHigh {
-  off = 0,
-  on = 1,
+  Off = 0,
+  On = 1,
 }
 
 const BYTE_MAX = 255
 
 export const getTargetTemperature = (
   product: Product,
-  mode: Mode.cft | Mode.eco,
+  mode: Mode.Comfort | Mode.Eco,
   value: number,
 ): PostAttrs => {
   const newValue = value * TEMPERATURE_SCALE
-  if (product === Product.glow) {
-    const tempH = newValue > BYTE_MAX ? BitHigh.on : BitHigh.off
+  if (product === Product.Glow) {
+    const tempH = newValue > BYTE_MAX ? BitHigh.On : BitHigh.Off
     return {
       [`${mode}_tempH`]: tempH,
       [`${mode}_tempL`]:
