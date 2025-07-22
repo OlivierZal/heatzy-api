@@ -24,22 +24,16 @@ export class FacadeManager implements IFacadeManager {
     if (instance) {
       const { id, product } = instance
       if (!this.#facades.has(id)) {
-        switch (product) {
-          case Product.Glow:
-            this.#facades.set(id, new DeviceGlowFacade(this.api, instance))
-            break
-          case Product.Pro:
-            this.#facades.set(id, new DeviceProFacade(this.api, instance))
-            break
-          case Product.V1:
-            this.#facades.set(id, new DeviceFacade(this.api, instance))
-            break
-          case Product.V2:
-          case Product.V4:
-            this.#facades.set(id, new DeviceV2Facade(this.api, instance))
-            break
-          default:
-        }
+        this.#facades.set(
+          id,
+          new {
+            [Product.Glow]: DeviceGlowFacade,
+            [Product.Pro]: DeviceProFacade,
+            [Product.V1]: DeviceFacade,
+            [Product.V2]: DeviceV2Facade,
+            [Product.V4]: DeviceV2Facade,
+          }[product](this.api, instance),
+        )
       }
       return this.#facades.get(id) ?? null
     }

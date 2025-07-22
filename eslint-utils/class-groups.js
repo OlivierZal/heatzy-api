@@ -57,7 +57,7 @@ const selectorIncompatibilities = {
   'static-block': allModifiers,
 }
 
-export const classGroups = {
+export const clsGroups = {
   customGroups: [
     {
       elementNamePattern: '^on.+',

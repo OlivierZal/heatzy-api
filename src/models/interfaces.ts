@@ -1,7 +1,7 @@
 import type { DateTime } from 'luxon'
 
 import type { Mode } from '../enums.ts'
-import type { Attrs } from '../types.ts'
+import type { Attributes } from '../types.ts'
 
 export enum Product {
   Glow = 5,
@@ -17,11 +17,11 @@ export interface IBaseDeviceModel {
   readonly name: string
   readonly previousMode: PreviousMode
   readonly product: Product
-  readonly update: (data: Partial<Attrs>) => void
+  readonly update: (data: Partial<Attributes>) => void
 }
 
 export interface IDeviceModel extends IBaseDeviceModel {
-  readonly data: Attrs
+  readonly data: Attributes
   readonly productKey: string
   readonly productName: string
 }
@@ -29,7 +29,7 @@ export interface IDeviceModel extends IBaseDeviceModel {
 export type PreviousMode = Exclude<Mode, Mode.Stop>
 
 const productMapping: Record<string, Product> = {
-  /* eslint-disable @typescript-eslint/naming-convention */
+  /* eslint-disable @typescript-eslint/naming-convention, unicorn/no-unused-properties */
   // V1
   '9420ae048da545c88fc6274d204dd25f': Product.V1,
   // V2
@@ -50,7 +50,7 @@ const productMapping: Record<string, Product> = {
   '2884feb88e0b4f30b75ea5572276a102': Product.Glow,
   // Pro
   a77a929fcf0d4631bc4f669080376891: Product.Pro,
-  /* eslint-enable @typescript-eslint/naming-convention */
+  /* eslint-enable @typescript-eslint/naming-convention, unicorn/no-unused-properties */
 }
 
 export const getProduct = (productKey: string): Product => {

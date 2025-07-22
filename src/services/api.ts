@@ -1,4 +1,4 @@
-import https from 'https'
+import https from 'node:https'
 
 import axios, {
   type AxiosError,
@@ -11,7 +11,7 @@ import axios, {
 import { DateTime, Duration, Settings as LuxonSettings } from 'luxon'
 
 import type {
-  Attrs,
+  Attributes,
   Bindings,
   Data,
   Device,
@@ -243,16 +243,16 @@ export class API implements IAPI {
   async #handleRequest(
     config: InternalAxiosRequestConfig,
   ): Promise<InternalAxiosRequestConfig> {
-    const newConfig = { ...config }
-    if (newConfig.url !== LOGIN_PATH) {
+    const configNew = { ...config }
+    if (configNew.url !== LOGIN_PATH) {
       const { expireAt, token } = this
       if (expireAt && DateTime.fromSeconds(Number(expireAt)) < DateTime.now()) {
         await this.authenticate()
       }
-      newConfig.headers.set('X-Gizwits-User-token', token)
+      configNew.headers.set('X-Gizwits-User-token', token)
     }
-    this.#logger.log(String(new APICallRequestData(newConfig)))
-    return newConfig
+    this.#logger.log(String(new APICallRequestData(configNew)))
+    return configNew
   }
 
   #handleResponse(response: AxiosResponse): AxiosResponse {
@@ -317,12 +317,12 @@ export class API implements IAPI {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
       Object.fromEntries(
         await Promise.all(
-          devices.map(async ({ did }) => [
-            did,
-            (await this.deviceData({ id: did })).data.attr,
-          ]),
+          devices.map(async ({ did }) => {
+            const deviceData = await this.deviceData({ id: did })
+            return [did, deviceData.data.attr]
+          }),
         ),
-      ) as Record<string, Attrs>,
+      ) as Record<string, Attributes>,
     )
   }
 }

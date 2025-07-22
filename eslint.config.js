@@ -2,6 +2,7 @@ import js from '@eslint/js'
 import stylistic from '@stylistic/eslint-plugin'
 import prettier from 'eslint-config-prettier/flat'
 import perfectionist from 'eslint-plugin-perfectionist'
+import unicorn from 'eslint-plugin-unicorn'
 import yml from 'eslint-plugin-yml'
 
 import { defineConfig } from 'eslint/config'
@@ -10,7 +11,7 @@ import { configs as packageJsonConfigs } from 'eslint-plugin-package-json'
 import { Alphabet } from 'eslint-plugin-perfectionist/alphabet'
 import { configs as tsConfigs } from 'typescript-eslint'
 
-import { classGroups } from './eslint-utils/class-groups.js'
+import { clsGroups } from './eslint-utils/class-groups.js'
 
 const buildExportImportGroup = (selector) =>
   ['type', 'value'].map((group) => `${group}-${selector}`)
@@ -30,8 +31,8 @@ const arrayLikeSortOptions = {
   newlinesBetween: 'never',
 }
 
-const classSortOptions = {
-  ...classGroups,
+const clsSortOptions = {
+  ...clsGroups,
   newlinesBetween: 'ignore',
 }
 
@@ -149,6 +150,7 @@ const config = defineConfig([
   {
     extends: [
       js.configs.all,
+      unicorn.configs.all,
       tsConfigs.all,
       tsConfigs.strictTypeChecked,
       importXConfigs.errors,
@@ -331,6 +333,7 @@ const config = defineConfig([
       'import-x/unambiguous': 'error',
       'max-lines': 'off',
       'no-bitwise': 'off',
+      'no-continue': 'off',
       'no-else-return': [
         'error',
         {
@@ -347,7 +350,7 @@ const config = defineConfig([
       'no-undefined': 'off',
       'one-var': ['error', 'never'],
       'perfectionist/sort-array-includes': ['error', arrayLikeSortOptions],
-      'perfectionist/sort-classes': ['error', classSortOptions],
+      'perfectionist/sort-classes': ['error', clsSortOptions],
       'perfectionist/sort-decorators': ['error', decoratorSortOptions],
       'perfectionist/sort-enums': ['error', enumSortOptions],
       'perfectionist/sort-exports': [
@@ -384,6 +387,16 @@ const config = defineConfig([
       'perfectionist/sort-union-types': ['error', typeSortOptions],
       'sort-imports': 'off',
       'sort-keys': 'off',
+      'unicorn/no-null': 'off',
+      'unicorn/no-useless-switch-case': 'off',
+      'unicorn/prevent-abbreviations': [
+        'error',
+        {
+          replacements: {
+            args: false,
+          },
+        },
+      ],
     },
     settings: {
       perfectionist: {

@@ -59,7 +59,7 @@ export interface SettingManager {
   ) => void
 }
 
-export type OnSyncFunction = (params?: { ids?: string[] }) => Promise<void>
+export type OnSyncFunction = (parameters?: { ids?: string[] }) => Promise<void>
 
 export const isAPISetting = (value: string): value is keyof APISettings =>
   (

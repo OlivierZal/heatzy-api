@@ -1,7 +1,7 @@
 import type { DateTime } from 'luxon'
 
 import type { IAPI } from '../services/index.ts'
-import type { Attrs, PostAttrs } from '../types.ts'
+import type { Attributes, PostAttributes } from '../types.ts'
 
 import { UNIT } from '../constants.ts'
 import { syncDevices, updateDevice } from '../decorators/index.ts'
@@ -50,7 +50,7 @@ export class DeviceFacade implements IDeviceFacade {
     return this.instance.previousMode
   }
 
-  protected get data(): Attrs {
+  protected get data(): Attributes {
     return this.instance.data
   }
 
@@ -68,21 +68,26 @@ export class DeviceFacade implements IDeviceFacade {
 
   @syncDevices
   @updateDevice
-  public async setValues(attrs: PostAttrs): Promise<Partial<Attrs>> {
-    return this.control(attrs)
+  public async setValues(
+    attributes: PostAttributes,
+  ): Promise<Partial<Attributes>> {
+    return this.control(attributes)
   }
 
   @syncDevices
   @updateDevice
-  public async values(): Promise<Attrs> {
-    return (await this.api.deviceData({ id: this.id })).data.attr
+  public async values(): Promise<Attributes> {
+    const deviceData = await this.api.deviceData({ id: this.id })
+    return deviceData.data.attr
   }
 
-  public update(data: Partial<Attrs>): void {
+  public update(data: Partial<Attributes>): void {
     this.instance.update(data)
   }
 
-  protected async control({ mode }: PostAttrs): Promise<Partial<Attrs>> {
+  protected async control({
+    mode,
+  }: PostAttributes): Promise<Partial<Attributes>> {
     if (isModeV1(mode)) {
       const { [mode]: modeV1 } = modeToModeV1
       await this.api.control({
@@ -94,7 +99,9 @@ export class DeviceFacade implements IDeviceFacade {
     return {}
   }
 
-  protected getValue<T extends keyof Attrs>(key: T): NonNullable<Attrs[T]> {
+  protected getValue<T extends keyof Attributes>(
+    key: T,
+  ): NonNullable<Attributes[T]> {
     const {
       data: { [key]: value },
     } = this

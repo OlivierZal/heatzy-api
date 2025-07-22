@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import type { Attrs, PostAttrs } from '../types.ts'
+import type { Attributes, PostAttributes } from '../types.ts'
 
 import { DerogationMode } from '../enums.ts'
 
@@ -8,15 +8,18 @@ import type { IDeviceV2Facade } from './interfaces.ts'
 
 import { DeviceFacade } from './device.ts'
 
+const ZERO = 0
+
 export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
   public get derogationEndString(): string | null {
-    const { derogationEndDate } = this
+    const { derogationEndDate, derogationMode } = this
     if (derogationEndDate) {
-      switch (this.derogationMode) {
+      switch (derogationMode) {
         case DerogationMode.Boost:
-        case DerogationMode.Presence:
+        case DerogationMode.Presence: {
           return derogationEndDate.toLocaleString(DateTime.TIME_24_SIMPLE)
-        case DerogationMode.Vacation:
+        }
+        case DerogationMode.Vacation: {
           return derogationEndDate.toLocaleString({
             day: 'numeric',
             hour: '2-digit',
@@ -24,6 +27,7 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
             minute: '2-digit',
             month: 'short',
           })
+        }
         case DerogationMode.Off:
         default:
       }
@@ -47,10 +51,12 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
     return Boolean(this.getValue('timer_switch'))
   }
 
-  protected override async control(attrs: PostAttrs): Promise<Partial<Attrs>> {
-    if (Object.keys(attrs).length) {
-      await this.api.control({ id: this.id, postData: { attrs } })
+  protected override async control(
+    attributes: PostAttributes,
+  ): Promise<Partial<Attributes>> {
+    if (Object.keys(attributes).length > ZERO) {
+      await this.api.control({ id: this.id, postData: { attrs: attributes } })
     }
-    return attrs
+    return attributes
   }
 }

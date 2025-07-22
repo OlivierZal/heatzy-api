@@ -6,7 +6,7 @@ import type {
   TemperatureCompensation,
 } from './enums.ts'
 
-export interface Attrs extends PostAttrs {
+export interface Attributes extends PostAttributes {
   readonly mode: Mode
   // Glow
   readonly cur_tempH?: number
@@ -29,11 +29,11 @@ export interface Device {
 }
 
 export interface DeviceData {
-  readonly attr: Attrs
+  readonly attr: Attributes
 }
 
 export interface DevicePostData {
-  readonly attrs: PostAttrs
+  readonly attrs: PostAttributes
 }
 
 export interface DeviceV1PostData {
@@ -55,7 +55,7 @@ export interface LoginPostData {
   readonly username: string
 }
 
-export interface PostAttrs {
+export interface PostAttributes {
   readonly mode?: Mode
   // Not V1
   readonly derog_mode?: DerogationMode

@@ -1,7 +1,7 @@
 import 'source-map-support/register.js'
 
 export type {
-  Attrs,
+  Attributes,
   Bindings,
   Data,
   Device,
@@ -12,7 +12,7 @@ export type {
   ErrorData,
   LoginData,
   LoginPostData,
-  PostAttrs,
+  PostAttributes,
 } from './types.ts'
 
 export { UNIT } from './constants.ts'
@@ -50,4 +50,4 @@ export {
   type SettingManager,
   API as HeatzyAPI,
 } from './services/index.ts'
-export { getTargetTemperature } from './utils.ts'
+export { getTargetTemperature } from './utilities.ts'

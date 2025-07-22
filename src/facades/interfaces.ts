@@ -1,7 +1,7 @@
 import type { DateTime } from 'luxon'
 
 import type { DerogationMode, Mode, TemperatureCompensation } from '../enums.ts'
-import type { Attrs, PostAttrs } from '../types.ts'
+import type { Attributes, PostAttributes } from '../types.ts'
 
 import {
   type IBaseDeviceModel,
@@ -13,8 +13,8 @@ export interface IDeviceFacade extends IBaseDeviceModel {
   readonly isOn: boolean
   readonly mode: Mode
   readonly onSync: () => Promise<void>
-  readonly setValues: (data: PostAttrs) => Promise<Partial<Attrs>>
-  readonly values: () => Promise<Attrs>
+  readonly setValues: (data: PostAttributes) => Promise<Partial<Attributes>>
+  readonly values: () => Promise<Attributes>
 }
 
 export interface IDeviceGlowFacade extends IDeviceV2Facade {

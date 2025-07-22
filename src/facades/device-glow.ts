@@ -6,8 +6,10 @@ import type { IDeviceGlowFacade } from './interfaces.ts'
 import { DeviceV2Facade } from './device-v2.ts'
 
 const temperatureRange = {
-  cft: { max: 30, min: 15 },
-  eco: { max: 19, min: 10 },
+  /* eslint-disable unicorn/no-unused-properties */
+  [Mode.Comfort]: { max: 30, min: 15 },
+  [Mode.Eco]: { max: 19, min: 10 },
+  /* eslint-enable unicorn/no-unused-properties */
 }
 
 export class DeviceGlowFacade

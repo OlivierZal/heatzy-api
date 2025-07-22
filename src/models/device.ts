@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import type { Attrs, Device } from '../types.ts'
+import type { Attributes, Device } from '../types.ts'
 
 import { DerogationMode, Mode } from '../enums.ts'
 
@@ -24,13 +24,13 @@ export class DeviceModel implements IDeviceModel {
 
   public readonly productName: string
 
-  #data: Attrs
+  #data: Attributes
 
   #derogationEndDate: DateTime | null = null
 
   #previousMode?: PreviousMode
 
-  private constructor(device: Device, data: Attrs) {
+  private constructor(device: Device, data: Attributes) {
     ;({
       dev_alias: this.name,
       did: this.id,
@@ -41,7 +41,7 @@ export class DeviceModel implements IDeviceModel {
     this.product = getProduct(this.productKey)
   }
 
-  public get data(): Attrs {
+  public get data(): Attributes {
     return this.#data
   }
 
@@ -69,35 +69,47 @@ export class DeviceModel implements IDeviceModel {
 
   public static sync(
     devices: readonly Device[],
-    data: Record<string, Attrs>,
+    data: Record<string, Attributes>,
   ): void {
-    devices.forEach((device) => {
+    for (const device of devices) {
       const { did } = device
-      const { [did]: attrs } = data
-      if (attrs) {
+      const { [did]: attributes } = data
+      if (attributes) {
         if (this.#instances.has(did)) {
-          this.#instances.get(did)?.update(attrs)
-          return
+          this.#instances.get(did)?.update(attributes)
+          continue
         }
-        const newDevice = new this(device, attrs)
-        this.#instances.set(did, newDevice)
-        const {
-          cur_mode: currentMode,
-          derog_mode: derogationMode,
-          derog_time: derogationTime,
-          mode,
-        } = attrs
-        newDevice.#handle({ currentMode, derogationMode, derogationTime, mode })
+        this.#updateInstances(did, device, attributes)
       }
-    })
-    ;[...this.#instances.keys()].forEach((id) => {
+    }
+    this.#cleanInstances(devices)
+  }
+
+  static #cleanInstances(devices: readonly Device[]): void {
+    for (const id of this.#instances.keys()) {
       if (!devices.map(({ did }) => did).includes(id)) {
         this.#instances.delete(id)
       }
-    })
+    }
   }
 
-  public update(data: Partial<Attrs>): void {
+  static #updateInstances(
+    did: string,
+    device: Device,
+    attributes: Attributes,
+  ): void {
+    const deviceNew = new this(device, attributes)
+    this.#instances.set(did, deviceNew)
+    const {
+      cur_mode: currentMode,
+      derog_mode: derogationMode,
+      derog_time: derogationTime,
+      mode,
+    } = attributes
+    deviceNew.#handle({ currentMode, derogationMode, derogationTime, mode })
+  }
+
+  public update(data: Partial<Attributes>): void {
     const {
       cur_mode: currentMode,
       derog_mode: derogationMode,
@@ -105,117 +117,104 @@ export class DeviceModel implements IDeviceModel {
       mode,
     } = this.#data
     const {
-      cur_mode: newCurrentMode,
-      derog_mode: newDerogationMode,
-      derog_time: newDerogationTime,
+      cur_mode: currentModeNew,
+      derog_mode: derogationModeNew,
+      derog_time: derogationTimeNew,
     } = data
     this.#handle({
       currentMode,
+      currentModeNew,
       derogationMode,
+      derogationModeNew,
       derogationTime,
+      derogationTimeNew,
       mode,
-      newCurrentMode,
-      newDerogationMode,
-      newDerogationTime,
     })
     this.#data = { ...this.#data, ...data }
   }
 
   #handle({
     currentMode,
+    currentModeNew,
     derogationMode,
+    derogationModeNew,
     derogationTime,
+    derogationTimeNew,
     mode,
-    newCurrentMode,
-    newDerogationMode,
-    newDerogationTime,
   }: {
     mode: Mode
     currentMode?: Mode
+    currentModeNew?: Mode
     derogationMode?: DerogationMode
+    derogationModeNew?: DerogationMode
     derogationTime?: number
-    newCurrentMode?: Mode
-    newDerogationMode?: DerogationMode
-    newDerogationTime?: number
+    derogationTimeNew?: number
   }): void {
     this.#handlePreviousMode(mode)
     this.#handleDerogationModeEndDate({
       currentMode,
+      currentModeNew,
       derogationMode,
+      derogationModeNew,
       derogationTime,
-      newCurrentMode,
-      newDerogationMode,
-      newDerogationTime,
+      derogationTimeNew,
     })
   }
 
   #handleDerogationModeEndDate({
     currentMode,
+    currentModeNew,
     derogationMode,
+    derogationModeNew,
     derogationTime,
-    newCurrentMode,
-    newDerogationMode,
-    newDerogationTime,
+    derogationTimeNew,
   }: {
     currentMode?: Mode
+    currentModeNew?: Mode
     derogationMode?: DerogationMode
+    derogationModeNew?: DerogationMode
     derogationTime?: number
-    newCurrentMode?: Mode
-    newDerogationMode?: DerogationMode
-    newDerogationTime?: number
+    derogationTimeNew?: number
   }): void {
-    const currentDerogationMode = newDerogationMode ?? derogationMode
+    const currentDerogationMode = derogationModeNew ?? derogationMode
     if (currentDerogationMode === DerogationMode.Presence) {
-      this.#handlePresenceDerogationEndDate({ currentMode, newCurrentMode })
+      this.#handlePresenceDerogationEndDate({ currentMode, currentModeNew })
       return
     }
     if (
       currentDerogationMode !== undefined &&
-      ((newDerogationMode !== undefined &&
-        newDerogationMode !== derogationMode) ||
-        (newDerogationTime !== undefined &&
-          newDerogationTime !== derogationTime))
+      ((derogationModeNew !== undefined &&
+        derogationModeNew !== derogationMode) ||
+        (derogationTimeNew !== undefined &&
+          derogationTimeNew !== derogationTime))
     ) {
-      const currentDerogationTime = newDerogationTime ?? derogationTime
+      const currentDerogationTime = derogationTimeNew ?? derogationTime
       const now = DateTime.now()
-      switch (currentDerogationMode) {
-        case DerogationMode.Boost:
-          this.#derogationEndDate = now.plus({ minutes: currentDerogationTime })
-          break
-        case DerogationMode.Vacation:
-          this.#derogationEndDate = now.plus({ days: currentDerogationTime })
-          break
-        case DerogationMode.Off:
-        default:
-          this.#derogationEndDate = null
-      }
+      ;({ [currentDerogationMode]: this.#derogationEndDate } = {
+        [DerogationMode.Boost]: now.plus({ minutes: currentDerogationTime }),
+        [DerogationMode.Off]: null,
+        [DerogationMode.Vacation]: now.plus({ days: currentDerogationTime }),
+      })
     }
   }
 
   #handlePresenceDerogationEndDate({
     currentMode,
-    newCurrentMode,
+    currentModeNew,
   }: {
     currentMode?: Mode
-    newCurrentMode?: Mode
+    currentModeNew?: Mode
   }): void {
-    if (newCurrentMode !== undefined && newCurrentMode !== currentMode) {
-      switch (newCurrentMode) {
-        case Mode.Comfort:
-          this.#derogationEndDate = DateTime.now().plus({ minutes: 90 })
-          break
-        case Mode.ComfortMinus1:
-          this.#derogationEndDate = DateTime.now().plus({ minutes: 60 })
-          break
-        case Mode.ComfortMinus2:
-          this.#derogationEndDate = DateTime.now().plus({ minutes: 30 })
-          break
-        case Mode.Eco:
-        case Mode.FrostProtection:
-        case Mode.Stop:
-        default:
-          this.#derogationEndDate = null
-      }
+    if (currentModeNew !== undefined && currentModeNew !== currentMode) {
+      const now = DateTime.now()
+      ;({ [currentModeNew]: this.#derogationEndDate } = {
+        [Mode.Comfort]: now.plus({ minutes: 90 }),
+        [Mode.ComfortMinus1]: now.plus({ minutes: 60 }),
+        [Mode.ComfortMinus2]: now.plus({ minutes: 30 }),
+        [Mode.Eco]: null,
+        [Mode.FrostProtection]: null,
+        [Mode.Stop]: null,
+      })
     }
   }
 
