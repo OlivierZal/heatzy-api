@@ -76,8 +76,10 @@ export class DeviceFacade implements IDeviceFacade {
   @syncDevices
   @updateDevice
   public async values(): Promise<Attributes> {
-    const deviceData = await this.api.deviceData({ id: this.id })
-    return deviceData.data.attr
+    const {
+      data: { attr },
+    } = await this.api.deviceData({ id: this.id })
+    return attr
   }
 
   public update(data: Partial<Attributes>): void {

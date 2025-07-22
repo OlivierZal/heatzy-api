@@ -195,11 +195,13 @@ export class API implements IAPI {
   }
 
   async #authenticate({ password, username }: LoginPostData): Promise<true> {
-    const { data } = await this.login({ postData: { password, username } })
+    const {
+      data: { expire_at: expireAt, token },
+    } = await this.login({ postData: { password, username } })
     this.username = username
     this.password = password
-    this.expireAt = String(data.expire_at)
-    ;({ token: this.token } = data)
+    this.expireAt = String(expireAt)
+    this.token = token
     await this.fetch()
     return true
   }
@@ -317,8 +319,10 @@ export class API implements IAPI {
       Object.fromEntries(
         await Promise.all(
           devices.map(async ({ did }) => {
-            const deviceData = await this.deviceData({ id: did })
-            return [did, deviceData.data.attr]
+            const {
+              data: { attr },
+            } = await this.deviceData({ id: did })
+            return [did, attr]
           }),
         ),
       ) as Record<string, Attributes>,
