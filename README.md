@@ -1011,17 +1011,17 @@ Defined in: [src/facades/interfaces.ts:47](https://github.com/OlivierZal/heatzy-
 ### OnSyncFunction()
 
 ```ts
-type OnSyncFunction = (parameters?: { ids?: string[] }) => Promise<void>
+type OnSyncFunction = (params?: { ids?: string[] }) => Promise<void>
 ```
 
 Defined in: [src/services/interfaces.ts:62](https://github.com/OlivierZal/heatzy-api/blob/d7aa466e9f96259bcacc4d014c376aa2c1246c19/src/services/interfaces.ts#L62)
 
 #### Parameters
 
-| Parameter         | Type                      |
-| ----------------- | ------------------------- |
-| `parameters?`     | \{ `ids?`: `string`[]; \} |
-| `parameters.ids?` | `string`[]                |
+| Parameter     | Type                      |
+| ------------- | ------------------------- |
+| `params?`     | \{ `ids?`: `string`[]; \} |
+| `params.ids?` | `string`[]                |
 
 #### Returns
 

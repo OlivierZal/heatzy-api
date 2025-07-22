@@ -397,6 +397,8 @@ const config = defineConfig([
           replacements: {
             arg: false,
             args: false,
+            param: false,
+            params: false,
             utils: false,
           },
         },
