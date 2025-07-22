@@ -56,7 +56,7 @@ export const buildGroups = ({
         }),
       )
       const [groupPair] = groupPairs
-      return [...Array.from({length: groupPair.length}).keys()].map((index) =>
+      return [...Array.from({ length: groupPair.length }).keys()].map((index) =>
         groupPairs.map((group) => group[index]),
       )
     }
