@@ -15,7 +15,6 @@ export type {
   PostAttributes,
 } from './types.ts'
 
-export { UNIT } from './constants.ts'
 export { syncDevices, updateDevice } from './decorators/index.ts'
 export {
   DerogationMode,
@@ -50,4 +49,4 @@ export {
   type SettingManager,
   API as HeatzyAPI,
 } from './services/index.ts'
-export { getTargetTemperature } from './utilities.ts'
+export { getTargetTemperature } from './utils.ts'

@@ -8,8 +8,6 @@ import type { IDeviceV2Facade } from './interfaces.ts'
 
 import { DeviceFacade } from './device.ts'
 
-const ZERO = 0
-
 export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
   public get derogationEndString(): string | null {
     const { derogationEndDate, derogationMode } = this
@@ -54,7 +52,7 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
   protected override async control(
     attributes: PostAttributes,
   ): Promise<Partial<Attributes>> {
-    if (Object.keys(attributes).length > ZERO) {
+    if (Object.keys(attributes).length > 0) {
       await this.api.control({ id: this.id, postData: { attrs: attributes } })
     }
     return attributes

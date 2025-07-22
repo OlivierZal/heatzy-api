@@ -98,15 +98,15 @@ export class DeviceModel implements IDeviceModel {
     device: Device,
     attributes: Attributes,
   ): void {
-    const deviceNew = new this(device, attributes)
-    this.#instances.set(did, deviceNew)
+    const newDevice = new this(device, attributes)
+    this.#instances.set(did, newDevice)
     const {
       cur_mode: currentMode,
       derog_mode: derogationMode,
       derog_time: derogationTime,
       mode,
     } = attributes
-    deviceNew.#handle({ currentMode, derogationMode, derogationTime, mode })
+    newDevice.#handle({ currentMode, derogationMode, derogationTime, mode })
   }
 
   public update(data: Partial<Attributes>): void {
@@ -117,78 +117,78 @@ export class DeviceModel implements IDeviceModel {
       mode,
     } = this.#data
     const {
-      cur_mode: currentModeNew,
-      derog_mode: derogationModeNew,
-      derog_time: derogationTimeNew,
+      cur_mode: newCurrentMode,
+      derog_mode: newDerogationMode,
+      derog_time: newDerogationTime,
     } = data
     this.#handle({
       currentMode,
-      currentModeNew,
       derogationMode,
-      derogationModeNew,
       derogationTime,
-      derogationTimeNew,
       mode,
+      newCurrentMode,
+      newDerogationMode,
+      newDerogationTime,
     })
     this.#data = { ...this.#data, ...data }
   }
 
   #handle({
     currentMode,
-    currentModeNew,
     derogationMode,
-    derogationModeNew,
     derogationTime,
-    derogationTimeNew,
     mode,
+    newCurrentMode,
+    newDerogationMode,
+    newDerogationTime,
   }: {
     mode: Mode
     currentMode?: Mode
-    currentModeNew?: Mode
     derogationMode?: DerogationMode
-    derogationModeNew?: DerogationMode
     derogationTime?: number
-    derogationTimeNew?: number
+    newCurrentMode?: Mode
+    newDerogationMode?: DerogationMode
+    newDerogationTime?: number
   }): void {
     this.#handlePreviousMode(mode)
     this.#handleDerogationModeEndDate({
       currentMode,
-      currentModeNew,
       derogationMode,
-      derogationModeNew,
       derogationTime,
-      derogationTimeNew,
+      newCurrentMode,
+      newDerogationMode,
+      newDerogationTime,
     })
   }
 
   #handleDerogationModeEndDate({
     currentMode,
-    currentModeNew,
     derogationMode,
-    derogationModeNew,
     derogationTime,
-    derogationTimeNew,
+    newCurrentMode,
+    newDerogationMode,
+    newDerogationTime,
   }: {
     currentMode?: Mode
-    currentModeNew?: Mode
     derogationMode?: DerogationMode
-    derogationModeNew?: DerogationMode
     derogationTime?: number
-    derogationTimeNew?: number
+    newCurrentMode?: Mode
+    newDerogationMode?: DerogationMode
+    newDerogationTime?: number
   }): void {
-    const currentDerogationMode = derogationModeNew ?? derogationMode
+    const currentDerogationMode = newDerogationMode ?? derogationMode
     if (currentDerogationMode === DerogationMode.Presence) {
-      this.#handlePresenceDerogationEndDate({ currentMode, currentModeNew })
+      this.#handlePresenceDerogationEndDate({ currentMode, newCurrentMode })
       return
     }
     if (
       currentDerogationMode !== undefined &&
-      ((derogationModeNew !== undefined &&
-        derogationModeNew !== derogationMode) ||
-        (derogationTimeNew !== undefined &&
-          derogationTimeNew !== derogationTime))
+      ((newDerogationMode !== undefined &&
+        newDerogationMode !== derogationMode) ||
+        (newDerogationTime !== undefined &&
+          newDerogationTime !== derogationTime))
     ) {
-      const currentDerogationTime = derogationTimeNew ?? derogationTime
+      const currentDerogationTime = newDerogationTime ?? derogationTime
       const now = DateTime.now()
       ;({ [currentDerogationMode]: this.#derogationEndDate } = {
         [DerogationMode.Boost]: now.plus({ minutes: currentDerogationTime }),
@@ -200,14 +200,14 @@ export class DeviceModel implements IDeviceModel {
 
   #handlePresenceDerogationEndDate({
     currentMode,
-    currentModeNew,
+    newCurrentMode,
   }: {
     currentMode?: Mode
-    currentModeNew?: Mode
+    newCurrentMode?: Mode
   }): void {
-    if (currentModeNew !== undefined && currentModeNew !== currentMode) {
+    if (newCurrentMode !== undefined && newCurrentMode !== currentMode) {
       const now = DateTime.now()
-      ;({ [currentModeNew]: this.#derogationEndDate } = {
+      ;({ [newCurrentMode]: this.#derogationEndDate } = {
         [Mode.Comfort]: now.plus({ minutes: 90 }),
         [Mode.ComfortMinus1]: now.plus({ minutes: 60 }),
         [Mode.ComfortMinus2]: now.plus({ minutes: 30 }),

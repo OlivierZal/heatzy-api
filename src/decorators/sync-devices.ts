@@ -6,7 +6,7 @@ export const syncDevices = <T extends Partial<Attributes> | readonly Device[]>(
   target: (...args: any[]) => Promise<T>,
   _context: ClassMethodDecoratorContext,
 ): ((...args: unknown[]) => Promise<T>) =>
-  async function targetNew(this: IAPI | IDeviceFacade, ...args: unknown[]) {
+  async function newTarget(this: IAPI | IDeviceFacade, ...args: unknown[]) {
     const data = await target.call(this, ...args)
     await this.onSync?.()
     return data

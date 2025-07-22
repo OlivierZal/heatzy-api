@@ -11,7 +11,7 @@ import { configs as packageJsonConfigs } from 'eslint-plugin-package-json'
 import { Alphabet } from 'eslint-plugin-perfectionist/alphabet'
 import { configs as tsConfigs } from 'typescript-eslint'
 
-import { clsGroups } from './eslint-utils/class-groups.js'
+import { classGroups } from './eslint-utils/class-groups.js'
 
 const buildExportImportGroup = (selector) =>
   ['type', 'value'].map((group) => `${group}-${selector}`)
@@ -31,8 +31,8 @@ const arrayLikeSortOptions = {
   newlinesBetween: 'never',
 }
 
-const clsSortOptions = {
-  ...clsGroups,
+const classSortOptions = {
+  ...classGroups,
   newlinesBetween: 'ignore',
 }
 
@@ -259,6 +259,7 @@ const config = defineConfig([
       '@typescript-eslint/no-magic-numbers': [
         'error',
         {
+          ignore: [0, 1],
           ignoreEnums: true,
         },
       ],
@@ -350,7 +351,7 @@ const config = defineConfig([
       'no-undefined': 'off',
       'one-var': ['error', 'never'],
       'perfectionist/sort-array-includes': ['error', arrayLikeSortOptions],
-      'perfectionist/sort-classes': ['error', clsSortOptions],
+      'perfectionist/sort-classes': ['error', classSortOptions],
       'perfectionist/sort-decorators': ['error', decoratorSortOptions],
       'perfectionist/sort-enums': ['error', enumSortOptions],
       'perfectionist/sort-exports': [
@@ -387,13 +388,16 @@ const config = defineConfig([
       'perfectionist/sort-union-types': ['error', typeSortOptions],
       'sort-imports': 'off',
       'sort-keys': 'off',
+      'unicorn/no-keyword-prefix': 'off',
       'unicorn/no-null': 'off',
       'unicorn/no-useless-switch-case': 'off',
       'unicorn/prevent-abbreviations': [
         'error',
         {
           replacements: {
+            arg: false,
             args: false,
+            utils: false,
           },
         },
       ],

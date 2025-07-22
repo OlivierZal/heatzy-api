@@ -39,9 +39,9 @@ const getMessage = (error: AxiosError): string => {
 }
 
 const withErrorMessage = <T extends AxiosResponse | InternalAxiosRequestConfig>(
-  base: new (argument?: T) => APICallContextData,
+  base: new (arg?: T) => APICallContextData,
   error: AxiosError,
-): new (argument?: T) => APICallContextDataWithErrorMessage =>
+): new (arg?: T) => APICallContextDataWithErrorMessage =>
   class extends base {
     public readonly errorMessage = getMessage(error)
   }

@@ -41,7 +41,6 @@ const APPLICATION_ID = 'X-Gizwits-Application-Id'
 const LOGIN_PATH = '/login'
 
 const DEFAULT_SYNC_INTERVAL = 5
-const NO_SYNC_INTERVAL = 0
 const RETRY_DELAY = 1000
 
 const setting = <This extends API>(
@@ -96,7 +95,7 @@ export class API implements IAPI {
       username,
     } = config
     this.#autoSyncInterval = Duration.fromObject({
-      seconds: autoSyncInterval ?? NO_SYNC_INTERVAL,
+      seconds: autoSyncInterval ?? 0,
     }).as('milliseconds')
     this.#logger = logger
     this.onSync = onSync
@@ -243,16 +242,16 @@ export class API implements IAPI {
   async #handleRequest(
     config: InternalAxiosRequestConfig,
   ): Promise<InternalAxiosRequestConfig> {
-    const configNew = { ...config }
-    if (configNew.url !== LOGIN_PATH) {
+    const newConfig = { ...config }
+    if (newConfig.url !== LOGIN_PATH) {
       const { expireAt, token } = this
       if (expireAt && DateTime.fromSeconds(Number(expireAt)) < DateTime.now()) {
         await this.authenticate()
       }
-      configNew.headers.set('X-Gizwits-User-token', token)
+      newConfig.headers.set('X-Gizwits-User-token', token)
     }
-    this.#logger.log(String(new APICallRequestData(configNew)))
-    return configNew
+    this.#logger.log(String(new APICallRequestData(newConfig)))
+    return newConfig
   }
 
   #handleResponse(response: AxiosResponse): AxiosResponse {
