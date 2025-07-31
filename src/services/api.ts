@@ -40,6 +40,7 @@ import {
 const APPLICATION_ID = 'X-Gizwits-Application-Id'
 const LOGIN_PATH = '/login'
 
+const NO_SYNC_INTERVAL = 0
 const DEFAULT_SYNC_INTERVAL = 5
 const RETRY_DELAY = 1000
 
@@ -95,7 +96,7 @@ export class API implements IAPI {
       username,
     } = config
     this.#autoSyncInterval = Duration.fromObject({
-      seconds: autoSyncInterval ?? 0,
+      seconds: autoSyncInterval ?? NO_SYNC_INTERVAL,
     }).as('milliseconds')
     this.#logger = logger
     this.onSync = onSync

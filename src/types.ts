@@ -1,3 +1,4 @@
+import type { POST_DATA_UNIT } from './constants.ts'
 import type {
   DerogationMode,
   Mode,
@@ -36,7 +37,7 @@ export interface DevicePostData {
 }
 
 export interface DeviceV1PostData {
-  readonly raw: [1, 1, mode: number]
+  readonly raw: [typeof POST_DATA_UNIT, typeof POST_DATA_UNIT, mode: number]
 }
 
 export interface ErrorData {

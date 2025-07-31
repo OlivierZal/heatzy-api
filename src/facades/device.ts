@@ -3,6 +3,7 @@ import type { DateTime } from 'luxon'
 import type { IAPI } from '../services/index.ts'
 import type { Attributes, PostAttributes } from '../types.ts'
 
+import { POST_DATA_UNIT } from '../constants.ts'
 import { syncDevices, updateDevice } from '../decorators/index.ts'
 import { Mode, modeToModeV1 } from '../enums.ts'
 import {
@@ -93,7 +94,7 @@ export class DeviceFacade implements IDeviceFacade {
       const { [mode]: modeV1 } = modeToModeV1
       await this.api.control({
         id: this.id,
-        postData: { raw: [1, 1, Number(modeV1)] },
+        postData: { raw: [POST_DATA_UNIT, POST_DATA_UNIT, Number(modeV1)] },
       })
       return { mode }
     }
