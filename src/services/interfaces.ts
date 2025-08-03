@@ -8,12 +8,12 @@ import type {
   LoginPostData,
 } from '../types.ts'
 
-const apiSettingKeys = new Set([
+const apiSettingKeys = new Set<keyof APISettings>([
   'expireAt',
   'password',
   'token',
   'username',
-]) satisfies Set<keyof APISettings> as Set<string>
+]) as Set<string>
 
 export interface APIConfig extends Partial<LoginPostData> {
   readonly autoSyncInterval?: number | null
