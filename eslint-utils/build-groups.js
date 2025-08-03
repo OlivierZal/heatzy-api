@@ -18,14 +18,11 @@ const modifierCombos = ({ modifiers }) =>
 const compatibleModifierCombos = ({ modifierIncompatibilities, modifiers }) =>
   modifierCombos({ modifiers }).filter((combo) => {
     const comboSet = new Set(combo)
-    return comboSet.every((modifier) => {
-      const incompatibilities = new Set(
-        modifierIncompatibilities[modifier] ?? [],
-      )
-      return incompatibilities.every(
+    return comboSet.every((modifier) =>
+      new Set(modifierIncompatibilities[modifier] ?? []).every(
         (incompatibleModifier) => !comboSet.has(incompatibleModifier),
-      )
-    })
+      ),
+    )
   })
 
 const buildGroupsForSelector = ({
