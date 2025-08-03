@@ -240,7 +240,7 @@ const config = defineConfig([
         },
         {
           format: ['PascalCase'],
-          selector: ['enumMember', 'typeLike'],
+          selector: ['typeLike'],
         },
         {
           format: ['camelCase'],

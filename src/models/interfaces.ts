@@ -1,15 +1,8 @@
 import type { DateTime } from 'luxon'
 
-import type { Mode } from '../enums.ts'
 import type { Attributes } from '../types.ts'
 
-export enum Product {
-  Glow = 5,
-  Pro = 6,
-  V1 = 1,
-  V2 = 2,
-  V4 = 4,
-}
+import { type Mode, Product } from '../enums.ts'
 
 export interface IBaseDeviceModel {
   readonly derogationEndDate: DateTime | null
@@ -26,30 +19,30 @@ export interface IDeviceModel extends IBaseDeviceModel {
   readonly productName: string
 }
 
-export type PreviousMode = Exclude<Mode, Mode.Stop>
+export type PreviousMode = Exclude<Mode, Mode.stop>
 
 const productMapping: Record<string, Product> = {
   /* eslint-disable @typescript-eslint/naming-convention, unicorn/no-unused-properties */
   // V1
-  '9420ae048da545c88fc6274d204dd25f': Product.V1,
+  '9420ae048da545c88fc6274d204dd25f': Product.v1,
   // V2
-  '4fc968a21e7243b390e9ede6f1c6465d': Product.V2,
-  '51d16c22a5f74280bc3cfe9ebcdc6402': Product.V2,
+  '4fc968a21e7243b390e9ede6f1c6465d': Product.v2,
+  '51d16c22a5f74280bc3cfe9ebcdc6402': Product.v2,
   // V3
-  b8c6657b66c34148b4dee64d615cefc7: Product.V2,
-  b9a67b6ce24b437d9794103fd317e627: Product.V2,
+  b8c6657b66c34148b4dee64d615cefc7: Product.v2,
+  b9a67b6ce24b437d9794103fd317e627: Product.v2,
   // V4
-  '46409c7f29d4411c85a3a46e5ee3703e': Product.V4,
-  '9dacde7ef459421eaf8dc4bea9385634': Product.V4,
+  '46409c7f29d4411c85a3a46e5ee3703e': Product.v4,
+  '9dacde7ef459421eaf8dc4bea9385634': Product.v4,
   // Glow
-  '2fd622e45283470f9e27e8e6167d7533': Product.Glow,
-  cffa0df68a52449085c5d1e72c2f6bb0: Product.Glow,
+  '2fd622e45283470f9e27e8e6167d7533': Product.glow,
+  cffa0df68a52449085c5d1e72c2f6bb0: Product.glow,
   // Onyx
-  bb10d064f8de409db633b750faa22a52: Product.Glow,
+  bb10d064f8de409db633b750faa22a52: Product.glow,
   // Shine
-  '2884feb88e0b4f30b75ea5572276a102': Product.Glow,
+  '2884feb88e0b4f30b75ea5572276a102': Product.glow,
   // Pro
-  a77a929fcf0d4631bc4f669080376891: Product.Pro,
+  a77a929fcf0d4631bc4f669080376891: Product.pro,
   /* eslint-enable @typescript-eslint/naming-convention, unicorn/no-unused-properties */
 }
 

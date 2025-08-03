@@ -19,6 +19,7 @@ export { syncDevices, updateDevice } from './decorators/index.ts'
 export {
   DerogationMode,
   Mode,
+  Product,
   Switch,
   TemperatureCompensation,
 } from './enums.ts'
@@ -38,7 +39,6 @@ export {
   type IDeviceModel,
   type PreviousMode,
   DeviceModel,
-  Product,
 } from './models/index.ts'
 export {
   type APIConfig,

@@ -5,11 +5,10 @@ import type { Attributes, PostAttributes } from '../types.ts'
 
 import { POST_DATA_UNIT } from '../constants.ts'
 import { syncDevices, updateDevice } from '../decorators/index.ts'
-import { Mode, modeToModeV1 } from '../enums.ts'
+import { type Product, Mode, modeToModeV1 } from '../enums.ts'
 import {
   type IDeviceModel,
   type PreviousMode,
-  type Product,
   DeviceModel,
 } from '../models/index.ts'
 
@@ -35,7 +34,7 @@ export class DeviceFacade implements IDeviceFacade {
   }
 
   public get isOn(): boolean {
-    return this.mode !== Mode.Stop
+    return this.mode !== Mode.stop
   }
 
   public get mode(): Mode {

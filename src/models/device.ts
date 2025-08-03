@@ -2,12 +2,11 @@ import { DateTime } from 'luxon'
 
 import type { Attributes, Device } from '../types.ts'
 
-import { DerogationMode, Mode } from '../enums.ts'
+import { type Product, DerogationMode, Mode } from '../enums.ts'
 
 import {
   type IDeviceModel,
   type PreviousMode,
-  type Product,
   getProduct,
 } from './interfaces.ts'
 
@@ -52,7 +51,7 @@ export class DeviceModel implements IDeviceModel {
   }
 
   public get previousMode(): PreviousMode {
-    return this.#previousMode ?? Mode.Eco
+    return this.#previousMode ?? Mode.eco
   }
 
   public static getAll(): DeviceModel[] {
@@ -177,7 +176,7 @@ export class DeviceModel implements IDeviceModel {
     newDerogationTime?: number
   }): void {
     const currentDerogationMode = newDerogationMode ?? derogationMode
-    if (currentDerogationMode === DerogationMode.Presence) {
+    if (currentDerogationMode === DerogationMode.presence) {
       this.#handlePresenceDerogationEndDate({ currentMode, newCurrentMode })
       return
     }
@@ -191,9 +190,9 @@ export class DeviceModel implements IDeviceModel {
       const currentDerogationTime = newDerogationTime ?? derogationTime
       const now = DateTime.now()
       ;({ [currentDerogationMode]: this.#derogationEndDate } = {
-        [DerogationMode.Boost]: now.plus({ minutes: currentDerogationTime }),
-        [DerogationMode.Off]: null,
-        [DerogationMode.Vacation]: now.plus({ days: currentDerogationTime }),
+        [DerogationMode.boost]: now.plus({ minutes: currentDerogationTime }),
+        [DerogationMode.off]: null,
+        [DerogationMode.vacation]: now.plus({ days: currentDerogationTime }),
       })
     }
   }
@@ -208,18 +207,18 @@ export class DeviceModel implements IDeviceModel {
     if (newCurrentMode !== undefined && newCurrentMode !== currentMode) {
       const now = DateTime.now()
       ;({ [newCurrentMode]: this.#derogationEndDate } = {
-        [Mode.Comfort]: now.plus({ minutes: 90 }),
-        [Mode.ComfortMinus1]: now.plus({ minutes: 60 }),
-        [Mode.ComfortMinus2]: now.plus({ minutes: 30 }),
-        [Mode.Eco]: null,
-        [Mode.FrostProtection]: null,
-        [Mode.Stop]: null,
+        [Mode.comfort]: now.plus({ minutes: 90 }),
+        [Mode.comfortMinus1]: now.plus({ minutes: 60 }),
+        [Mode.comfortMinus2]: now.plus({ minutes: 30 }),
+        [Mode.eco]: null,
+        [Mode.frostProtection]: null,
+        [Mode.stop]: null,
       })
     }
   }
 
   #handlePreviousMode(mode: Mode): void {
-    if (mode !== Mode.Stop) {
+    if (mode !== Mode.stop) {
       this.#previousMode = mode
     }
   }

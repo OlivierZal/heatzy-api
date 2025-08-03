@@ -1,6 +1,7 @@
+import type { IDeviceModel } from '../models/index.ts'
 import type { IAPI } from '../services/index.ts'
 
-import { type IDeviceModel, Product } from '../models/index.ts'
+import { Product } from '../enums.ts'
 
 import type { IDeviceFacadeAny, IFacadeManager } from './interfaces.ts'
 
@@ -27,11 +28,11 @@ export class FacadeManager implements IFacadeManager {
         this.#facades.set(
           id,
           new {
-            [Product.Glow]: DeviceGlowFacade,
-            [Product.Pro]: DeviceProFacade,
-            [Product.V1]: DeviceFacade,
-            [Product.V2]: DeviceV2Facade,
-            [Product.V4]: DeviceV2Facade,
+            [Product.glow]: DeviceGlowFacade,
+            [Product.pro]: DeviceProFacade,
+            [Product.v1]: DeviceFacade,
+            [Product.v2]: DeviceV2Facade,
+            [Product.v4]: DeviceV2Facade,
           }[product](this.api, instance),
         )
       }

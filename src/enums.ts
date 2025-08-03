@@ -1,30 +1,38 @@
 export enum DerogationMode {
-  Boost = 2,
-  Off = 0,
-  Vacation = 1,
+  boost = 2,
+  off = 0,
+  vacation = 1,
   // Pro
-  Presence = 3,
+  presence = 3,
 }
 
 export enum Mode {
-  Comfort = 'cft',
-  Eco = 'eco',
-  FrostProtection = 'fro',
-  Stop = 'stop',
+  comfort = 'cft',
+  eco = 'eco',
+  frostProtection = 'fro',
+  stop = 'stop',
   // Not V1, V2
-  ComfortMinus1 = 'cft1',
-  ComfortMinus2 = 'cft2',
+  comfortMinus1 = 'cft1',
+  comfortMinus2 = 'cft2',
+}
+
+export enum Product {
+  glow = 5,
+  pro = 6,
+  v1 = 1,
+  v2 = 2,
+  v4 = 4,
 }
 
 export enum Switch {
-  Off = 0,
-  On = 1,
+  off = 0,
+  on = 1,
 }
 
 export enum TemperatureCompensation {
-  Minus5C = 0,
-  NoChange = 50,
-  Plus5C = 100,
+  minus5C = 0,
+  noChange = 50,
+  plus5C = 100,
 }
 
 export const modeToModeV1: Partial<Record<Mode, number>> = {

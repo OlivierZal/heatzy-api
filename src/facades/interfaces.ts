@@ -1,13 +1,14 @@
 import type { DateTime } from 'luxon'
 
-import type { DerogationMode, Mode, TemperatureCompensation } from '../enums.ts'
+import type { IBaseDeviceModel, IDeviceModel } from '../models/index.ts'
 import type { Attributes, PostAttributes } from '../types.ts'
 
 import {
-  type IBaseDeviceModel,
-  type IDeviceModel,
+  type DerogationMode,
+  type Mode,
+  type TemperatureCompensation,
   Product,
-} from '../models/index.ts'
+} from '../enums.ts'
 
 export interface IDeviceFacade extends IBaseDeviceModel {
   readonly isOn: boolean
@@ -52,12 +53,12 @@ export type IDeviceFacadeAny =
 
 export const supportsV2 = (
   device: IDeviceFacadeAny,
-): device is IDeviceV2Facade => device.product >= Product.V2
+): device is IDeviceV2Facade => device.product >= Product.v2
 
 export const supportsGlow = (
   device: IDeviceFacadeAny,
-): device is IDeviceGlowFacade => device.product >= Product.Glow
+): device is IDeviceGlowFacade => device.product >= Product.glow
 
 export const supportsPro = (
   device: IDeviceFacadeAny,
-): device is IDeviceProFacade => device.product >= Product.Pro
+): device is IDeviceProFacade => device.product >= Product.pro

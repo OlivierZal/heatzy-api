@@ -15,12 +15,12 @@ export class DeviceV2Facade extends DeviceFacade implements IDeviceV2Facade {
     const { derogationEndDate, derogationMode } = this
     return derogationEndDate ?
         {
-          [DerogationMode.Boost]: () =>
+          [DerogationMode.boost]: () =>
             derogationEndDate.toLocaleString(DateTime.TIME_24_SIMPLE),
-          [DerogationMode.Off]: () => null,
-          [DerogationMode.Presence]: () =>
+          [DerogationMode.off]: () => null,
+          [DerogationMode.presence]: () =>
             derogationEndDate.toLocaleString(DateTime.TIME_24_SIMPLE),
-          [DerogationMode.Vacation]: () =>
+          [DerogationMode.vacation]: () =>
             derogationEndDate.toLocaleString({
               day: 'numeric',
               hour: '2-digit',

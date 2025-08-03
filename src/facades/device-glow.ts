@@ -7,8 +7,8 @@ import { DeviceV2Facade } from './device-v2.ts'
 
 const temperatureRange = {
   /* eslint-disable unicorn/no-unused-properties */
-  [Mode.Comfort]: { max: 30, min: 15 },
-  [Mode.Eco]: { max: 19, min: 10 },
+  [Mode.comfort]: { max: 30, min: 15 },
+  [Mode.eco]: { max: 19, min: 10 },
   /* eslint-enable unicorn/no-unused-properties */
 }
 
@@ -25,7 +25,7 @@ export class DeviceGlowFacade
   }
 
   public get comfortTemperature(): number {
-    return this.getTargetTemperature(Mode.Comfort)
+    return this.getTargetTemperature(Mode.comfort)
   }
 
   public get currentTemperature(): number {
@@ -33,14 +33,14 @@ export class DeviceGlowFacade
   }
 
   public get ecoTemperature(): number {
-    return this.getTargetTemperature(Mode.Eco)
+    return this.getTargetTemperature(Mode.eco)
   }
 
   public get temperatureCompensation(): number {
     return this.getValue('com_temp')
   }
 
-  protected getTargetTemperature(mode: Mode.Comfort | Mode.Eco): number {
+  protected getTargetTemperature(mode: Mode.comfort | Mode.eco): number {
     const {
       [mode]: { max, min },
     } = temperatureRange
@@ -48,7 +48,7 @@ export class DeviceGlowFacade
   }
 
   protected getTemperature(
-    mode: 'cur' | Mode.Comfort | Mode.Eco = 'cur',
+    mode: 'cur' | Mode.comfort | Mode.eco = 'cur',
   ): number {
     return (
       this.getValue(`${mode}_tempH`) * TEMPERATURE_SCALE +
