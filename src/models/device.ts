@@ -85,8 +85,9 @@ export class DeviceModel implements IDeviceModel {
   }
 
   static #cleanInstances(devices: readonly Device[]): void {
+    const deviceIds = new Set(devices.map(({ did }) => did))
     for (const id of this.#instances.keys()) {
-      if (!devices.map(({ did }) => did).includes(id)) {
+      if (!deviceIds.has(id)) {
         this.#instances.delete(id)
       }
     }

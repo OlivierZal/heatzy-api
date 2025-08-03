@@ -8,6 +8,13 @@ import type {
   LoginPostData,
 } from '../types.ts'
 
+const apiSettingKeys = new Set([
+  'expireAt',
+  'password',
+  'token',
+  'username',
+]) satisfies Set<keyof APISettings> as Set<string>
+
 export interface APIConfig extends Partial<LoginPostData> {
   readonly autoSyncInterval?: number | null
   readonly language?: string
@@ -62,11 +69,4 @@ export interface SettingManager {
 export type OnSyncFunction = (params?: { ids?: string[] }) => Promise<void>
 
 export const isAPISetting = (value: string): value is keyof APISettings =>
-  (
-    [
-      'expireAt',
-      'password',
-      'token',
-      'username',
-    ] satisfies (keyof APISettings)[] as string[]
-  ).includes(value)
+  apiSettingKeys.has(value)
