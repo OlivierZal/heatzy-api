@@ -478,7 +478,6 @@ const config = defineConfig([
     ...packageJsonConfigs.recommended,
     rules: {
       ...packageJsonConfigs.recommended.rules,
-      'package-json/no-redundant-files': 'error',
       'package-json/require-author': 'error',
       'package-json/require-bugs': 'error',
       'package-json/require-files': 'error',
