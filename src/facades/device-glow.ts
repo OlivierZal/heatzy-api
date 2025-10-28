@@ -17,7 +17,7 @@ export class DeviceGlowFacade
   implements IDeviceGlowFacade
 {
   public override get isLocked(): boolean {
-    return Boolean(this.getValue('lock_c'))
+    return Boolean(this.getValue('LOCK_C'))
   }
 
   public override get isOn(): boolean {

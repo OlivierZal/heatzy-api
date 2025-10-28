@@ -213,7 +213,7 @@ const config = defineConfig([
         {
           filter: {
             match: true,
-            regex: '^(Heating_state|.+_temp(H|L))$',
+            regex: '^(LOCK_C|Heating_state|.+_temp(H|L))$',
           },
           format: null,
           selector: 'typeProperty',

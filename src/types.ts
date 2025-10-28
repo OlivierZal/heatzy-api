@@ -70,7 +70,7 @@ export interface PostAttributes {
   readonly cft_tempL?: number
   readonly eco_tempH?: number
   readonly eco_tempL?: number
-  readonly lock_c?: Switch
+  readonly LOCK_C?: Switch
   readonly on_off?: Switch
   // Pro
   readonly cft_temp?: number
