@@ -1,7 +1,7 @@
 export enum DerogationMode {
-  boost = 2,
   off = 0,
   vacation = 1,
+  boost = 2,
   // Pro
   presence = 3,
 }
@@ -17,11 +17,11 @@ export enum Mode {
 }
 
 export enum Product {
-  glow = 5,
-  pro = 6,
   v1 = 1,
   v2 = 2,
   v4 = 4,
+  glow = 5,
+  pro = 6,
 }
 
 export enum Switch {
