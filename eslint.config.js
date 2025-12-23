@@ -125,6 +125,10 @@ const config = defineConfig([
           selector: ['typeProperty'],
         },
         {
+          format: ['camelCase'],
+          selector: ['enumMember'],
+        },
+        {
           format: ['camelCase', 'snake_case'],
           selector: ['typeProperty'],
         },
@@ -146,7 +150,7 @@ const config = defineConfig([
         },
         {
           format: ['PascalCase'],
-          selector: ['typeLike'],
+          selector: ['enumMember', 'typeLike'],
         },
         {
           format: ['camelCase'],
