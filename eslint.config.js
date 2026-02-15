@@ -19,7 +19,7 @@ const buildImportGroup = (selector) =>
   )
 
 const arrayLikeSortOptions = {
-  groups: ['literal', 'spread'],
+  groups: ['literal'],
 }
 
 const typeSortOptions = {
@@ -495,29 +495,8 @@ const config = defineConfig([
       ],
     },
   },
-  {
-    extends: [
-      packageJsonConfigs['recommended-publishable'],
-      packageJsonConfigs.stylistic,
-    ],
-    files: ['package.json'],
-    rules: {
-      'package-json/require-author': 'error',
-      'package-json/require-bugs': 'error',
-      'package-json/require-homepage': 'error',
-      'package-json/require-keywords': 'error',
-      'package-json/require-scripts': 'error',
-      'package-json/require-types': 'error',
-      'package-json/restrict-dependency-ranges': [
-        'error',
-        [
-          {
-            rangeType: 'caret',
-          },
-        ],
-      ],
-    },
-  },
+  packageJsonConfigs['recommended-publishable'],
+  packageJsonConfigs.stylistic,
 ])
 
 export default config
