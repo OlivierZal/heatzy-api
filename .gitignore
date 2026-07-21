@@ -1,6 +1,11 @@
+.claude/
 node_modules/
+.env
+.env.*
 /.npmrc
 /.vscode/*
 !/.vscode/settings.json
 /coverage/
 /dist/
+/docs/
+/scripts/
