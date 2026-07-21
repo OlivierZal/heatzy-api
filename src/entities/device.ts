@@ -39,6 +39,19 @@ const hasDerogationChanged = ({
   (newDerogationMode !== undefined && newDerogationMode !== derogationMode) ||
   (newDerogationTime !== undefined && newDerogationTime !== derogationTime)
 
+// The running window a derogation opens: boost counts minutes, vacation
+// days; off has no window (`null`). Presence is handled separately (its
+// window keys off the reported mode, not `derog_time`).
+const derogationDuration = (
+  mode: DerogationMode,
+  time: number,
+): Temporal.DurationLike | null => {
+  if (mode === DerogationMode.off) {
+    return null
+  }
+  return mode === DerogationMode.boost ? { minutes: time } : { days: time }
+}
+
 /**
  * In-memory model of one bound Heatzy device: wire identity, the
  * last-synced attribute payload, and the derived state the wire does
@@ -166,12 +179,8 @@ export class Device {
       return
     }
     const time = transition.newDerogationTime ?? transition.derogationTime ?? 0
-    this.#derogationEnd =
-      mode === DerogationMode.off ?
-        null
-      : this.#now().add(
-          mode === DerogationMode.boost ? { minutes: time } : { days: time },
-        )
+    const duration = derogationDuration(mode, time)
+    this.#derogationEnd = duration === null ? null : this.#now().add(duration)
   }
 
   // The presence countdown keys off the *reported* mode: comfort

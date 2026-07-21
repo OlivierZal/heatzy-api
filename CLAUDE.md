@@ -106,6 +106,16 @@ fire-and-forget `.catch()`, and the single-flight `.finally()` in
   exclusions `sonar-project.properties` declares). A Sonar finding is
   handled like a lint error — the code adapts, or the divergence is
   settled as a documented verdict — never merged over.
+- The SonarCloud project runs **CI-based analysis** (the `ci.yml` scan
+  step on the `lts/*` leg): **Automatic Analysis must stay DISABLED** in
+  the project's Administration settings. If it is on, the CI scanner
+  aborts with `exit 3` ("running CI analysis while Automatic Analysis is
+  enabled") and fails the required `Test (Node lts/*)` leg — and
+  autoscan miscategorizes the `S2245` `Math.random` jitter in
+  `retry-backoff.ts` as a _vulnerability_ (quality gate red) instead of
+  the reviewable _hotspot_ the CI scanner raises. That hotspot is marked
+  SAFE in the dashboard with the documented "retry timing is not
+  security-sensitive" rationale (mirrors melcloud-api).
 - Dependabot PRs auto-merge via `gh pr merge --auto`; the `merge_group`
   triggers in the workflows are inert but harmless (user-owned repo,
   merge queue is org-only).
