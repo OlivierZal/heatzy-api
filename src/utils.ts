@@ -18,6 +18,20 @@ export const isKeyOf =
     Object.hasOwn(record, key)
 
 /**
+ * Clamp `value` into the inclusive `[range.min, range.max]` range.
+ * @param value - Candidate value, possibly outside the bounds.
+ * @param range - Inclusive bounds.
+ * @param range.max - Upper bound (inclusive).
+ * @param range.min - Lower bound (inclusive).
+ * @returns `value`, clamped to `[range.min, range.max]`.
+ * @category Utilities
+ */
+export const clampToRange = (
+  value: number,
+  range: { max: number; min: number },
+): number => Math.min(Math.max(value, range.min), range.max)
+
+/**
  * Build the control attributes that set a target temperature, in the
  * register layout the product generation expects: Glow splits the
  * value across `tempH`/`tempL` (hundreds bit + remainder in tenths),

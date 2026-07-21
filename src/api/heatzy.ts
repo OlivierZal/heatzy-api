@@ -590,6 +590,9 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
     url: string,
     config: Record<string, unknown> = {},
   ): Promise<HttpResponse<T>> {
+    // No heatzy endpoint sends per-call headers, so auth headers are
+    // the only ones — a config.headers merge would be an uncovered
+    // dead branch (see the melcloud dispatch for the general form).
     const requestConfig = {
       ...config,
       headers: this.#getAuthHeaders(),
