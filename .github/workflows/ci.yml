@@ -1,0 +1,69 @@
+concurrency:
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ci-${{ github.ref }}
+jobs:
+  check:
+    name: Check
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-node-and-install
+        with:
+          node-version: lts/*
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format
+      - run: npm run docs
+      - run: npm run lint:package
+    timeout-minutes: 15
+  test:
+    # `latest` tracks brand-new Node releases; continue-on-error keeps
+    # the workflow run green when that leg breaks. The check run itself
+    # still reports failure, so keep `Test (Node latest)` out of the
+    # required status checks or it will still block merges.
+    continue-on-error: ${{ matrix.node-version == 'latest' }}
+    env:
+      # Job-level so the Sonar step's `if` can self-arm on it — the
+      # `secrets` context is not available in step conditions.
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    name: Test (Node ${{ matrix.node-version }})
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup-node-and-install
+        with:
+          node-version: ${{ matrix.node-version }}
+      # Coverage (and the Sonar upload that consumes it) runs once, on
+      # the current-LTS leg — modern yet stable, and always blocking, so
+      # the quality gate cannot be skipped silently. Other legs just run
+      # the suite, and the condition needs no update when the `engines`
+      # floor moves.
+      - if: matrix.node-version == 'lts/*'
+        run: npm test -- --coverage
+      - if: matrix.node-version != 'lts/*'
+        run: npm test
+      # Self-armed on the secret: until SONAR_TOKEN is provisioned the
+      # upload skips instead of failing the leg.
+      - if: matrix.node-version == 'lts/*' && env.SONAR_TOKEN != '' && (github.event_name == 'push' || (github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository))
+        uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, latest, lts/*]
+    timeout-minutes: 20
+name: CI
+on:
+  merge_group: {}
+  pull_request: {}
+  push:
+    branches: [main]
+permissions: {}

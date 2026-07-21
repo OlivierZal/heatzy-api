@@ -1,12 +1,12 @@
 {
   "name": "@olivierzal/heatzy-api",
-  "version": "9.0.0",
+  "version": "10.0.0",
   "description": "Heatzy API for Node.js",
   "keywords": [
     "heatzy",
     "api"
   ],
-  "homepage": "https://github.com/OlivierZal/heatzy-api#readme",
+  "homepage": "https://olivierzal.github.io/heatzy-api/",
   "bugs": {
     "url": "https://github.com/OlivierZal/heatzy-api/issues"
   },
@@ -14,54 +14,73 @@
     "type": "git",
     "url": "git+https://github.com/OlivierZal/heatzy-api.git"
   },
-  "license": "ISC",
+  "license": "MIT",
   "author": "Olivier Zalmanski",
   "sideEffects": false,
   "type": "module",
   "exports": {
-    ".": "./dist/main.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
-  "types": "dist/main.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist",
     "src"
   ],
   "scripts": {
-    "build": "tsc",
-    "docs": "typedoc && npm run format:docs",
+    "build": "node ./node_modules/@typescript/native/bin/tsc --project tsconfig.build.json",
+    "docs": "typedoc",
     "format": "prettier . --check",
-    "format:docs": "prettier README.md --ignore-path --write",
     "format:fix": "prettier . --write",
-    "lint": "eslint .",
+    "lint": "node --max-old-space-size=8192 ./node_modules/eslint/bin/eslint.js .",
     "lint:fix": "npm run lint -- --fix",
-    "prepare": "npm run docs && npm run lint:fix && npm run format:fix && npm run build"
+    "lint:package": "npm run build && publint --strict",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run typecheck && npm run lint && npm run format && npm run docs",
+    "test": "vitest run",
+    "test:coverage": "npm test -- --coverage",
+    "test:update": "npm test -- --update",
+    "typecheck": "node ./node_modules/@typescript/native/bin/tsc --noEmit"
   },
   "dependencies": {
-    "axios": "^1.18.1",
-    "https": "^1.0.0",
-    "luxon": "^3.7.2",
-    "source-map-support": "^0.5.21"
+    "temporal-polyfill": "^1.0.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@eslint/json": "^2.0.1",
+    "@eslint/markdown": "^8.0.3",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@types/luxon": "^3.7.2",
+    "@swc/core": "^1.15.43",
     "@types/node": "^26.1.1",
-    "@typescript/native-preview": "^7.0.0-dev.20260707.2",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/eslint-plugin": "^1.6.23",
     "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-jsdoc": "^63.0.13",
     "eslint-plugin-package-json": "^1.6.0",
     "eslint-plugin-perfectionist": "^5.10.0",
     "eslint-plugin-unicorn": "^72.0.0",
     "eslint-plugin-yml": "^3.6.0",
+    "jiti": "^2.7.0",
     "jsonc-eslint-parser": "^3.1.0",
     "prettier": "^3.9.5",
     "prettier-plugin-packagejson": "^3.0.2",
+    "publint": "^0.3.21",
     "typedoc": "^0.28.20",
-    "typedoc-plugin-markdown": "^4.12.0",
-    "typescript": "^7.0.2",
-    "typescript-eslint": "^8.64.0"
+    "typedoc-plugin-coverage": "^4.0.3",
+    "typedoc-plugin-mdn-links": "^5.1.1",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.65.0",
+    "unplugin-swc": "^1.5.9",
+    "vitest": "^4.1.7"
+  },
+  "engines": {
+    "node": ">=22.19.0"
   }
 }

@@ -1,0 +1,41 @@
+concurrency:
+  cancel-in-progress: false
+  group: pages
+jobs:
+  build:
+    name: Build docs
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-node-and-install
+      - run: npm run build
+      - run: npm run docs
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9
+        with:
+          path: docs
+    timeout-minutes: 15
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    name: Deploy docs
+    needs: build
+    permissions:
+      id-token: write
+      pages: write
+    runs-on: ubuntu-24.04
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128
+    timeout-minutes: 10
+name: Generate & deploy docs
+on:
+  release:
+    types: [published]
+  workflow_dispatch: {}
+permissions: {}
