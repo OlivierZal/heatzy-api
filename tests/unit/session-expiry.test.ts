@@ -1,0 +1,53 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { isSessionExpired } from '../../src/resilience/session-expiry.ts'
+import { Temporal } from '../../src/temporal.ts'
+import { mockTemporalNowInstant } from '../helpers.ts'
+
+describe(isSessionExpired, () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(
+      Temporal.Instant.from('2026-04-11T12:00:00Z').epochMilliseconds,
+    )
+    mockTemporalNowInstant()
+  })
+
+  afterEach(() => {
+    vi.mocked(Temporal.Now.instant).mockRestore()
+    vi.useRealTimers()
+  })
+
+  it('returns false for an empty string (no expiry recorded yet)', () => {
+    expect(isSessionExpired('')).toBe(false)
+  })
+
+  it('returns false for a valid ISO date in the future', () => {
+    expect(isSessionExpired('2026-04-11T13:00:00Z')).toBe(false)
+  })
+
+  it('returns true for a valid ISO date in the past', () => {
+    expect(isSessionExpired('2026-04-11T11:00:00Z')).toBe(true)
+  })
+
+  it('returns true for an unparseable value (corruption self-heals)', () => {
+    expect(isSessionExpired('not-a-valid-iso-date')).toBe(true)
+  })
+
+  it('returns true for the literal string "Invalid Date"', () => {
+    expect(isSessionExpired('Invalid Date')).toBe(true)
+  })
+
+  it('returns false when exactly equal to now (strict past comparison)', () => {
+    expect(isSessionExpired('2026-04-11T12:00:00Z')).toBe(false)
+  })
+
+  it('parses ISO timestamps without explicit timezone offset', () => {
+    // Offset-less inputs are interpreted in the runtime's system
+    // timezone (or the optional `zone` argument). The Heatzy client
+    // persists `expiry` as an offset-bearing ISO instant, so this
+    // branch only guards externally-edited or legacy stored values.
+    expect(isSessionExpired('2030-12-31T00:00:00')).toBe(false)
+    expect(isSessionExpired('2020-01-01T00:00:00')).toBe(true)
+  })
+})
