@@ -3,6 +3,7 @@ import {
   Mode,
   TEMPERATURE_SCALE,
 } from '../constants.ts'
+import { clampToRange } from '../utils.ts'
 import { DeviceV2Facade } from './device-v2.ts'
 
 const COMFORT_RANGE = { max: 30, min: 15 } as const
@@ -60,8 +61,10 @@ export class DeviceGlowFacade extends DeviceV2Facade {
   protected getTargetTemperature(
     mode: typeof Mode.comfort | typeof Mode.eco,
   ): number {
-    const { max, min } = mode === Mode.comfort ? COMFORT_RANGE : ECO_RANGE
-    return Math.max(Math.min(this.getTemperature(mode), max), min)
+    return clampToRange(
+      this.getTemperature(mode),
+      mode === Mode.comfort ? COMFORT_RANGE : ECO_RANGE,
+    )
   }
 
   // Glow encodes temperatures across two registers: `tempH` carries

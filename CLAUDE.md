@@ -63,6 +63,15 @@ Architecture, toolchain and process are aligned on the sibling
   rejected sign-ins.
 - **No `logLabel`**: a single client — nothing to disambiguate in logs.
 - **Single `.` export**: one dialect → no `/classic`-style subpaths.
+- **No `NoChangesError`**: an empty/no-op `setValues` resolves silently
+  (V1 returns `{}`, V2+ skips the wire call) and still fires the sync
+  notification. melcloud throws `NoChangesError` on an empty payload, but
+  here the app-side `#sendUpdate` already guards on
+  `Object.keys(updateData).length > 0` before calling, so no real caller
+  hits the empty path — adding the error would be untested machinery.
+- **No per-call header merge in `#dispatch`**: no Gizwits endpoint sends
+  custom per-call headers, so `#dispatch` writes only the auth headers;
+  melcloud's `configHeaders` merge would be a dead, uncovered branch here.
 
 ## Lint doctrine
 
