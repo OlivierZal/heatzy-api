@@ -1,12 +1,11 @@
+export { DeviceGlowFacade } from './device-glow.ts'
+export { DeviceProFacade } from './device-pro.ts'
+export { DeviceV2Facade } from './device-v2.ts'
+export { DeviceFacade } from './device.ts'
+export { FacadeManager } from './manager.ts'
 export {
-  type IDeviceFacade,
-  type IDeviceFacadeAny,
-  type IDeviceGlowFacade,
-  type IDeviceProFacade,
-  type IDeviceV2Facade,
-  type IFacadeManager,
+  type DeviceFacadeAny,
   supportsGlow,
   supportsPro,
   supportsV2,
-} from './interfaces.ts'
-export { FacadeManager } from './manager.ts'
+} from './types.ts'

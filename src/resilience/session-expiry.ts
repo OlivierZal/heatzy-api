@@ -1,0 +1,67 @@
+import { Temporal } from '../temporal.ts'
+
+// `offset: 'use'` keeps offset-bearing inputs (`Z`, `±HH:MM`, `±HHMM`)
+// at their absolute instant while offset-less inputs adopt `zone`.
+const toInstant = (
+  expiry: string,
+  zone: string | undefined,
+): Temporal.Instant =>
+  Temporal.ZonedDateTime.from(
+    `${expiry}[${zone ?? Temporal.Now.timeZoneId()}]`,
+    { offset: 'use' },
+  ).toInstant()
+
+const parseToInstant = (
+  expiry: string,
+  zone: string | undefined,
+): Temporal.Instant | null => {
+  try {
+    return toInstant(expiry, zone)
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Check whether an ISO 8601 expiry timestamp has passed or is malformed.
+ *
+ * Semantics:
+ * - Empty string → `false` (no expiry recorded yet, e.g. fresh instance)
+ * - Unparseable value → `true` (defensive: corruption is treated as expired
+ *   so the caller reauthenticates instead of silently trusting stale state)
+ * - Valid ISO date in the past → `true`
+ * - Valid ISO date in the future → `false` (subject to `aheadMs` below)
+ *
+ * Pre-emptive refresh: pass `aheadMs > 0` to treat a token as expired
+ * while it still has that much lifetime left. This lets `ensureSession`
+ * renew the session **before** the real expiry tick, so no request
+ * ever pays the full re-auth round-trip in its critical path. The
+ * common value is 5 minutes (`5 * 60 * 1000`).
+ *
+ * Offset-less ISO strings are interpreted in the supplied `zone`
+ * (without one, the runtime's system timezone is used); strings with
+ * an explicit `Z` or `±HH:MM` offset are parsed as absolute
+ * `Temporal.Instant`s, ignoring `zone`. The Heatzy client persists
+ * expiry as an offset-bearing ISO instant, so the zone never applies.
+ * @param expiry - ISO 8601 expiry timestamp (or empty string).
+ * @param aheadMs - Consider the session expired `aheadMs` milliseconds
+ * before its real expiry (default 0 = real expiry).
+ * @param zone - IANA timezone for offset-less inputs; defaults to the
+ * runtime system zone.
+ * @returns `true` if the expiry is past (or within `aheadMs`) or cannot be parsed, `false` otherwise.
+ */
+export const isSessionExpired = (
+  expiry: string,
+  aheadMs = 0,
+  zone?: string,
+): boolean => {
+  if (expiry === '') {
+    return false
+  }
+  const parsed = parseToInstant(expiry, zone)
+  if (parsed === null) {
+    return true
+  }
+  const threshold = Temporal.Now.instant().add({ milliseconds: aheadMs })
+  return Temporal.Instant.compare(parsed, threshold) < 0
+}

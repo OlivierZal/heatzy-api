@@ -1,43 +1,71 @@
-import type { IDeviceModel } from '../models/index.ts'
-import type { IAPI } from '../services/index.ts'
-
-import { Product } from '../enums.ts'
-
-import type { IDeviceFacadeAny, IFacadeManager } from './interfaces.ts'
-
+import type { HeatzyAPIAdapter } from '../api/types.ts'
+import type { Device } from '../entities/index.ts'
+import { Product } from '../constants.ts'
+import type { DeviceFacadeAny } from './types.ts'
 import { DeviceGlowFacade } from './device-glow.ts'
 import { DeviceProFacade } from './device-pro.ts'
 import { DeviceV2Facade } from './device-v2.ts'
 import { DeviceFacade } from './device.ts'
 
-export class FacadeManager implements IFacadeManager {
-  public readonly api: IAPI
+const createFacade = (
+  api: HeatzyAPIAdapter,
+  device: Device,
+): DeviceFacadeAny => {
+  switch (device.product) {
+    case Product.glow: {
+      return new DeviceGlowFacade(api, device)
+    }
+    case Product.pro: {
+      return new DeviceProFacade(api, device)
+    }
+    case Product.v1: {
+      return new DeviceFacade(api, device)
+    }
+    case Product.v2:
+    case Product.v4: {
+      return new DeviceV2Facade(api, device)
+    }
+  }
+}
 
-  readonly #facades = new Map<string, IDeviceFacadeAny>()
+/**
+ * Lazily creates and caches facade instances using a WeakMap keyed by
+ * entity reference. Ensures each registry entity maps to exactly one
+ * facade throughout its lifetime.
+ * @category Facades
+ */
+export class FacadeManager {
+  readonly #api: HeatzyAPIAdapter
 
-  public constructor(api: IAPI) {
-    this.api = api
+  readonly #facades = new WeakMap<Device, DeviceFacadeAny>()
+
+  /**
+   * Builds a facade manager bound to the given API client; facades it
+   * returns share that reference.
+   * @param api - Heatzy API client.
+   */
+  public constructor(api: HeatzyAPIAdapter) {
+    this.#api = api
   }
 
+  /**
+   * Returns the cached facade for the given entity, lazily creating
+   * one on first access; passing `undefined` returns `null`.
+   * @param instance - Registry entity to wrap, or `undefined`.
+   * @returns The facade, or `null` when no instance was supplied.
+   */
+  public get(instance: Device): DeviceFacadeAny
   public get(): null
-  public get(instance: IDeviceModel): IDeviceFacadeAny
-  public get(instance?: IDeviceModel): IDeviceFacadeAny | null {
-    if (instance) {
-      const { id, product } = instance
-      if (!this.#facades.has(id)) {
-        this.#facades.set(
-          id,
-          new {
-            [Product.glow]: DeviceGlowFacade,
-            [Product.pro]: DeviceProFacade,
-            [Product.v1]: DeviceFacade,
-            [Product.v2]: DeviceV2Facade,
-            [Product.v4]: DeviceV2Facade,
-          }[product](this.api, instance),
-        )
-      }
-      return this.#facades.get(id) ?? null
+  public get(instance?: Device): DeviceFacadeAny | null
+  public get(instance?: Device): DeviceFacadeAny | null {
+    if (instance === undefined) {
+      return null
     }
-    return null
+    let facade = this.#facades.get(instance)
+    if (facade === undefined) {
+      facade = createFacade(this.#api, instance)
+      this.#facades.set(instance, facade)
+    }
+    return facade
   }
 }
