@@ -277,16 +277,15 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   }
 
   /**
-   * Sign in with explicit credentials. Throws
-   * {@link AuthenticationError} on rejection (Gizwits answers HTTP 400
-   * with error codes in the body). Successful return guarantees the
-   * registry reflects server state — the post-auth sync is enforced
-   * here.
+   * Sign in with explicit credentials. Refused credentials come back as
+   * Gizwits HTTP 400 with error codes in the body. Successful return
+   * guarantees the registry reflects server state — the post-auth sync
+   * is enforced here.
    *
    * Use {@link resumeSession} for a best-effort restore from persisted
    * credentials that logs + swallows errors.
    * @param credentials - Explicit username/password.
-   * @throws {AuthenticationError} when credentials are rejected.
+   * @throws {@link AuthenticationError} when credentials are rejected.
    */
   public async authenticate(credentials: LoginCredentials): Promise<void> {
     const epoch = this.#logOutEpoch
