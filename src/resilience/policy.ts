@@ -4,9 +4,7 @@
  * Each policy owns exactly one concern (rate-limiting, auth retry,
  * transient-error retry…) and wraps the caller's `attempt` with its
  * own semantics. Policies are **composed** via {@link CompositePolicy}
- * to build the request pipeline declaratively, replacing the prior
- * inline `makeRequestAttempt` chain whose stages were tangled across
- * `BaseAPI.request`, `makeRequestAttempt`, and `runWithEvents`.
+ * to build the request pipeline declaratively.
  *
  * Implementations MUST:
  * - run the caller's `attempt` at most once per `run` invocation per
@@ -25,10 +23,9 @@ export interface ResiliencePolicy {
  * array is the **outermost** wrapper — it sees the request before any
  * inner policy gets to decorate it, and sees the result last.
  *
- * Example: `new CompositePolicy([rate, auth, transient]).run(fetch)`
- * runs as `rate(auth(transient(fetch)))`. A transient 5xx is retried
- * first; a 401 on the last attempt triggers auth-retry; a 429 in any
- * branch hits the rate-limit gate outermost.
+ * Example: `new CompositePolicy([auth, transient]).run(fetch)` runs as
+ * `auth(transient(fetch))`: a transient 5xx is retried first; an auth
+ * failure once the inner retries give up triggers the outer auth-retry.
  *
  * An empty composite is a no-op pass-through.
  */

@@ -2,9 +2,9 @@
  * Minimal structural shape required by the API call loggers.
  *
  * Both `HttpRequestConfig` (used internally by `HttpClient.request`)
- * and Home's literal request config (built inside `#dispatch`) satisfy
- * this contract structurally — no double type assertion is needed at
- * the call site, and the transport stays free to evolve.
+ * and the literal request config `HeatzyAPI` builds in `#dispatch`
+ * satisfy this contract structurally — no double type assertion is
+ * needed at the call site, and the transport stays free to evolve.
  */
 export interface LoggableRequestConfig {
   readonly data?: unknown
@@ -47,10 +47,6 @@ const isSensitive = (key: string): boolean =>
 // body and contains at least one sensitive key (e.g. `password=...`).
 // Returns the redacted form, or `undefined` when nothing was redacted so
 // the caller can keep the original value untouched.
-//
-// Required because Home's `#submitCredentials()` posts credentials as a
-// URLSearchParams string, and the object-key redaction below otherwise
-// passes the entire body through verbatim.
 const redactFormEncoded = (value: string): string | undefined => {
   if (!value.includes('=')) {
     return undefined

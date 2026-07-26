@@ -3,9 +3,8 @@ import { APIError } from './base.ts'
 /**
  * Thrown when a runtime validator (Zod, in this SDK) rejects an
  * upstream response. The `context` field surfaces which boundary the
- * payload came from (e.g. `'BFF /context'`, `'ClientLogin3'`,
- * `'OIDC token endpoint'`) so consumer dashboards can group drift
- * alerts without parsing the message string.
+ * payload came from (e.g. `'login'`, `'GET /bindings'`) so consumer
+ * dashboards can group drift alerts without parsing the message string.
  *
  * The underlying `ZodError` (or any other validator error) is attached
  * through the standard `cause` chain.

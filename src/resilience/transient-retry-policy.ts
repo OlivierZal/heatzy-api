@@ -18,8 +18,8 @@ export interface RetryTelemetry {
  *
  * This policy only makes sense on idempotent verbs (typically GET):
  * retrying a POST that may have landed server-side is a duplicate
- * write in disguise. `BaseAPI.request` gates application of this
- * policy accordingly; the policy itself is neutral about method.
+ * write in disguise. `HeatzyAPI` applies it to GET requests only;
+ * the policy itself is neutral about method.
  *
  * Ownership: transient 5xx. Non-transient 5xx (e.g., 500) or any
  * other error propagates untouched on the first failure — no retry.

@@ -47,9 +47,7 @@ export const isTransientServerError = (error: unknown): boolean => {
 
 /**
  * Default transient-retry budget used by the client's GET-only
- * requests. Keeping these in
- * one place prevents drift: if we decide to tune the upper bound or
- * jitter ratio, we update a single constant instead of two.
+ * requests.
  */
 export const DEFAULT_TRANSIENT_RETRY_OPTIONS: Pick<
   RetryBackoffOptions,
@@ -149,11 +147,8 @@ export const withRetryBackoff = async <T>(
   operation: () => Promise<T>,
   options: RetryBackoffOptions,
 ): Promise<T> => {
-  // Recursive shape (over a loop) makes the sequential nature of each
-  // attempt structural: every retry strictly awaits the previous
-  // attempt's settlement and the backoff delay before the next call.
-  // Also gives the function a single, type-checked exit — no need for
-  // an unreachable post-loop throw.
+  // Recursive over a loop: a single type-checked exit — no unreachable
+  // post-loop throw.
   const attempt = async (number: number): Promise<T> => {
     try {
       return await operation()
