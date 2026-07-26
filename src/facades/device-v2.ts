@@ -19,8 +19,8 @@ export class DeviceV2Facade extends DeviceFacade {
     if (derogationEndDate === null || derogationMode === DerogationMode.off) {
       return null
     }
-    return derogationMode === DerogationMode.vacation ?
-        derogationEndDate.toLocaleString(this.api.locale, {
+    return derogationMode === DerogationMode.vacation
+      ? derogationEndDate.toLocaleString(this.api.locale, {
           day: 'numeric',
           hour: '2-digit',
           hourCycle: 'h23',

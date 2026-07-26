@@ -90,11 +90,9 @@ export class Device {
    * @returns The derogation end date, or `null`.
    */
   public get derogationEndDate(): Temporal.ZonedDateTime | null {
-    return (
-        this.#derogationEnd !== null &&
-          Temporal.ZonedDateTime.compare(this.#derogationEnd, this.#now()) > 0
-      ) ?
-        this.#derogationEnd
+    return this.#derogationEnd !== null &&
+      Temporal.ZonedDateTime.compare(this.#derogationEnd, this.#now()) > 0
+      ? this.#derogationEnd
       : null
   }
 
@@ -191,9 +189,8 @@ export class Device {
     newCurrentMode,
   }: DerogationTransition): void {
     if (newCurrentMode !== undefined && newCurrentMode !== currentMode) {
-      this.#derogationEnd =
-        isPresenceCountdownMode(newCurrentMode) ?
-          this.#now().add({ minutes: PRESENCE_END_MINUTES[newCurrentMode] })
+      this.#derogationEnd = isPresenceCountdownMode(newCurrentMode)
+        ? this.#now().add({ minutes: PRESENCE_END_MINUTES[newCurrentMode] })
         : null
     }
   }

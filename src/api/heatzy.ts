@@ -83,13 +83,13 @@ const DEFAULT_AUTH_RETRY_COOLDOWN_MS = 1000
 const LOGIN_BACKOFF_FAILURE_MS = 900_000
 
 const buildTransport = (transport: TransportConfig | undefined): HttpClient =>
-  transport instanceof HttpClient ? transport : (
-    new HttpClient({
-      baseURL: API_BASE_URL,
-      headers: { [APPLICATION_ID_HEADER]: APPLICATION_ID },
-      timeout: transport?.timeoutMs ?? DEFAULT_TIMEOUT_MS,
-    })
-  )
+  transport instanceof HttpClient
+    ? transport
+    : new HttpClient({
+        baseURL: API_BASE_URL,
+        headers: { [APPLICATION_ID_HEADER]: APPLICATION_ID },
+        timeout: transport?.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+      })
 
 /**
  * Narrow a login rejection surfaced by the HTTP client into the shared
@@ -101,15 +101,13 @@ const buildTransport = (transport: TransportConfig | undefined): HttpClient =>
  * @returns An {@link AuthenticationError} for a 400/401 `HttpError`; `null` otherwise.
  */
 export const toAuthFailure = (error: unknown): AuthenticationError | null =>
-  (
-    isHttpError(error) &&
-    (error.response.status === HttpStatus.BadRequest ||
-      error.response.status === HttpStatus.Unauthorized)
-  ) ?
-    new AuthenticationError('Heatzy rejected the credentials', {
-      cause: error,
-    })
-  : null
+  isHttpError(error) &&
+  (error.response.status === HttpStatus.BadRequest ||
+    error.response.status === HttpStatus.Unauthorized)
+    ? new AuthenticationError('Heatzy rejected the credentials', {
+        cause: error,
+      })
+    : null
 
 /**
  * Heatzy (Gizwits) API client. Handles authentication, session
@@ -791,9 +789,9 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   ): Promise<T> {
     const { schema, ...config } = options
     const { data } = await this.#request<T>(method, url, config)
-    return schema === undefined ? data : (
-        parseOrThrow(schema, data, `${method.toUpperCase()} ${url}`)
-      )
+    return schema === undefined
+      ? data
+      : parseOrThrow(schema, data, `${method.toUpperCase()} ${url}`)
   }
 
   #resolvePersistedCredentials(): LoginCredentials | null {
