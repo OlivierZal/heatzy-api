@@ -67,10 +67,7 @@ const DEFAULT_SYNC_INTERVAL_MINUTES = 5
 const DEFAULT_TIMEOUT_MS = 30_000
 
 // Cool-down between consecutive auth-retry consumptions on the same
-// RetryGuard. Hardcoded because no caller has ever needed to tune it —
-// the value carries over from the field-proven Axios interceptor's
-// retry window, and adjusting it is more likely to mask bugs than
-// reflect a real product need.
+// RetryGuard. Deliberately hardcoded — no caller has needed to tune it.
 const DEFAULT_AUTH_RETRY_COOLDOWN_MS = 1000
 
 // Automatic re-login backoff after a REJECTED sign-in: hammering the
@@ -153,10 +150,6 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
 
   readonly #api: HttpClient
 
-  // Policy instances are created once in the constructor and reused
-  // for every request. Stateless w.r.t. individual calls — the shared
-  // state (retry guard) lives in the policy's injected dependencies,
-  // not in the policy itself.
   readonly #authRetryPolicy: AuthRetryPolicy
 
   // The config slice consulted after construction (shutdown signal,
@@ -175,11 +168,8 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   // sign-out always wins over work it overlapped.
   #logOutEpoch = 0
 
-  // Single in-flight refresh handle. Set when the first `#ensureSession`
-  // call detects an expired session, cleared when the refresh resolves
-  // (success or failure). Subsequent concurrent callers await the same
-  // promise instead of each triggering their own round-trip — prevents
-  // the thundering-herd pattern on token expiry.
+  // Single in-flight session refresh — deduplication semantics on
+  // `#ensureSession`.
   #refreshPromise: Promise<void> | null = null
 
   readonly #registry: DeviceRegistry

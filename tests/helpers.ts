@@ -62,12 +62,7 @@ export function mock(value: unknown = {}): unknown {
 
 /**
  * Spin up an `HttpClient` instance and a Vitest spy on its `request`
- * method in one call. Centralises the four-file duplication of
- *
- *     const client = new HttpClient({ baseURL, timeout: 30_000 })
- *     const requestSpy = vi.spyOn(client, 'request')
- *
- * so tests can do `const { client, requestSpy } = createMockHttpClient(url)`.
+ * method in one call.
  * @param baseURL - Base URL forwarded to the underlying HttpClient.
  * @returns The wired client + a spy on `request`.
  */

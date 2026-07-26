@@ -49,9 +49,9 @@ const typeLikeSortOptions = {
 
 const config = defineConfig([
   {
-    // `scripts/` holds one-shot wire probes committed as dated evidence
-    // artifacts (cited from CLAUDE.md), not shipped code — they stay
-    // outside the lint scope by decision, like the build outputs.
+    // `scripts/` holds gitignored one-shot wire probes, not shipped
+    // code — they stay outside the lint scope by decision, like the
+    // build outputs.
     ignores: ['coverage/', 'dist/', 'docs/', 'scripts/'],
   },
   {
@@ -773,9 +773,9 @@ const config = defineConfig([
       'unicorn/no-non-function-verb-prefix': 'error',
       // Unaware of `Symbol.dispose`.
       'unicorn/no-nonstandard-builtin-properties': 'off',
-      // The MELCloud wire speaks `null` (`LoginData: null` on rejected
-      // credentials, group "leave unchanged" sentinels) — banning null
-      // literals fights the domain.
+      // The Gizwits wire speaks `null` (`detail_message`/`error_message`
+      // in error bodies) and `SettingManager.get` returns it — banning
+      // null literals fights the domain.
       'unicorn/no-null': 'off',
       // Owned by `@typescript-eslint/no-unnecessary-boolean-literal-compare`.
       'unicorn/no-unnecessary-boolean-comparison': 'off',

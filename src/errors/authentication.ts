@@ -1,8 +1,8 @@
 import { APIError } from './base.ts'
 
 /**
- * The server rejected the credentials, the login form could not be
- * parsed, or the reactive re-authentication after a 401 failed.
+ * The server rejected the credentials (Gizwits answers HTTP 400 or 401
+ * on the login path).
  * @category Errors
  */
 export class AuthenticationError extends APIError {

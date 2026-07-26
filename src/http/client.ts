@@ -1,10 +1,5 @@
 import { HttpError } from './errors.ts'
 
-// `fetch()` in Node 22+ accepts `dispatcher` (undici-specific). We import
-// the type from undici-types (the copy bundled with @types/node that
-// Node's `fetch()` declaration uses) so passing a dispatcher
-// instantiated from the `undici` runtime package remains structurally
-// compatible with what fetch expects.
 type FetchBody = NonNullable<FetchInit['body']>
 
 // `Dispatcher` is defined both in the `undici` npm package and in
@@ -35,10 +30,9 @@ export interface HttpClientConfig {
 }
 
 /**
- * Configuration accepted by {@link HttpClient.request}.
- *
- * Intentionally mirrors the subset of the Axios request config that the
- * library relied on, so call sites migrate verbatim.
+ * Configuration accepted by {@link HttpClient.request}. Field names
+ * intentionally mirror the Axios request-config subset (`data`,
+ * `params`…).
  * @category HTTP
  */
 export interface HttpRequestConfig {
@@ -64,7 +58,7 @@ export interface HttpResponse<T = unknown> {
 
 // Join relative `url` onto `baseURL`. `new URL(absolutePath, base)` follows
 // RFC 3986 and replaces base's path entirely — which drops any prefix like
-// `/Mitsubishi.Wifi.Client` from `baseURL`. Strip the leading slash so the
+// `/app` from `baseURL`. Strip the leading slash so the
 // URL constructor treats it as a relative segment and concatenates.
 const resolveUrl = (baseURL: string, url: string | undefined): string => {
   if (url === undefined || url === '') {
@@ -140,11 +134,11 @@ const readHeaders = (headers: Headers): Record<string, string | string[]> => {
   return result
 }
 
-// Try JSON first, fall back to text. Axios auto-parses bodies by default —
-// content-type from upstream can be absent or a JSON variant the strict
-// `application/json` substring misses (e.g. `text/json`, `application/problem+json`).
-// Matching on parseability keeps those callers working without a content-type
-// allowlist that drifts with every new server flavour.
+// Try JSON first, fall back to text: the upstream content-type can be
+// absent or a JSON variant a strict `application/json` substring match
+// misses (e.g. `text/json`, `application/problem+json`). Matching on
+// parseability avoids a content-type allowlist that drifts with every
+// new server flavour.
 const parseBody = async (response: Response): Promise<unknown> => {
   if (
     response.status === NULL_BODY_STATUS ||
@@ -182,7 +176,7 @@ const combineSignals = (
  * Thin fetch-based HTTP client used internally by the SDK.
  *
  * Returns a normalised `{ data, status, headers }` response and
- * throws {@link HttpError} on non-2xx — so retry/rate-limit/observability
+ * throws {@link HttpError} on non-2xx — so the retry and observability
  * layers stay unchanged when the transport is swapped.
  * @category HTTP
  */

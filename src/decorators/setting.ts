@@ -26,7 +26,7 @@ const setting = (
       const { settingManager } = this
       if (settingManager !== undefined) {
         // An empty string is the cleared sentinel for every persisted
-        // field (credentials, tokens, context key, expiry): delete the
+        // field (credentials, token, expiry, login backoff): delete the
         // key outright when the host delegates `unset`, so a logout
         // leaves no empty leftovers. `get` falls back to the accessor's
         // own `''` default when the key is absent, so this reads back

@@ -1,7 +1,6 @@
 /**
  * Shared time unit constants. Single source of truth so callers don't
- * recompute (or worse, redefine with subtly different names like
- * `MILLISECONDS_IN_SECOND` vs `MILLISECONDS_PER_SECOND`).
+ * recompute or redefine them.
  */
 
 /** Number of milliseconds in one second. */
