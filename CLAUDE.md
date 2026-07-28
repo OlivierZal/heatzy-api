@@ -85,6 +85,15 @@ fire-and-forget `.catch()`, and the single-flight `.finally()` in
 `#ensureSession`. `src/temporal.ts` is the only sanctioned
 `temporal-polyfill` entry point.
 
+- All-type exports hoist the keyword (`export type { A, B }`); mixed
+  exports keep inline `type` specifiers, mirroring the
+  inline-type-imports style. No shipped rule enforces the export side
+  (`consistent-type-exports` tolerates inline specifiers once present;
+  `import-x/consistent-type-specifier-style` covers imports only): the
+  convention is maintained by hand, in review — a bespoke
+  `no-restricted-syntax` selector for it was removed by decision
+  (2026-07-28).
+
 ## TypeScript & docs conventions
 
 - Tool ownership: prettier = formatting, perfectionist = all sorting,
