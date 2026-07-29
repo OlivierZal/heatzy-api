@@ -69,7 +69,7 @@
     "eslint-plugin-yml": "^3.6.0",
     "jiti": "^2.7.0",
     "jsonc-eslint-parser": "^3.1.0",
-    "prettier": "^3.9.5",
+    "prettier": "^3.9.6",
     "prettier-plugin-packagejson": "^3.0.2",
     "publint": "^0.3.21",
     "typedoc": "^0.28.20",
