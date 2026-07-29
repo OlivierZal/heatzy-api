@@ -363,6 +363,48 @@ describe(HeatzyAPI, () => {
         Date.now() + LOGIN_BACKOFF_MS,
       )
     })
+
+    // The registry guarantee above is only worth as much as its failure
+    // mode: the post-auth sync must not resolve over a registry it could
+    // not build. A generation Heatzy ships after this SDK is the real
+    // case — `getProduct` throws on the unknown key.
+    it('rejects when the enforced post-auth sync cannot build the registry', async () => {
+      const { settingManager } = createSettingStore()
+      const api = await createApi({ settingManager })
+      mockWire({
+        bindings: [{ ...buildBinding(), product_key: 'unshipped-generation' }],
+      })
+
+      await expect(
+        api.authenticate({ password: 'secret', username: 'user@test.com' }),
+      ).rejects.toThrow('Invalid product: unshipped-generation')
+
+      // The sign-in half succeeded, so the session stands: the caller
+      // must see the sync failure, not a bogus credential problem.
+      expect(api.isAuthenticated()).toBe(true)
+      expect(api.registry.devices.getById('did-pro')).toBeUndefined()
+    })
+
+    it('reports a resume whose sign-in worked but whose sync failed as still authenticated', async () => {
+      const onAuthenticationLost = vi.fn<() => void>()
+      const { settingManager } = createSettingStore()
+      const api = await createApi({
+        events: { onAuthenticationLost },
+        settingManager,
+      })
+      settingManager.set('password', 'secret')
+      settingManager.set('username', 'user@test.com')
+      mockWire({
+        bindings: [{ ...buildBinding(), product_key: 'unshipped-generation' }],
+      })
+
+      await expect(api.resumeSession()).resolves.toBe(true)
+
+      // Prompting the user to sign in again over credentials that just
+      // worked would be the wrong signal entirely.
+      expect(onAuthenticationLost).not.toHaveBeenCalled()
+      expect(api.isAuthenticated()).toBe(true)
+    })
   })
 
   describe('automatic login backoff', () => {

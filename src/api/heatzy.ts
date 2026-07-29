@@ -244,27 +244,6 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   }
 
   /**
-   * Fetch all bindings and their live attributes, sync the device
-   * registry, and schedule the next auto-sync. Failures are logged
-   * and swallowed (the next cycle retries); the returned list is
-   * empty on failure.
-   * @returns The fetched `/bindings` entries.
-   */
-  @syncDevices
-  public async fetch(): Promise<readonly DeviceBinding[]> {
-    const epoch = this.#logOutEpoch
-    this.clearSync()
-    try {
-      return await this.#fetch()
-    } catch (error) {
-      this.logger.error('Failed to fetch devices:', error)
-      return []
-    } finally {
-      this.#settleSyncCycle(epoch)
-    }
-  }
-
-  /**
    * Sign in with explicit credentials. Refused credentials come back as
    * Gizwits HTTP 400 with error codes in the body. Successful return
    * guarantees the registry reflects server state — the post-auth sync
@@ -274,6 +253,10 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
    * credentials that logs + swallows errors.
    * @param credentials - Explicit username/password.
    * @throws {@link AuthenticationError} when credentials are rejected.
+   * @throws {@link ValidationError} — or whatever the post-auth sync
+   * raises — when the sign-in succeeded but the registry could not be
+   * populated. The guarantee above is the reason: resolving here would
+   * report success over an empty registry.
    */
   public async authenticate(credentials: LoginCredentials): Promise<void> {
     const epoch = this.#logOutEpoch
@@ -293,6 +276,25 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   /** Cancels any pending auto-sync timer; subsequent `setSyncInterval` or `fetch` calls re-arm it. */
   public clearSync(): void {
     this.#syncManager.clear()
+  }
+
+  /**
+   * Fetch all bindings and their live attributes, sync the device
+   * registry, and schedule the next auto-sync. Failures are logged
+   * and swallowed (the next cycle retries); the returned list is
+   * empty on failure and no sync notification fires. An empty list is
+   * indistinguishable from an account with no bindings, so a caller
+   * that needs to know the registry is current must not use this
+   * entry point — {@link authenticate} enforces its sync instead.
+   * @returns The fetched `/bindings` entries.
+   */
+  public async fetch(): Promise<readonly DeviceBinding[]> {
+    try {
+      return await this.#syncCycle()
+    } catch (error) {
+      this.logger.error('Failed to fetch devices:', error)
+      return []
+    }
   }
 
   /**
@@ -432,7 +434,11 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
       return true
     } catch (error) {
       this.logger.error('Session resume failed:', error)
-      return false
+      // Judge by the session, not by the throw: `authenticate` also
+      // rejects when the sign-in succeeded and its enforced sync then
+      // failed. Reporting that as a lost session would prompt the user
+      // to log back in over credentials that just worked.
+      return this.isAuthenticated()
     }
   }
 
@@ -493,6 +499,23 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
     return this.#requestData<Data>('post', `/control/${id}`, {
       data: postData,
     })
+  }
+
+  // The registry refresh both entry points share, without a
+  // best-effort guard: `fetch` downgrades a failure to a logged empty
+  // list, the post-auth path must not. Validation rejections, an
+  // unknown `product_key` and registry bugs all surface here, and they
+  // are permanent — retrying cannot clear them, so a sign-in that
+  // resolved over one would report success on an empty registry.
+  @syncDevices
+  async #syncCycle(): Promise<readonly DeviceBinding[]> {
+    const epoch = this.#logOutEpoch
+    this.clearSync()
+    try {
+      return await this.#fetch()
+    } finally {
+      this.#settleSyncCycle(epoch)
+    }
   }
 
   #applyCredentials(username?: string, password?: string): void {
@@ -677,7 +700,7 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
       return
     }
     this.#setLoginBackoffUntil(null)
-    await this.fetch()
+    await this.#syncCycle()
   }
 
   #getAuthHeaders(): Record<string, string> {
