@@ -14,7 +14,7 @@ import {
 } from '../constants.ts'
 import { syncDevices, updateDevice } from '../decorators/index.ts'
 import { AttributeNotFoundError } from '../errors/index.ts'
-import { isKeyOf } from '../utils.ts'
+import { isKeyOf, omitUndefined } from '../utils.ts'
 
 const isModeV1 = isKeyOf(modeToModeV1)
 
@@ -101,7 +101,10 @@ export class DeviceFacade {
   @syncDevices
   @updateDevice
   public async setValues(attributes: PostAttributes): Promise<PostAttributes> {
-    return this.control(attributes)
+    // Stripped at the single entry point: V1's `control` checks each key
+    // against `undefined` itself, but V2+ counts keys to decide whether
+    // anything reaches the wire — and `{ mode: undefined }` has one.
+    return this.control(omitUndefined(attributes))
   }
 
   /**
