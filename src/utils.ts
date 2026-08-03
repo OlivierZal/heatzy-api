@@ -18,6 +18,26 @@ export const isKeyOf =
     Object.hasOwn(record, key)
 
 /**
+ * Drop present-`undefined` keys from an attribute payload. The
+ * `PostAttributes` fields are declared `| undefined`, so JS and TS
+ * callers alike can hand over `{ mode: undefined }` — which must count
+ * as "nothing to send", not as one attribute. Mirrors melcloud-api's
+ * helper of the same name.
+ * @template T - Payload type whose entries are filtered.
+ * @param values - The candidate payload.
+ * @returns `values` without its `undefined`-valued keys.
+ * @category Utilities
+ */
+export function omitUndefined<T extends object>(values: T): T
+export function omitUndefined(
+  values: Record<string, unknown>,
+): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(values).filter(([, value]) => value !== undefined),
+  )
+}
+
+/**
  * Clamp `value` into the inclusive `[range.min, range.max]` range.
  * @param value - Candidate value, possibly outside the bounds.
  * @param range - Inclusive bounds.
