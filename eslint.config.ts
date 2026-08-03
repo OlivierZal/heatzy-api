@@ -1083,7 +1083,10 @@ const config: Config[] = defineConfig([
     },
   },
   {
+    // Scoped: without `files`, this block applied to every file and
+    // leaked its inert `yml/*` rules onto every `.ts`.
     extends: [ymlConfigs.standard, ymlConfigs.prettier],
+    files: ['**/*.{yaml,yml}'],
     rules: {
       'yml/file-extension': [
         'error',
