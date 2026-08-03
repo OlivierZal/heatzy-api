@@ -2,5 +2,6 @@
   "sonarlint.connectedMode.project": {
     "connectionId": "olivierzal",
     "projectKey": "OlivierZal_heatzy-api"
-  }
+  },
+  "typescript.native-preview.tsdk": "node_modules/@typescript/native"
 }
