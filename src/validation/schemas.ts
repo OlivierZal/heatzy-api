@@ -62,17 +62,23 @@ const DeviceBindingSchema = z.looseObject({
   product_name: z.string(),
 })
 
-/** `/bindings` response envelope. */
+/**
+ * `/bindings` response envelope.
+ */
 export const BindingsSchema: z.ZodType<Bindings> = z.looseObject({
   devices: z.array(DeviceBindingSchema),
 })
 
-/** `/devdata/{did}/latest` response envelope. */
+/**
+ * `/devdata/{did}/latest` response envelope.
+ */
 export const DeviceDataSchema: z.ZodType<DeviceData> = z.looseObject({
   attr: AttributesSchema,
 })
 
-/** `/login` response. */
+/**
+ * `/login` response.
+ */
 export const LoginDataSchema: z.ZodType<LoginData> = z.looseObject({
   expire_at: z.number(),
   token: z.string().min(1),

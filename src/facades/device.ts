@@ -26,10 +26,14 @@ const isModeV1 = isKeyOf(modeToModeV1)
  * @category Facades
  */
 export class DeviceFacade {
-  /** Wire `did` of the wrapped device. */
+  /**
+   * Wire `did` of the wrapped device.
+   */
   public readonly id: string
 
-  /** Product generation of the wrapped device. */
+  /**
+   * Product generation of the wrapped device.
+   */
   public readonly product: Product
 
   /**

@@ -273,7 +273,9 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
     await this.#finishLogin(epoch)
   }
 
-  /** Cancels any pending auto-sync timer; subsequent `setSyncInterval` or `fetch` calls re-arm it. */
+  /**
+   * Cancels any pending auto-sync timer; subsequent `setSyncInterval` or `fetch` calls re-arm it.
+   */
   public clearSync(): void {
     this.#syncManager.clear()
   }
@@ -442,7 +444,9 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
     }
   }
 
-  /** Releases the auto-sync timer and any retry-guard timers; the instance must not be reused after disposal. */
+  /**
+   * Releases the auto-sync timer and any retry-guard timers; the instance must not be reused after disposal.
+   */
   public [Symbol.dispose](): void {
     this.#syncManager[Symbol.dispose]()
     this.#retryGuard[Symbol.dispose]()

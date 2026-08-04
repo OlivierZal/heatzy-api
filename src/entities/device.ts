@@ -61,19 +61,29 @@ const derogationDuration = (
  * @category Entities
  */
 export class Device {
-  /** Wire `did` — the device's unique identifier. */
+  /**
+   * Wire `did` — the device's unique identifier.
+   */
   public readonly id: string
 
-  /** Wire `dev_alias` — the user-facing device name; tracks renames across syncs. */
+  /**
+   * Wire `dev_alias` — the user-facing device name; tracks renames across syncs.
+   */
   public name: string
 
-  /** Product generation resolved from the wire `product_key`. */
+  /**
+   * Product generation resolved from the wire `product_key`.
+   */
   public readonly product: Product
 
-  /** Wire `product_key` hash. */
+  /**
+   * Wire `product_key` hash.
+   */
   public readonly productKey: string
 
-  /** Wire `product_name` label. */
+  /**
+   * Wire `product_name` label.
+   */
   public readonly productName: string
 
   /**
