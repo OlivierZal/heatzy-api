@@ -23,7 +23,7 @@ A typed Node.js client for the [Heatzy](https://www.heatzy.com/) (Gizwits) API, 
 
 ## Requirements
 
-- Node.js >= 22
+- Node.js >= 22.19
 - A valid Heatzy account
 - For installing the package: a GitHub personal access token with the `read:packages` scope
 
