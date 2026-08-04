@@ -8,7 +8,9 @@ import { APIError } from './base.ts'
  * @category Errors
  */
 export class AttributeNotFoundError extends APIError {
-  /** The missing attribute key (wire name, e.g. `derog_mode`). */
+  /**
+   * The missing attribute key (wire name, e.g. `derog_mode`).
+   */
   public readonly attribute: string
 
   public override readonly name = 'AttributeNotFoundError'

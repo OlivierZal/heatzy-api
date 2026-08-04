@@ -5,7 +5,9 @@ import type {
 } from '../src/types/index.ts'
 import { DerogationMode, Mode, Switch } from '../src/constants.ts'
 
-/** One known `product_key` hash per product generation. */
+/**
+ * One known `product_key` hash per product generation.
+ */
 export const PRODUCT_KEYS = {
   glow: '2fd622e45283470f9e27e8e6167d7533',
   pro: 'a77a929fcf0d4631bc4f669080376891',
@@ -31,10 +33,14 @@ export const buildBinding = (
   ...overrides,
 })
 
-/** Minimal V1 attribute payload (mode only). */
+/**
+ * Minimal V1 attribute payload (mode only).
+ */
 export const v1Attributes: Attributes = { mode: Mode.comfort }
 
-/** Typical V2/V4 attribute payload. */
+/**
+ * Typical V2/V4 attribute payload.
+ */
 export const v2Attributes: Attributes = {
   derog_mode: DerogationMode.off,
   derog_time: 0,
@@ -43,7 +49,9 @@ export const v2Attributes: Attributes = {
   timer_switch: Switch.off,
 }
 
-/** Typical Glow attribute payload (split temperature registers). */
+/**
+ * Typical Glow attribute payload (split temperature registers).
+ */
 export const glowAttributes: Attributes = {
   cft_tempH: 2,
   cft_tempL: 10,
@@ -60,7 +68,9 @@ export const glowAttributes: Attributes = {
   timer_switch: Switch.off,
 }
 
-/** Typical Pro attribute payload (single registers + measures). */
+/**
+ * Typical Pro attribute payload (single registers + measures).
+ */
 export const proAttributes: Attributes = {
   cft_temp: 210,
   cur_humi: 45,
@@ -75,7 +85,9 @@ export const proAttributes: Attributes = {
   window_switch: Switch.off,
 }
 
-/** `/login` payload with a one-hour-away expiry (epoch seconds). */
+/**
+ * `/login` payload with a one-hour-away expiry (epoch seconds).
+ */
 export const buildLoginData = (
   expireAt: number = Math.trunc(Date.now() / 1000) + 3600,
 ): LoginData => ({
