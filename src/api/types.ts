@@ -35,11 +35,17 @@ export interface HeatzyAPIAdapter {
    * timezone instead of the host runtime timezone.
    */
   readonly timezone: string | undefined
-  /** Fetch all bindings and sync the device registry. */
+  /**
+   * Fetch all bindings and sync the device registry.
+   */
   readonly fetch: () => Promise<readonly DeviceBinding[]>
-  /** Read the live attribute payload of a single device. */
+  /**
+   * Read the live attribute payload of a single device.
+   */
   readonly getValues: ({ id }: { id: string }) => Promise<Attributes>
-  /** Send a control payload to a single device. */
+  /**
+   * Send a control payload to a single device.
+   */
   readonly updateValues: ({
     id,
     postData,
@@ -80,9 +86,13 @@ export interface HeatzyAPIConfig extends UndefinedTolerant<LoginCredentials> {
    * (`derogationEndString`). Defaults to the runtime locale.
    */
   readonly locale?: string | undefined
-  /** Custom logger. Defaults to `console`. */
+  /**
+   * Custom logger. Defaults to `console`.
+   */
   readonly logger?: Logger | undefined
-  /** External setting manager for persisting credentials and session data. */
+  /**
+   * External setting manager for persisting credentials and session data.
+   */
   readonly settingManager?: SettingManager | undefined
   /**
    * Restore the persisted session in the background instead of awaiting
@@ -104,7 +114,9 @@ export interface HeatzyAPIConfig extends UndefinedTolerant<LoginCredentials> {
    * to the runtime system timezone.
    */
   readonly timezone?: string | undefined
-  /** HTTP transport: pre-built {@link HttpClient} or build options. */
+  /**
+   * HTTP transport: pre-built {@link HttpClient} or build options.
+   */
   readonly transport?: TransportConfig | undefined
 }
 
@@ -115,15 +127,25 @@ export interface HeatzyAPIConfig extends UndefinedTolerant<LoginCredentials> {
  * @category Configuration
  */
 export interface HeatzyAPISettings {
-  /** Session expiry timestamp in ISO 8601 format. */
+  /**
+   * Session expiry timestamp in ISO 8601 format.
+   */
   readonly expiry?: string | null
-  /** Epoch-ms deadline before which automatic re-logins are refused. */
+  /**
+   * Epoch-ms deadline before which automatic re-logins are refused.
+   */
   readonly loginBackoffUntil?: string | null
-  /** Heatzy account password. */
+  /**
+   * Heatzy account password.
+   */
   readonly password?: string | null
-  /** Gizwits user token. */
+  /**
+   * Gizwits user token.
+   */
   readonly token?: string | null
-  /** Heatzy account username (email). */
+  /**
+   * Heatzy account username (email).
+   */
   readonly username?: string | null
 }
 
@@ -157,14 +179,22 @@ export interface LifecycleEvents {
    * two events always alternate.
    */
   readonly onAuthenticationRestored?: (() => void) | undefined
-  /** Invoked after a successful HTTP response is received. */
+  /**
+   * Invoked after a successful HTTP response is received.
+   */
   readonly onRequestComplete?:
     ((event: RequestCompleteEvent) => void) | undefined
-  /** Invoked when a request fails permanently (retries exhausted). */
+  /**
+   * Invoked when a request fails permanently (retries exhausted).
+   */
   readonly onRequestError?: ((event: RequestErrorEvent) => void) | undefined
-  /** Invoked before each backoff-scheduled retry attempt. */
+  /**
+   * Invoked before each backoff-scheduled retry attempt.
+   */
   readonly onRequestRetry?: ((event: RequestRetryEvent) => void) | undefined
-  /** Invoked when a request is dispatched for the first time. */
+  /**
+   * Invoked when a request is dispatched for the first time.
+   */
   readonly onRequestStart?: ((event: RequestStartEvent) => void) | undefined
   /**
    * Invoked after each sync trigger (auto-timer or
@@ -179,9 +209,13 @@ export interface LifecycleEvents {
  * @category Configuration
  */
 export interface Logger {
-  /** Log error messages. */
+  /**
+   * Log error messages.
+   */
   readonly error: Console['error']
-  /** Log informational messages. */
+  /**
+   * Log informational messages.
+   */
   readonly log: Console['log']
 }
 
@@ -190,9 +224,13 @@ export interface Logger {
  * @category Configuration
  */
 export interface RequestCompleteEvent extends RequestLifecycleContext {
-  /** Elapsed time in milliseconds, including any retry delays. */
+  /**
+   * Elapsed time in milliseconds, including any retry delays.
+   */
   readonly durationMs: number
-  /** Final HTTP status code returned by the upstream server. */
+  /**
+   * Final HTTP status code returned by the upstream server.
+   */
   readonly status: number
 }
 
@@ -201,9 +239,13 @@ export interface RequestCompleteEvent extends RequestLifecycleContext {
  * @category Configuration
  */
 export interface RequestErrorEvent extends RequestLifecycleContext {
-  /** Elapsed time in milliseconds, including any retry delays. */
+  /**
+   * Elapsed time in milliseconds, including any retry delays.
+   */
   readonly durationMs: number
-  /** The terminal error thrown by the request. */
+  /**
+   * The terminal error thrown by the request.
+   */
   readonly error: unknown
 }
 
@@ -216,11 +258,17 @@ export interface RequestErrorEvent extends RequestLifecycleContext {
  * @category Configuration
  */
 export interface RequestLifecycleContext {
-  /** Unique request identifier (UUID v4). */
+  /**
+   * Unique request identifier (UUID v4).
+   */
   readonly correlationId: string
-  /** HTTP method, uppercase. */
+  /**
+   * HTTP method, uppercase.
+   */
   readonly method: string
-  /** Request URL (possibly relative to the client's baseURL). */
+  /**
+   * Request URL (possibly relative to the client's baseURL).
+   */
   readonly url: string
 }
 
@@ -229,11 +277,17 @@ export interface RequestLifecycleContext {
  * @category Configuration
  */
 export interface RequestRetryEvent extends RequestLifecycleContext {
-  /** 1-based retry attempt number (1 = first retry, not the initial try). */
+  /**
+   * 1-based retry attempt number (1 = first retry, not the initial try).
+   */
   readonly attempt: number
-  /** Backoff delay in milliseconds before this retry fires. */
+  /**
+   * Backoff delay in milliseconds before this retry fires.
+   */
   readonly delayMs: number
-  /** The error that triggered the retry. */
+  /**
+   * The error that triggered the retry.
+   */
   readonly error: unknown
 }
 
@@ -248,9 +302,13 @@ export type RequestStartEvent = RequestLifecycleContext
  * @category Configuration
  */
 export interface SettingManager {
-  /** Retrieve a setting value by key. Returns the stored value, or `null`/`undefined` if absent. */
+  /**
+   * Retrieve a setting value by key. Returns the stored value, or `null`/`undefined` if absent.
+   */
   readonly get: (key: string) => string | null | undefined
-  /** Store a setting value by key. */
+  /**
+   * Store a setting value by key.
+   */
   readonly set: (key: string, value: string) => void
   /**
    * Delete a setting key. Optional: when a host does not provide it, the
