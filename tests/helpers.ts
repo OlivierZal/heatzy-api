@@ -1,8 +1,14 @@
 import { type MockInstance, vi } from 'vitest'
 
-import type { Logger, SettingManager } from '../src/api/index.ts'
+import type {
+  HeatzyAPIAdapter,
+  Logger,
+  SettingManager,
+  SyncCallback,
+} from '../src/api/index.ts'
 import { HttpClient, HttpError } from '../src/http/index.ts'
 import { Temporal } from '../src/temporal.ts'
+import { v1Attributes } from './fixtures.ts'
 
 export function cast(value: unknown): never
 export function cast(value: unknown): unknown {
@@ -43,6 +49,27 @@ export const defined = <T>(value: T | null | undefined): T => {
 }
 
 const HTTP_OK = 200
+
+/**
+ * Build a fully-mocked {@link HeatzyAPIAdapter} with benign defaults.
+ * @param overrides - Adapter members to replace.
+ * @returns The mocked adapter.
+ */
+export const createMockAdapter = (
+  overrides: Partial<HeatzyAPIAdapter> = {},
+): HeatzyAPIAdapter => ({
+  fetch: vi.fn<HeatzyAPIAdapter['fetch']>().mockResolvedValue([]),
+  getValues: vi
+    .fn<HeatzyAPIAdapter['getValues']>()
+    .mockResolvedValue(v1Attributes),
+  locale: undefined,
+  notifySync: vi.fn<SyncCallback>().mockResolvedValue(undefined),
+  timezone: undefined,
+  updateValues: vi
+    .fn<HeatzyAPIAdapter['updateValues']>()
+    .mockResolvedValue(undefined),
+  ...overrides,
+})
 
 export function mock<T extends object>(value?: Partial<T>): T
 export function mock(value: unknown = {}): unknown {

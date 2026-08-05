@@ -1,22 +1,24 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { RetryGuard } from '../../src/resilience/retry-guard.ts'
+import { Temporal } from '../../src/temporal.ts'
+import { mockTemporalNowInstant } from '../helpers.ts'
 
 describe('retry guard', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+    mockTemporalNowInstant()
   })
 
   afterEach(() => {
+    vi.mocked(Temporal.Now.instant).mockRestore()
     vi.useRealTimers()
   })
 
-  it('starts inactive and allows the first consume', () => {
+  it('allows the first consume', () => {
     const guard = new RetryGuard(1000)
 
-    expect(guard.isActive).toBe(false)
     expect(guard.tryConsume()).toBe(true)
-    expect(guard.isActive).toBe(true)
   })
 
   it('rejects consecutive consumes within the window', () => {
@@ -34,17 +36,15 @@ describe('retry guard', () => {
     guard.tryConsume()
     vi.advanceTimersByTime(1000)
 
-    expect(guard.isActive).toBe(false)
     expect(guard.tryConsume()).toBe(true)
   })
 
-  it('symbol.dispose clears the pending window', () => {
+  it('keeps refusing until the delay elapses', () => {
     const guard = new RetryGuard(1000)
 
     guard.tryConsume()
-    guard[Symbol.dispose]()
+    vi.advanceTimersByTime(999)
 
-    expect(guard.isActive).toBe(false)
-    expect(guard.tryConsume()).toBe(true)
+    expect(guard.tryConsume()).toBe(false)
   })
 })

@@ -1,7 +1,6 @@
 export type {
   Attributes,
   Bindings,
-  Data,
   DeviceBinding,
   DeviceData,
   DevicePostData,
@@ -10,7 +9,6 @@ export type {
   LoginCredentials,
   LoginData,
   PostAttributes,
-  Resolved,
   UndefinedTolerant,
 } from './types/index.ts'
 
@@ -27,8 +25,8 @@ export {
   type RequestStartEvent,
   type SettingManager,
   type SyncCallback,
+  type TransportConfig,
   HeatzyAPI,
-  toAuthFailure,
 } from './api/index.ts'
 export {
   DerogationMode,
@@ -65,10 +63,12 @@ export {
 } from './facades/index.ts'
 export {
   type HttpClientConfig,
+  type HttpErrorRequestConfig,
   type HttpRequestConfig,
   type HttpResponse,
   HttpClient,
   HttpError,
+  HttpStatus,
   isHttpError,
 } from './http/index.ts'
 export { Temporal } from './temporal.ts'

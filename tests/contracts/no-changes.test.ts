@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import type { HeatzyAPIAdapter, SyncCallback } from '../../src/api/index.ts'
+import type { HeatzyAPIAdapter } from '../../src/api/index.ts'
 import type { PostAttributes } from '../../src/types/index.ts'
 import { Mode } from '../../src/constants.ts'
 import { Device } from '../../src/entities/index.ts'
@@ -15,6 +15,7 @@ import {
   v1Attributes,
   v2Attributes,
 } from '../fixtures.ts'
+import { createMockAdapter } from '../helpers.ts'
 
 // `setValues` answers one question on every generation — is there
 // anything to send? — and must answer it before the wire. A
@@ -88,17 +89,6 @@ const describeNoChangesContract = (
   })
 }
 
-const createApi = (): HeatzyAPIAdapter => ({
-  fetch: vi.fn<HeatzyAPIAdapter['fetch']>().mockResolvedValue([]),
-  getValues: vi
-    .fn<HeatzyAPIAdapter['getValues']>()
-    .mockResolvedValue(v1Attributes),
-  locale: undefined,
-  notifySync: vi.fn<SyncCallback>().mockResolvedValue(undefined),
-  timezone: undefined,
-  updateValues: vi.fn<HeatzyAPIAdapter['updateValues']>().mockResolvedValue({}),
-})
-
 const GENERATIONS = [
   {
     name: 'V1 device',
@@ -127,7 +117,7 @@ const GENERATIONS = [
 
 for (const { build, name } of GENERATIONS) {
   describeNoChangesContract(name, () => {
-    const api = createApi()
+    const api = createMockAdapter()
     const facade = build(api)
     return {
       wireCalls: (): number => vi.mocked(api.updateValues).mock.calls.length,

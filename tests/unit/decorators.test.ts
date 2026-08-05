@@ -93,13 +93,6 @@ describe(syncDevices, () => {
     expect(defined(targetOrder)).toBeLessThan(defined(notifyOrder))
   })
 
-  it('is a no-op without the notify hook', async () => {
-    const target = vi.fn<() => Promise<string>>().mockResolvedValue('result')
-    const decorated = syncDevices(target, mock<ClassMethodDecoratorContext>())
-
-    await expect(decorated.call({})).resolves.toBe('result')
-  })
-
   it('propagates an exception thrown by the sync callback', async () => {
     const notifySync = vi
       .fn<() => Promise<void>>()

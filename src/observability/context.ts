@@ -10,7 +10,6 @@ export interface LoggableRequestConfig {
   readonly data?: unknown
   readonly headers?: unknown
   readonly method?: string | undefined
-  readonly params?: unknown
   readonly url?: string | undefined
 }
 
@@ -19,7 +18,6 @@ const logKeys = [
   'dataType',
   'method',
   'url',
-  'params',
   'headers',
   'requestData',
   'responseData',
@@ -80,7 +78,7 @@ const redactValue = (value: unknown): unknown => {
   return Object.fromEntries(
     Object.entries(value).map(([key, property]) => [
       key,
-      isSensitive(key) ? REDACTED : property,
+      isSensitive(key) ? REDACTED : redactValue(property),
     ]),
   )
 }
@@ -93,14 +91,11 @@ export abstract class APICallLogData {
 
   public readonly method?: string | undefined
 
-  public readonly params: unknown
-
   public readonly url?: string | undefined
 
   protected constructor(config?: LoggableRequestConfig) {
     this.method = config?.method?.toUpperCase()
     this.url = config?.url
-    this.params = config?.params
   }
 
   public toString(): string {

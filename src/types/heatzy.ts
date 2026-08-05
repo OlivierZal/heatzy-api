@@ -33,12 +33,6 @@ export interface Bindings {
 }
 
 /**
- * `/control/{did}` success response — an empty object.
- * @category Types
- */
-export type Data = Record<string, never>
-
-/**
  * One `/bindings` entry — the wire identity of a bound device.
  * @category Types
  */

@@ -1,5 +1,10 @@
 import type { SettingManager } from '../api/types.ts'
 
+/**
+ * Structural host contract of the `setting` decorator: an optional
+ * external store the accessor delegates to.
+ * @internal
+ */
 interface HasSettingManager {
   settingManager?: SettingManager | undefined
 }

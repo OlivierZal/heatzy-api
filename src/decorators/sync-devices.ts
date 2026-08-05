@@ -5,7 +5,7 @@
  * delegate to `api.notifySync`) implement this contract structurally.
  */
 interface HasNotifySync {
-  readonly notifySync?: (params?: {
+  readonly notifySync: (params?: {
     ids?: string[] | undefined
   }) => Promise<void>
 }
@@ -15,7 +15,7 @@ interface HasNotifySync {
  * decorated method resolves. The host implements `notifySync`
  * structurally — facades enrich the payload with their `id` before
  * delegating, {@link HeatzyAPI} emits straight through the lifecycle
- * emitter. No action is taken when the host doesn't expose the hook.
+ * emitter.
  *
  * Intended for one-shot post-method notifications; this is **not**
  * a subscription. Exceptions thrown by the consumer's callback
@@ -33,6 +33,6 @@ export const syncDevices = <TArgs extends readonly unknown[], TResult>(
 ): ((...args: TArgs) => Promise<TResult>) =>
   async function newTarget(this: HasNotifySync, ...args: TArgs) {
     const data = await target.call(this, ...args)
-    await this.notifySync?.()
+    await this.notifySync()
     return data
   }

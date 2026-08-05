@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { HeatzyAPIAdapter, SyncCallback } from '../../src/api/index.ts'
+import type { HeatzyAPIAdapter } from '../../src/api/index.ts'
 import type { Attributes, PostAttributes } from '../../src/types/index.ts'
 import {
   DerogationMode,
@@ -30,7 +30,12 @@ import {
   v1Attributes,
   v2Attributes,
 } from '../fixtures.ts'
-import { defined, mock, mockTemporalNowZoned } from '../helpers.ts'
+import {
+  createMockAdapter,
+  defined,
+  mock,
+  mockTemporalNowZoned,
+} from '../helpers.ts'
 
 interface FacadeContext<T> {
   api: HeatzyAPIAdapter
@@ -38,54 +43,65 @@ interface FacadeContext<T> {
   facade: T
 }
 
-const createMockApi = (
-  overrides: Partial<HeatzyAPIAdapter> = {},
-): HeatzyAPIAdapter => ({
-  fetch: vi.fn<HeatzyAPIAdapter['fetch']>().mockResolvedValue([]),
-  getValues: vi
-    .fn<HeatzyAPIAdapter['getValues']>()
-    .mockResolvedValue(v1Attributes),
-  locale: undefined,
-  notifySync: vi.fn<SyncCallback>().mockResolvedValue(undefined),
-  timezone: undefined,
-  updateValues: vi.fn<HeatzyAPIAdapter['updateValues']>().mockResolvedValue({}),
-  ...overrides,
-})
+// One generic builder; the per-generation wrappers below pin the
+// binding key, default attributes and facade class in one line each.
+const createFacadeContext = <T>({
+  apiOverrides = {},
+  attributes,
+  binding,
+  build,
+}: {
+  attributes: Attributes
+  binding: Parameters<typeof buildBinding>[0]
+  apiOverrides?: Partial<HeatzyAPIAdapter>
+  build: (api: HeatzyAPIAdapter, device: Device) => T
+}): FacadeContext<T> => {
+  const api = createMockAdapter(apiOverrides)
+  const device = new Device(buildBinding(binding), attributes)
+  return { api, device, facade: build(api, device) }
+}
 
 const createV1Facade = (
   attributes: Attributes = v1Attributes,
   apiOverrides: Partial<HeatzyAPIAdapter> = {},
-): FacadeContext<DeviceFacade> => {
-  const api = createMockApi(apiOverrides)
-  const device = new Device(buildBinding('v1'), attributes)
-  return { api, device, facade: new DeviceFacade(api, device) }
-}
+): FacadeContext<DeviceFacade> =>
+  createFacadeContext({
+    apiOverrides,
+    attributes,
+    binding: 'v1',
+    build: (api, device) => new DeviceFacade(api, device),
+  })
 
 const createV2Facade = (
   attributes: Attributes = v2Attributes,
   apiOverrides: Partial<HeatzyAPIAdapter> = {},
-): FacadeContext<DeviceV2Facade> => {
-  const api = createMockApi(apiOverrides)
-  const device = new Device(buildBinding('v2'), attributes)
-  return { api, device, facade: new DeviceV2Facade(api, device) }
-}
+): FacadeContext<DeviceV2Facade> =>
+  createFacadeContext({
+    apiOverrides,
+    attributes,
+    binding: 'v2',
+    build: (api, device) => new DeviceV2Facade(api, device),
+  })
 
 const createGlowFacade = (
   attributes: Attributes = glowAttributes,
-): FacadeContext<DeviceGlowFacade> => {
-  const api = createMockApi()
-  const device = new Device(buildBinding('glow'), attributes)
-  return { api, device, facade: new DeviceGlowFacade(api, device) }
-}
+): FacadeContext<DeviceGlowFacade> =>
+  createFacadeContext({
+    attributes,
+    binding: 'glow',
+    build: (api, device) => new DeviceGlowFacade(api, device),
+  })
 
 const createProFacade = (
   attributes: Attributes = proAttributes,
   apiOverrides: Partial<HeatzyAPIAdapter> = {},
-): FacadeContext<DeviceProFacade> => {
-  const api = createMockApi(apiOverrides)
-  const device = new Device(buildBinding('pro'), attributes)
-  return { api, device, facade: new DeviceProFacade(api, device) }
-}
+): FacadeContext<DeviceProFacade> =>
+  createFacadeContext({
+    apiOverrides,
+    attributes,
+    binding: 'pro',
+    build: (api, device) => new DeviceProFacade(api, device),
+  })
 
 describe(DeviceFacade, () => {
   it('exposes the wire identity and mode-derived getters', () => {
@@ -269,7 +285,7 @@ describe(DeviceV2Facade, () => {
         id: 'did-v2',
         product: Product.v2,
       })
-      const facade = new DeviceV2Facade(createMockApi(), device)
+      const facade = new DeviceV2Facade(createMockAdapter(), device)
 
       expect(facade.derogationEndString).toBeNull()
     })
@@ -475,7 +491,7 @@ describe(FacadeManager, () => {
   ])(
     'builds a $expected.name for a $product device',
     ({ attributes, expected, product }) => {
-      const manager = new FacadeManager(createMockApi())
+      const manager = new FacadeManager(createMockAdapter())
       const facade = manager.get(new Device(buildBinding(product), attributes))
 
       expect(facade.constructor).toBe(expected)
@@ -483,14 +499,14 @@ describe(FacadeManager, () => {
   )
 
   it('caches one facade per entity', () => {
-    const manager = new FacadeManager(createMockApi())
+    const manager = new FacadeManager(createMockAdapter())
     const device = new Device(buildBinding('pro'), proAttributes)
 
     expect(manager.get(device)).toBe(manager.get(device))
   })
 
   it('returns null without an entity', () => {
-    const manager = new FacadeManager(createMockApi())
+    const manager = new FacadeManager(createMockAdapter())
 
     expect(manager.get()).toBeNull()
   })
@@ -526,7 +542,7 @@ describe('capability guards', () => {
   ])(
     'narrows the $product generation surface',
     ({ attributes, product, supports }) => {
-      const manager = new FacadeManager(createMockApi())
+      const manager = new FacadeManager(createMockAdapter())
       const facade = manager.get(new Device(buildBinding(product), attributes))
 
       expect(supportsV2(facade)).toBe(supports.v2)

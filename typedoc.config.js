@@ -30,11 +30,9 @@ const config = {
   hostedBaseUrl: 'https://olivierzal.github.io/heatzy-api/',
   includeVersion: true,
   intentionallyNotExported: [
-    // Internal infrastructure leaked through public type signatures
-    // (also tagged `@internal` in source).
+    // Internal infrastructure leaked through a public decorator
+    // signature (tagged `@internal` in source).
     'HasSettingManager',
-    'HttpErrorRequestConfig',
-    'TransportConfig',
   ],
   markdownLinkExternal: true,
   name: 'Heatzy API for Node.js',
