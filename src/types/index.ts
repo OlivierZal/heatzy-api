@@ -8,7 +8,6 @@ export type {
   DevicePostData,
   DevicePostDataAny,
   DeviceV1PostData,
-  ErrorData,
   LoginData,
   PostAttributes,
 } from './heatzy.ts'

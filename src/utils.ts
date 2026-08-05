@@ -28,7 +28,9 @@ export const isKeyOf =
  * @returns `values` without its `undefined`-valued keys.
  * @category Utilities
  */
-export function omitUndefined<T extends object>(values: T): T
+export function omitUndefined<T extends object>(
+  values: T,
+): { [K in keyof T]?: Exclude<T[K], undefined> }
 export function omitUndefined(
   values: Record<string, unknown>,
 ): Record<string, unknown> {

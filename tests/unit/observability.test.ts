@@ -265,14 +265,6 @@ describe(createAPICallErrorData, () => {
     expect(data.dataType).toBe('API response')
   })
 
-  it('creates error data from request error (no HTTP response)', () => {
-    const error = new Error('Network Error')
-    const data = createAPICallErrorData(error)
-
-    expect(data.errorMessage).toBe('Network Error')
-    expect(data.dataType).toBe('API request')
-  })
-
   it('serializes error data with errorMessage included', () => {
     const error = new HttpError('Timeout', {
       config: createConfig(),

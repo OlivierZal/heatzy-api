@@ -1,6 +1,5 @@
-import { isHttpError } from '../http/index.ts'
+import type { HttpError } from '../http/index.ts'
 import type { APICallLogData } from './context.ts'
-import { APICallRequestData } from './request.ts'
 import { APICallResponseData } from './response.ts'
 
 /**
@@ -24,13 +23,9 @@ const withErrorMessage = (
  * @returns Structured log data including the error message.
  */
 export const createAPICallErrorData = (
-  error: Error,
-): APICallLogDataWithErrorMessage => {
-  if (isHttpError(error)) {
-    return withErrorMessage(
-      new APICallResponseData(error.response, error.config),
-      error.message,
-    )
-  }
-  return withErrorMessage(new APICallRequestData(), error.message)
-}
+  error: HttpError,
+): APICallLogDataWithErrorMessage =>
+  withErrorMessage(
+    new APICallResponseData(error.response, error.config),
+    error.message,
+  )
