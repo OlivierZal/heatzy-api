@@ -168,9 +168,7 @@ describe(HttpClient, () => {
 
     await expect(
       createClient().request({ url: '/boom' }),
-    ).rejects.toMatchObject({
-      config: { method: 'GET' },
-    })
+    ).rejects.toMatchObject({ config: { method: 'GET' } })
   })
 
   it('throws HttpError on non-2xx with body, headers, status, and config', async () => {
@@ -295,10 +293,7 @@ describe(HttpClient, () => {
   })
 
   it('preserves the base path when joining an absolute-style url', async () => {
-    const client = new HttpClient({
-      baseURL: `${BASE_URL}/app`,
-      timeout: 0,
-    })
+    const client = new HttpClient({ baseURL: `${BASE_URL}/app`, timeout: 0 })
     mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
 
     await client.request({ url: '/bindings' })
@@ -371,11 +366,7 @@ describe(HttpClient, () => {
   it('forwards the configured dispatcher into fetch', async () => {
     // Sentinel object — runtime shape is the only thing fetch inspects.
     const dispatcher = { sentinel: true }
-    const client = new HttpClient({
-      baseURL: BASE_URL,
-      dispatcher,
-      timeout: 0,
-    })
+    const client = new HttpClient({ baseURL: BASE_URL, dispatcher, timeout: 0 })
     mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
 
     await client.request({ url: '/d' })

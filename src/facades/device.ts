@@ -147,9 +147,7 @@ export class DeviceFacade {
     if (mode !== undefined && isModeV1(mode)) {
       await this.api.updateValues({
         id: this.id,
-        postData: {
-          raw: [POST_DATA_UNIT, POST_DATA_UNIT, modeToModeV1[mode]],
-        },
+        postData: { raw: [POST_DATA_UNIT, POST_DATA_UNIT, modeToModeV1[mode]] },
       })
       return { mode }
     }
