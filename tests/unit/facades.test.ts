@@ -287,10 +287,7 @@ describe(DeviceV2Facade, () => {
       const { device, facade } = createProFacade(proAttributes, {
         locale: 'fr-FR',
       })
-      device.update({
-        cur_mode: Mode.eco,
-        derog_mode: DerogationMode.presence,
-      })
+      device.update({ cur_mode: Mode.eco, derog_mode: DerogationMode.presence })
       device.update({ cur_mode: Mode.comfort })
 
       expect(facade.derogationEndString).toBe('11:30')

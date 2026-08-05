@@ -500,9 +500,7 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
     id: string
     postData: DevicePostDataAny
   }): Promise<Data> {
-    return this.#requestData<Data>('post', `/control/${id}`, {
-      data: postData,
-    })
+    return this.#requestData<Data>('post', `/control/${id}`, { data: postData })
   }
 
   // The registry refresh both entry points share, without a

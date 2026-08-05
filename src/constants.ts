@@ -33,23 +33,14 @@ export type Mode = (typeof Mode)[keyof typeof Mode]
  * Product generations, ordered so `>=` reads as capability support.
  * @category Constants
  */
-export const Product = {
-  glow: 5,
-  pro: 6,
-  v1: 1,
-  v2: 2,
-  v4: 4,
-} as const
+export const Product = { glow: 5, pro: 6, v1: 1, v2: 2, v4: 4 } as const
 export type Product = (typeof Product)[keyof typeof Product]
 
 /**
  * Numeric boolean the wire uses for every switch attribute.
  * @category Constants
  */
-export const Switch = {
-  off: 0,
-  on: 1,
-} as const
+export const Switch = { off: 0, on: 1 } as const
 export type Switch = (typeof Switch)[keyof typeof Switch]
 
 /**
@@ -69,12 +60,7 @@ export type TemperatureCompensation =
  * this maps the four base modes to their positional value.
  * @category Constants
  */
-export const modeToModeV1 = {
-  cft: 0,
-  eco: 1,
-  fro: 2,
-  stop: 3,
-} as const
+export const modeToModeV1 = { cft: 0, eco: 1, fro: 2, stop: 3 } as const
 
 /**
  * Constant filler of the V1 `raw` triplet's first two positions.

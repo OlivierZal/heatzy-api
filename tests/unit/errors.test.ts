@@ -46,10 +46,7 @@ describe.concurrent('apiError hierarchy', () => {
 
   it('validationError carries context and cause', () => {
     const cause = new Error('zod issue')
-    const error = new ValidationError('bad shape', {
-      cause,
-      context: 'login',
-    })
+    const error = new ValidationError('bad shape', { cause, context: 'login' })
 
     expect(error).toBeInstanceOf(ValidationError)
     expect(error).toBeInstanceOf(APIError)

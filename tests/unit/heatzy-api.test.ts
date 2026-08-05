@@ -137,10 +137,7 @@ describe(HeatzyAPI, () => {
     })
 
     it('exposes the configured locale and timezone', async () => {
-      const api = await createApi({
-        locale: 'fr-FR',
-        timezone: 'Europe/Paris',
-      })
+      const api = await createApi({ locale: 'fr-FR', timezone: 'Europe/Paris' })
 
       expect(api.locale).toBe('fr-FR')
       expect(api.timezone).toBe('Europe/Paris')
@@ -242,9 +239,7 @@ describe(HeatzyAPI, () => {
 
     it('signs out silently when the persisted token is rejected without credentials', async () => {
       const onAuthenticationLost = vi.fn<() => void>()
-      const { settingManager } = createSettingStore({
-        token: 'rejected-token',
-      })
+      const { settingManager } = createSettingStore({ token: 'rejected-token' })
       mockRejectedWire()
       const api = await createApi({
         events: { onAuthenticationLost },

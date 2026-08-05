@@ -90,7 +90,4 @@ export const proAttributes: Attributes = {
  */
 export const buildLoginData = (
   expireAt: number = Math.trunc(Date.now() / 1000) + 3600,
-): LoginData => ({
-  expire_at: expireAt,
-  token: 'user-token',
-})
+): LoginData => ({ expire_at: expireAt, token: 'user-token' })
