@@ -16,10 +16,10 @@ const withErrorMessage = (
   Object.assign(data, { errorMessage: message })
 
 /**
- * Create structured error log data from a failed HTTP request.
- * Uses response data when the error carries one, otherwise falls back to
- * request-only data.
- * @param error - The error thrown by the HTTP client.
+ * Create structured error log data from a failed HTTP request: the
+ * caller guards on `isHttpError`, so the response and its config are
+ * always present.
+ * @param error - The HTTP error thrown by the client.
  * @returns Structured log data including the error message.
  */
 export const createAPICallErrorData = (
