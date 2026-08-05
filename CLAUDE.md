@@ -80,7 +80,7 @@ reverse; no new disables; config-level `'off'` entries are triage
 verdicts, not suppressions; zero warnings. The only tolerated
 exceptions are protocol- or rule-pair-imposed and documented with a
 `-- reason`: the TC39 decorator `files`-scoped exceptions in
-`src/decorators/**`, the parse-boundary cast in `Device.update`, the
+`src/decorators/**`, the parse-boundary cast in `HttpClient.request`, the
 fire-and-forget `.catch()`, and the single-flight `.finally()` in
 `#ensureSession`. `src/temporal.ts` is the only sanctioned
 `temporal-polyfill` entry point.

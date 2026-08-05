@@ -1,4 +1,4 @@
-import { type MockInstance, expect, vi } from 'vitest'
+import { type MockInstance, vi } from 'vitest'
 
 import type { Logger, SettingManager } from '../src/api/index.ts'
 import { HttpClient, HttpError } from '../src/http/index.ts'
@@ -33,17 +33,6 @@ export const mockTemporalNowZoned = (): void => {
       timezone ?? 'UTC',
     ),
   )
-}
-
-// Wrap `expect.objectContaining` so call sites get a `never`-typed
-// matcher (assignable anywhere) instead of `any` — the latter trips
-// `@typescript-eslint/no-unsafe-assignment` when nested inside another
-// matcher's shape literal. Keeps the unsafe-return concession at one
-// boundary instead of scattered across every test file.
-export function matchObject(shape: object): never
-export function matchObject(shape: object): unknown {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- vitest's `objectContaining` is typed `any`; this helper is the single boundary that scopes the concession
-  return expect.objectContaining(shape)
 }
 
 export const defined = <T>(value: T | null | undefined): T => {
@@ -202,6 +191,3 @@ export const createHttpError = ({
 
 export const createServerError = (status: number, url = '/test'): HttpError =>
   createHttpError({ message: `Status ${String(status)}`, status, url })
-
-export const createUnauthorizedError = (url = '/test'): HttpError =>
-  createHttpError({ message: 'Unauthorized', status: 401, url })

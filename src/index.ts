@@ -7,7 +7,6 @@ export type {
   DevicePostData,
   DevicePostDataAny,
   DeviceV1PostData,
-  ErrorData,
   LoginCredentials,
   LoginData,
   PostAttributes,

@@ -8,10 +8,6 @@ import { DeviceGlowFacade } from './device-glow.ts'
  * @category Facades
  */
 export class DeviceProFacade extends DeviceGlowFacade {
-  public override get comfortTemperature(): number {
-    return this.getTargetTemperature(Mode.comfort)
-  }
-
   /**
    * The measured relative humidity.
    * @returns The reading in %.
@@ -28,14 +24,6 @@ export class DeviceProFacade extends DeviceGlowFacade {
    */
   public get currentMode(): Mode {
     return this.getValue('cur_mode')
-  }
-
-  public override get currentTemperature(): number {
-    return this.getTemperature()
-  }
-
-  public override get ecoTemperature(): number {
-    return this.getTargetTemperature(Mode.eco)
   }
 
   /**

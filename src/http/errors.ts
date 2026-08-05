@@ -21,8 +21,6 @@ export interface HttpErrorRequestConfig {
 export class HttpError<T = unknown> extends Error {
   public readonly config?: HttpErrorRequestConfig | undefined
 
-  public readonly isHttpError = true
-
   public readonly response: {
     readonly data: T
     readonly headers: Record<string, string | string[]>

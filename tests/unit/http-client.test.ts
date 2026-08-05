@@ -39,7 +39,6 @@ describe('httpError', () => {
     expect(error.response.headers['x-y']).toBe('z')
     expect(error.config?.url).toBe('/where')
     expect(error.config?.method).toBe('GET')
-    expect(error.isHttpError).toBe(true)
     expect(error.name).toBe('HttpError')
   })
 
@@ -185,7 +184,6 @@ describe(HttpClient, () => {
     await expect(promise).rejects.toThrow(HttpError)
     await expect(promise).rejects.toMatchObject({
       config: { method: 'POST', url: '/x' },
-      isHttpError: true,
       response: {
         data: { err: 'denied' },
         headers: { 'retry-after': '3' },

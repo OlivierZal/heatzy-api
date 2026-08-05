@@ -5,7 +5,7 @@ import type {
 } from '../types/index.ts'
 import { type Product, DerogationMode, getProduct, Mode } from '../constants.ts'
 import { Temporal } from '../temporal.ts'
-import { isKeyOf } from '../utils.ts'
+import { isKeyOf, omitUndefined } from '../utils.ts'
 
 /**
  * The last non-stop heating mode — what "back on" restores to.
@@ -169,12 +169,7 @@ export class Device {
       newDerogationTime: attributes.derog_time,
     })
 
-    this.#attributes = {
-      ...this.#attributes,
-      ...Object.fromEntries(
-        Object.entries(attributes).filter(([, value]) => value !== undefined),
-      ),
-    }
+    this.#attributes = { ...this.#attributes, ...omitUndefined(attributes) }
   }
 
   #handleDerogationEnd(transition: DerogationTransition): void {

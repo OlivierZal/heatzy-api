@@ -82,15 +82,6 @@ export interface DeviceV1PostData {
 }
 
 /**
- * Gizwits error body shape (4xx responses).
- * @category Types
- */
-export interface ErrorData {
-  readonly detail_message: string | null
-  readonly error_message: string | null
-}
-
-/**
  * `/login` response: the user token and its expiry (epoch seconds).
  * @category Types
  */
