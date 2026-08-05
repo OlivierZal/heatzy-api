@@ -1,5 +1,3 @@
-import { Temporal } from '../temporal.ts'
-
 /**
  * One-shot retry budget limiter.
  *
@@ -11,8 +9,11 @@ import { Temporal } from '../temporal.ts'
 export class RetryGuard {
   readonly #delay: number
 
-  // Epoch-ms deadline of the current window; consuming before it is
-  // refused. A plain deadline needs no timer to expire.
+  // Monotonic-ms deadline of the current window; consuming before it is
+  // refused. A plain deadline needs no timer to expire, and the
+  // monotonic clock keeps the window immune to system-clock
+  // adjustments — a wall-clock deadline would stretch it across a
+  // backwards jump.
   #until = 0
 
   public constructor(delayMs: number) {
@@ -25,7 +26,7 @@ export class RetryGuard {
    *   budget is exhausted for the current window.
    */
   public tryConsume(): boolean {
-    const now = Temporal.Now.instant().epochMilliseconds
+    const now = performance.now()
     if (now < this.#until) {
       return false
     }

@@ -1,17 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { RetryGuard } from '../../src/resilience/retry-guard.ts'
-import { Temporal } from '../../src/temporal.ts'
-import { mockTemporalNowInstant } from '../helpers.ts'
 
 describe('retry guard', () => {
   beforeEach(() => {
     vi.useFakeTimers()
-    mockTemporalNowInstant()
   })
 
   afterEach(() => {
-    vi.mocked(Temporal.Now.instant).mockRestore()
     vi.useRealTimers()
   })
 
