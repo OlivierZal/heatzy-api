@@ -225,6 +225,28 @@ describe(withRetryBackoff, () => {
     }
   })
 
+  it('detaches the abort listener once a backoff sleep completes', async () => {
+    const controller = new AbortController()
+    const removeSpy = vi.spyOn(controller.signal, 'removeEventListener')
+    const op = vi
+      .fn<() => Promise<string>>()
+      .mockRejectedValueOnce(new Error('boom'))
+      .mockResolvedValue('ok')
+
+    const promise = withRetryBackoff(op, {
+      initialDelayMs: 100,
+      isRetryable: ALWAYS_RETRYABLE,
+      jitterRatio: 0,
+      maxDelayMs: 10_000,
+      maxRetries: 3,
+      signal: controller.signal,
+    })
+    await vi.runAllTimersAsync()
+
+    await expect(promise).resolves.toBe('ok')
+    expect(removeSpy).toHaveBeenCalledWith('abort', expect.any(Function))
+  })
+
   it('aborts the backoff sleep when the signal fires', async () => {
     const controller = new AbortController()
     const op = vi

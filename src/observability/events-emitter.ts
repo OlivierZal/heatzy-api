@@ -62,6 +62,10 @@ export class LifecycleEmitter {
     )
   }
 
+  // Awaited (unlike the `#safeInvoke` family): the `@syncDevices`
+  // decorator awaits the notification so a decorated mutation resolves
+  // only after the observer has run. The non-throwing contract is the
+  // same — failures route through the shared reporter.
   public async emitSyncComplete(
     ...args: Parameters<SyncCallback>
   ): Promise<void> {
@@ -72,11 +76,15 @@ export class LifecycleEmitter {
     try {
       await callback(...args)
     } catch (error) {
-      this.#logger.error(
-        'LifecycleEvents.onSyncComplete callback threw — ignoring',
-        error,
-      )
+      this.#reportFailure('onSyncComplete', error)
     }
+  }
+
+  #reportFailure(callback: string, error: unknown): void {
+    this.#logger.error(
+      `LifecycleEvents.${callback} callback threw — ignoring`,
+      error,
+    )
   }
 
   #safeInvoke(callback: string, invoke: () => unknown): void {
@@ -92,10 +100,7 @@ export class LifecycleEmitter {
     try {
       this.#watchRejection(callback, invoke())
     } catch (error) {
-      this.#logger.error(
-        `LifecycleEvents.${callback} callback threw — ignoring`,
-        error,
-      )
+      this.#reportFailure(callback, error)
     }
   }
 

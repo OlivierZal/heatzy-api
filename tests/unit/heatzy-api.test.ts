@@ -830,9 +830,10 @@ describe(HeatzyAPI, () => {
       async ({ postData }) => {
         const { api } = await createAuthedApi()
         mockRequest.mockResolvedValue(mockResponse({}))
-        const data = await api.updateValues({ id: 'did-pro', postData })
 
-        expect(data).toStrictEqual({})
+        await expect(
+          api.updateValues({ id: 'did-pro', postData }),
+        ).resolves.toBeUndefined()
         expect(mockRequest).toHaveBeenCalledWith(
           expect.objectContaining({
             data: postData,

@@ -5,7 +5,6 @@ import type { z } from 'zod'
 import type {
   Attributes,
   Bindings,
-  Data,
   DeviceBinding,
   DevicePostDataAny,
   LoginCredentials,
@@ -30,7 +29,6 @@ import {
 import {
   type ResiliencePolicy,
   AuthRetryPolicy,
-  CompositePolicy,
   isSessionExpired,
   RetryGuard,
   TransientRetryPolicy,
@@ -445,11 +443,10 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   }
 
   /**
-   * Releases the auto-sync timer and any retry-guard timers; the instance must not be reused after disposal.
+   * Releases the auto-sync timer; the instance must not be reused after disposal.
    */
   public [Symbol.dispose](): void {
     this.#syncManager[Symbol.dispose]()
-    this.#retryGuard[Symbol.dispose]()
   }
 
   /**
@@ -487,11 +484,11 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   }
 
   /**
-   * Send a control payload to a single device.
+   * Send a control payload to a single device. The server's response
+   * body is empty by contract and is not consumed.
    * @param root0 - Destructured options.
    * @param root0.id - Device identifier (wire `did`).
    * @param root0.postData - Named attributes, or the V1 `raw` triplet.
-   * @returns The (empty) server response.
    */
   public async updateValues({
     id,
@@ -499,8 +496,8 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   }: {
     id: string
     postData: DevicePostDataAny
-  }): Promise<Data> {
-    return this.#requestData<Data>('post', `/control/${id}`, { data: postData })
+  }): Promise<void> {
+    await this.#request('post', `/control/${id}`, { data: postData })
   }
 
   // The registry refresh both entry points share, without a
@@ -560,32 +557,33 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
     method: string
     url: string
   }): ResiliencePolicy {
-    const policies: ResiliencePolicy[] = [this.#authRetryPolicy]
-    if (context.method === 'GET') {
-      policies.push(
-        new TransientRetryPolicy(
-          {
-            onRetry: (
-              retryAttempt: number,
-              error: unknown,
-              delayMs: number,
-            ): void => {
-              this.logger.log(
-                `Transient server error on ${context.url}: retry ${String(retryAttempt)} in ${String(delayMs)} ms`,
-              )
-              this.#events.emitRetry({
-                ...context,
-                attempt: retryAttempt,
-                delayMs,
-                error,
-              })
-            },
-          },
-          this.#config.abortSignal,
-        ),
-      )
+    if (context.method !== 'GET') {
+      return this.#authRetryPolicy
     }
-    return new CompositePolicy(policies)
+    const transientPolicy = new TransientRetryPolicy(
+      {
+        onRetry: (
+          retryAttempt: number,
+          error: unknown,
+          delayMs: number,
+        ): void => {
+          this.logger.log(
+            `Transient server error on ${context.url}: retry ${String(retryAttempt)} in ${String(delayMs)} ms`,
+          )
+          this.#events.emitRetry({
+            ...context,
+            attempt: retryAttempt,
+            delayMs,
+            error,
+          })
+        },
+      },
+      this.#config.abortSignal,
+    )
+    return {
+      run: async <T>(attempt: () => Promise<T>): Promise<T> =>
+        this.#authRetryPolicy.run(async () => transientPolicy.run(attempt)),
+    }
   }
 
   #clearPersistedSession(): void {
@@ -600,7 +598,7 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   async #dispatch<T = unknown>(
     method: string,
     url: string,
-    config: Record<string, unknown> = {},
+    config: { readonly data?: unknown } = {},
   ): Promise<HttpResponse<T>> {
     // No heatzy endpoint sends per-call headers, so auth headers are
     // the only ones — a config.headers merge would be an uncovered
@@ -774,7 +772,7 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   async #request<T = unknown>(
     method: string,
     url: string,
-    config: Record<string, unknown> = {},
+    config: { readonly data?: unknown } = {},
   ): Promise<HttpResponse<T>> {
     await this.#ensureSession()
     const context = {
@@ -794,19 +792,18 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
     return this.#runWithEvents(context, async () => policy.run(attempt))
   }
 
-  // Strip the envelope and parse the body when a `schema` peer key is
-  // supplied; throw on transport failure — the contract every
-  // required-path endpoint (sync, mutations) wants.
+  // Strip the envelope and parse the body against the endpoint's
+  // schema; throw on transport failure — the contract every
+  // required-path endpoint (sync, mutations) wants. Responses nothing
+  // consumes (`/control`) go through `#request` directly.
   async #requestData<T>(
     method: string,
     url: string,
-    options: Record<string, unknown> & { readonly schema?: z.ZodType<T> } = {},
+    options: { readonly schema: z.ZodType<T>; readonly data?: unknown },
   ): Promise<T> {
     const { schema, ...config } = options
     const { data } = await this.#request<T>(method, url, config)
-    return schema === undefined
-      ? data
-      : parseOrThrow(schema, data, `${method.toUpperCase()} ${url}`)
+    return parseOrThrow(schema, data, `${method.toUpperCase()} ${url}`)
   }
 
   #resolvePersistedCredentials(): LoginCredentials | null {
@@ -821,20 +818,20 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
     context: { correlationId: string; method: string; url: string },
     runner: () => Promise<HttpResponse<T>>,
   ): Promise<HttpResponse<T>> {
-    const startedAt = Date.now()
+    const startedAt = Temporal.Now.instant().epochMilliseconds
     this.#events.emitStart(context)
     try {
       const response = await runner()
       this.#events.emitComplete({
         ...context,
-        durationMs: Date.now() - startedAt,
+        durationMs: Temporal.Now.instant().epochMilliseconds - startedAt,
         status: response.status,
       })
       return response
     } catch (error) {
       this.#events.emitError({
         ...context,
-        durationMs: Date.now() - startedAt,
+        durationMs: Temporal.Now.instant().epochMilliseconds - startedAt,
         error,
       })
       throw error

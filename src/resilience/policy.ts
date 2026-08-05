@@ -3,8 +3,8 @@
  *
  * Each policy owns exactly one concern (rate-limiting, auth retry,
  * transient-error retry…) and wraps the caller's `attempt` with its
- * own semantics. Policies are **composed** via {@link CompositePolicy}
- * to build the request pipeline declaratively.
+ * own semantics. The client composes policies directly — the outer
+ * policy's `run` receives a closure over the inner one's.
  *
  * Implementations MUST:
  * - run the caller's `attempt` at most once per `run` invocation per
@@ -16,35 +16,4 @@
  */
 export interface ResiliencePolicy {
   run: <T>(attempt: () => Promise<T>) => Promise<T>
-}
-
-/**
- * Compose N policies into a single pipeline. The first policy in the
- * array is the **outermost** wrapper — it sees the request before any
- * inner policy gets to decorate it, and sees the result last.
- *
- * Example: `new CompositePolicy([auth, transient]).run(fetch)` runs as
- * `auth(transient(fetch))`: a transient 5xx is retried first; an auth
- * failure once the inner retries give up triggers the outer auth-retry.
- *
- * An empty composite is a no-op pass-through.
- */
-export class CompositePolicy implements ResiliencePolicy {
-  // Innermost-first ordering, computed once — `run` only re-wraps the
-  // attempt closure per call, never re-derives the pipeline.
-  readonly #reversedPolicies: readonly ResiliencePolicy[]
-
-  public constructor(policies: readonly ResiliencePolicy[]) {
-    this.#reversedPolicies = policies.toReversed()
-  }
-
-  public async run<T>(attempt: () => Promise<T>): Promise<T> {
-    let wrapped: () => Promise<T> = attempt
-    for (const policy of this.#reversedPolicies) {
-      const inner = wrapped
-      const wrap = async (): Promise<T> => policy.run(inner)
-      wrapped = wrap
-    }
-    return wrapped()
-  }
 }

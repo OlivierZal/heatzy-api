@@ -14,5 +14,5 @@ export type {
   TransportConfig,
 } from './types.ts'
 
-export { HeatzyAPI, toAuthFailure } from './heatzy.ts'
+export { HeatzyAPI } from './heatzy.ts'
 export { SyncManager } from './sync-manager.ts'

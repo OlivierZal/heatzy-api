@@ -1,55 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import {
-  type ResiliencePolicy,
   AuthRetryPolicy,
-  CompositePolicy,
   RetryGuard,
   TransientRetryPolicy,
 } from '../../src/resilience/index.ts'
 import { createServerError } from '../helpers.ts'
-
-describe(CompositePolicy, () => {
-  it('empty composite runs the attempt verbatim', async () => {
-    const composite = new CompositePolicy([])
-    const attempt = vi.fn<() => Promise<string>>().mockResolvedValue('ok')
-
-    await expect(composite.run(attempt)).resolves.toBe('ok')
-    expect(attempt).toHaveBeenCalledTimes(1)
-  })
-
-  it('wraps outer-to-inner — first array element sees the call first', async () => {
-    const callOrder: string[] = []
-    const makePolicy = (label: string): ResiliencePolicy => ({
-      run: async <T>(inner: () => Promise<T>): Promise<T> => {
-        callOrder.push(`${label}:before`)
-        const result = await inner()
-        callOrder.push(`${label}:after`)
-        return result
-      },
-    })
-    const composite = new CompositePolicy([
-      makePolicy('outer'),
-      makePolicy('mid'),
-      makePolicy('inner'),
-    ])
-
-    await composite.run(async () => {
-      callOrder.push('attempt')
-      await Promise.resolve()
-    })
-
-    expect(callOrder).toStrictEqual([
-      'outer:before',
-      'mid:before',
-      'inner:before',
-      'attempt',
-      'inner:after',
-      'mid:after',
-      'outer:after',
-    ])
-  })
-})
 
 describe(AuthRetryPolicy, () => {
   // Gizwits reports an invalid or expired token as HTTP 400 (error
@@ -57,7 +13,7 @@ describe(AuthRetryPolicy, () => {
   it.each([400, 401])(
     'replays the attempt after a %i when reauthenticate returns true',
     async (status) => {
-      using guard = new RetryGuard(1000)
+      const guard = new RetryGuard(1000)
       const reauthenticate = vi
         .fn<() => Promise<boolean>>()
         .mockResolvedValue(true)
@@ -76,7 +32,7 @@ describe(AuthRetryPolicy, () => {
   it.each([400, 401])(
     'rethrows the %i when the guard refuses a retry',
     async (status) => {
-      using guard = new RetryGuard(1000)
+      const guard = new RetryGuard(1000)
 
       // consume the single token
       guard.tryConsume()
@@ -96,7 +52,7 @@ describe(AuthRetryPolicy, () => {
   it.each([400, 401])(
     'rethrows the %i when reauthenticate fails',
     async (status) => {
-      using guard = new RetryGuard(1000)
+      const guard = new RetryGuard(1000)
       const reauthenticate = vi
         .fn<() => Promise<boolean>>()
         .mockResolvedValue(false)
@@ -113,7 +69,7 @@ describe(AuthRetryPolicy, () => {
   )
 
   it('passes another status (500) through without triggering reauth', async () => {
-    using guard = new RetryGuard(1000)
+    const guard = new RetryGuard(1000)
     const reauthenticate = vi.fn<() => Promise<boolean>>()
     const policy = new AuthRetryPolicy(guard, reauthenticate)
 

@@ -1,7 +1,6 @@
 import type { HttpClient } from '../http/index.ts'
 import type {
   Attributes,
-  Data,
   DeviceBinding,
   DevicePostDataAny,
   LoginCredentials,
@@ -52,7 +51,7 @@ export interface HeatzyAPIAdapter {
   }: {
     id: string
     postData: DevicePostDataAny
-  }) => Promise<Data>
+  }) => Promise<void>
 }
 
 /**
@@ -331,7 +330,7 @@ export type SyncCallback = (params?: {
  * {@link HttpClient} instance — the SDK either reuses your wired client
  * (with its own dispatcher, headers, timeout) or builds a fetch-backed
  * default whose timeout you can tweak via `timeoutMs`.
- * @internal
+ * @category Configuration
  */
 export type TransportConfig =
   | HttpClient

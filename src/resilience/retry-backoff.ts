@@ -114,16 +114,25 @@ const sleep = async (ms: number, signal?: AbortSignal): Promise<void> => {
   if (signal?.aborted === true) {
     throw toAbortReason(signal)
   }
+  if (signal === undefined) {
+    return new Promise<void>((resolve) => {
+      setTimeout(resolve, ms)
+    })
+  }
   return new Promise<void>((resolve, reject) => {
-    const timer = setTimeout(resolve, ms)
-    signal?.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(timer)
-        reject(toAbortReason(signal))
-      },
-      { once: true },
-    )
+    // Detach the abort listener when the timer fires: `{ once: true }`
+    // only removes it after an abort, so a long-lived signal (the
+    // documented Homey shutdown signal) would otherwise accumulate one
+    // listener per backoff sleep for the life of the process.
+    const onAbort = (): void => {
+      clearTimeout(timer)
+      reject(toAbortReason(signal))
+    }
+    const timer = setTimeout(() => {
+      signal.removeEventListener('abort', onAbort)
+      resolve()
+    }, ms)
+    signal.addEventListener('abort', onAbort, { once: true })
   })
 }
 

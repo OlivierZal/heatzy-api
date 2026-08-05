@@ -12,7 +12,6 @@ interface TestRequestConfig {
   data?: unknown
   headers?: Record<string, string>
   method?: string
-  params?: Record<string, unknown>
   url?: string
 }
 
@@ -28,7 +27,6 @@ const createConfig = (
   data: { key: 'value' },
   headers: { 'Content-Type': 'application/json' },
   method: 'post',
-  params: { id: 1 },
   url: '/test/endpoint',
   ...overrides,
 })
@@ -49,7 +47,6 @@ describe('api call request data', () => {
     expect(data.dataType).toBe('API request')
     expect(data.method).toBe('POST')
     expect(data.url).toBe('/test/endpoint')
-    expect(data.params).toStrictEqual({ id: 1 })
     expect(data.requestData).toStrictEqual({ key: 'value' })
     expect(data.headers).toStrictEqual({ 'Content-Type': 'application/json' })
   })
@@ -59,7 +56,6 @@ describe('api call request data', () => {
 
     expect(data.method).toBeUndefined()
     expect(data.url).toBeUndefined()
-    expect(data.params).toBeUndefined()
     expect(data.requestData).toBeUndefined()
     expect(data.headers).toBeUndefined()
   })
@@ -75,6 +71,32 @@ describe('api call request data', () => {
     ])
   })
 
+  it('redacts sensitive keys nested in object payloads', () => {
+    const data = new APICallRequestData(
+      createConfig({ data: { body: { password: 'secret', safe: 'ok' } } }),
+    )
+    const parsed: Record<string, unknown> = cast(JSON.parse(data.toString()))
+
+    expect(parsed.requestData).toStrictEqual({
+      body: { password: '******', safe: 'ok' },
+    })
+  })
+
+  it('redacts sensitive keys at any nesting depth', () => {
+    const data = new APICallRequestData(
+      createConfig({
+        data: {
+          outer: { entries: [{ inner: { token: 'secret' }, safe: 'ok' }] },
+        },
+      }),
+    )
+    const parsed: Record<string, unknown> = cast(JSON.parse(data.toString()))
+
+    expect(parsed.requestData).toStrictEqual({
+      outer: { entries: [{ inner: { token: '******' }, safe: 'ok' }] },
+    })
+  })
+
   it('serializes to JSON with logKeys', () => {
     const data = new APICallRequestData(createConfig())
     const parsed: Record<string, unknown> = cast(JSON.parse(data.toString()))
@@ -83,7 +105,6 @@ describe('api call request data', () => {
     expect(parsed.method).toBe('POST')
     expect(parsed.url).toBe('/test/endpoint')
     expect(parsed).toHaveProperty('headers')
-    expect(parsed).toHaveProperty('params')
     expect(parsed).toHaveProperty('requestData')
   })
 })

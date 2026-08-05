@@ -14,8 +14,6 @@ type FetchDispatcher = object
 
 type FetchInit = NonNullable<Parameters<typeof fetch>[1]>
 
-const NULL_BODY_STATUS = 204
-
 const JSON_CONTENT_TYPE = 'application/json'
 
 /**
@@ -30,9 +28,8 @@ export interface HttpClientConfig {
 }
 
 /**
- * Configuration accepted by {@link HttpClient.request}. Field names
- * intentionally mirror the Axios request-config subset (`data`,
- * `params`…).
+ * Configuration accepted by {@link HttpClient.request}: body (`data`),
+ * query (`params`), per-request headers, method, abort signal and URL.
  * @category HTTP
  */
 export interface HttpRequestConfig {
@@ -140,12 +137,8 @@ const readHeaders = (headers: Headers): Record<string, string | string[]> => {
 // parseability avoids a content-type allowlist that drifts with every
 // new server flavour.
 const parseBody = async (response: Response): Promise<unknown> => {
-  if (
-    response.status === NULL_BODY_STATUS ||
-    response.headers.get('content-length') === '0'
-  ) {
-    return ''
-  }
+  // A null-body status (204) and a `content-length: 0` response both
+  // read back as empty text, so one emptiness check covers them all.
   const text = await response.text()
   if (text === '') {
     return ''
