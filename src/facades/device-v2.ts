@@ -11,7 +11,10 @@ export class DeviceV2Facade extends DeviceFacade {
   /**
    * The running derogation's end, formatted for display in the
    * configured locale — time-of-day for boost and presence, day +
-   * month + time for vacation. `null` when no derogation is running.
+   * month + time for vacation. `null` when no derogation is running —
+   * or when it was already running at first sight: the wire carries no
+   * start timestamp, so the end is only derived when a change is
+   * observed (see {@link Device.derogationEndDate}).
    * @returns The formatted end label, or `null`.
    */
   public get derogationEndString(): string | null {

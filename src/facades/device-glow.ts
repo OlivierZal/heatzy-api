@@ -1,13 +1,11 @@
 import {
   type TemperatureCompensation,
+  GLOW_SETPOINT_RANGES,
   Mode,
   TEMPERATURE_SCALE,
 } from '../constants.ts'
 import { clampToRange } from '../utils.ts'
 import { DeviceV2Facade } from './device-v2.ts'
-
-const COMFORT_RANGE = { max: 30, min: 15 } as const
-const ECO_RANGE = { max: 19, min: 10 } as const
 
 /**
  * Facade for Glow products (incl. Onyx and Shine): split high/low
@@ -61,10 +59,7 @@ export class DeviceGlowFacade extends DeviceV2Facade {
   protected getTargetTemperature(
     mode: typeof Mode.comfort | typeof Mode.eco,
   ): number {
-    return clampToRange(
-      this.getTemperature(mode),
-      mode === Mode.comfort ? COMFORT_RANGE : ECO_RANGE,
-    )
+    return clampToRange(this.getTemperature(mode), GLOW_SETPOINT_RANGES[mode])
   }
 
   // Glow encodes temperatures across two registers: `tempH` carries

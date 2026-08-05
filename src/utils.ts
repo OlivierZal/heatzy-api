@@ -1,5 +1,11 @@
 import type { PostAttributes } from './types/index.ts'
-import { type Mode, Product, Switch, TEMPERATURE_SCALE } from './constants.ts'
+import {
+  type Mode,
+  GLOW_SETPOINT_RANGES,
+  Product,
+  Switch,
+  TEMPERATURE_SCALE,
+} from './constants.ts'
 
 const BYTE_MAX = 255
 
@@ -55,9 +61,11 @@ export const clampToRange = (
 
 /**
  * Build the control attributes that set a target temperature, in the
- * register layout the product generation expects: Glow splits the
- * value across `tempH`/`tempL` (hundreds bit + remainder in tenths),
- * every other generation takes a single `temp` register in tenths.
+ * register layout the product generation expects: Glow clamps the
+ * value into the mode's accepted range — symmetric with the read
+ * side — and splits it across `tempH`/`tempL` (hundreds bit +
+ * remainder in tenths); every other generation takes a single `temp`
+ * register in tenths, unclamped.
  * @param product - Product generation of the target device.
  * @param mode - Which setpoint to write (comfort or eco).
  * @param value - Target temperature in °C.
@@ -69,13 +77,14 @@ export const getTargetTemperature = (
   mode: typeof Mode.comfort | typeof Mode.eco,
   value: number,
 ): PostAttributes => {
-  const scaled = value * TEMPERATURE_SCALE
   if (product === Product.glow) {
+    const scaled =
+      clampToRange(value, GLOW_SETPOINT_RANGES[mode]) * TEMPERATURE_SCALE
     const high = scaled > BYTE_MAX ? Switch.on : Switch.off
     return {
       [`${mode}_tempH`]: high,
       [`${mode}_tempL`]: scaled - high * TEMPERATURE_SCALE * TEMPERATURE_SCALE,
     }
   }
-  return { [`${mode}_temp`]: scaled }
+  return { [`${mode}_temp`]: value * TEMPERATURE_SCALE }
 }
