@@ -60,4 +60,24 @@ describe(getTargetTemperature, () => {
       eco_tempL: 180,
     })
   })
+
+  it('clamps a Glow comfort write above the range, like the read side', () => {
+    expect(getTargetTemperature(Product.glow, Mode.comfort, 35)).toStrictEqual({
+      cft_tempH: 1,
+      cft_tempL: 200,
+    })
+  })
+
+  it('clamps a Glow eco write below the range, like the read side', () => {
+    expect(getTargetTemperature(Product.glow, Mode.eco, 5)).toStrictEqual({
+      eco_tempH: 0,
+      eco_tempL: 100,
+    })
+  })
+
+  it('leaves a non-Glow write unclamped', () => {
+    expect(getTargetTemperature(Product.pro, Mode.comfort, 35)).toStrictEqual({
+      cft_temp: 350,
+    })
+  })
 })

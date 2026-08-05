@@ -30,6 +30,17 @@ export const Mode = {
 export type Mode = (typeof Mode)[keyof typeof Mode]
 
 /**
+ * Glow setpoint bounds in °C per mode — the wire's accepted ranges,
+ * applied symmetrically: reads clamp device-reported values into them,
+ * writes clamp outgoing values into them.
+ * @category Constants
+ */
+export const GLOW_SETPOINT_RANGES = {
+  cft: { max: 30, min: 15 },
+  eco: { max: 19, min: 10 },
+} as const
+
+/**
  * Product generations, ordered so `>=` reads as capability support.
  * @category Constants
  */

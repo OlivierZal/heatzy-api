@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Glow setpoint writes are clamped into the wire's accepted ranges** (comfort 15–30 °C, eco 10–19 °C), symmetric with the read side. `getTargetTemperature(Product.glow, …)` used to encode out-of-range values verbatim, so a caller could write 35 °C and read 30 °C back. Non-Glow generations are unchanged.
+
 ## [11.0.1] - 2026-08-03
 
 ### Fixed
@@ -51,6 +57,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[unreleased]: https://github.com/OlivierZal/heatzy-api/compare/v11.0.1...HEAD
 [11.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v11.0.0...v11.0.1
 [11.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v10.0.0...v11.0.0
 [10.0.0]: https://github.com/OlivierZal/heatzy-api/releases/tag/v10.0.0
