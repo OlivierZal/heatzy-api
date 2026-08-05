@@ -97,7 +97,6 @@ export class Device {
   /**
    * When the running derogation (boost, vacation, presence countdown)
    * ends, or `null` when none is running or the deadline has passed.
-   *
    * The wire carries the derogation's duration but not its start, so
    * the end is derived when a change is observed. A derogation already
    * running when the SDK first sees the device therefore stays `null`
