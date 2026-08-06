@@ -136,13 +136,17 @@ fire-and-forget `.catch()`, and the single-flight `.finally()` in
 - Every review thread (Copilot or human) must end RESOLVED: with a code
   change when the point holds, or with a reasoned reply when it does
   not — verify claims against sources before acting either way.
-- SonarCloud must be spotless for a PR to merge: quality gate green,
-  zero open issues on its analysis, 100 % coverage (within the
-  exclusions `sonar-project.properties` declares), and 0 % duplicated
-  lines on the whole codebase — new and old code alike, not just the
-  new-code gate. A Sonar finding is
-  handled like a lint error — the code adapts, or the divergence is
-  settled as a documented verdict — never merged over.
+- SonarCloud must be spotless for a PR to merge — and the quality gate
+  passing is necessary, NOT sufficient: the free-tier gate tolerates
+  3 % duplication on new code, lets code smells through, and cannot be
+  customized, so the real bar is ours, held in review. That bar is
+  zero on BOTH windows — new code and overall alike: zero open issues
+  of every kind (bugs, code smells, vulnerabilities) across the whole
+  project, 0 % duplicated lines across the whole codebase, and 100 %
+  coverage (within the exclusions `sonar-project.properties`
+  declares). A Sonar finding is handled like a lint error — the code
+  adapts, or the divergence is settled as a documented verdict — never
+  merged over.
 - The SonarCloud project runs **CI-based analysis** (the `ci.yml` scan
   step on the `lts/*` leg): **Automatic Analysis must stay DISABLED** in
   the project's Administration settings. If it is on, the CI scanner
