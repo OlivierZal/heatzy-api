@@ -353,10 +353,37 @@ describe(HeatzyAPI, () => {
       ).rejects.toBeInstanceOf(AuthenticationError)
 
       expect(api.isAuthenticated()).toBe(false)
-      expect(settingManager.get('token')).toBe('')
+      // A rejected attempt persists no credential or session artifact —
+      // neither the refused pair nor a token; the login backoff IS
+      // stored, that being its job.
+      expect(settingManager.get('username')).toBeNull()
+      expect(settingManager.get('password')).toBeNull()
+      expect(settingManager.get('token')).toBeNull()
       expect(Number(settingManager.get('loginBackoffUntil'))).toBe(
         Date.now() + LOGIN_BACKOFF_MS,
       )
+    })
+
+    it('keeps the previously persisted credentials and session on a rejected sign-in', async () => {
+      const { settingManager } = createSettingStore({
+        expiry: '2099-01-01T00:00:00Z',
+        password: 'right',
+        token: 'live-token',
+        username: 'good@test.com',
+      })
+      const api = await createApi({ settingManager })
+      mockRejectedWire()
+
+      await expect(
+        api.authenticate({ password: 'typo', username: 'good@test.com' }),
+      ).rejects.toBeInstanceOf(AuthenticationError)
+
+      // Only a server-accepted pair may displace the stored one: a
+      // typo'd retry must not destroy a working login.
+      expect(settingManager.get('username')).toBe('good@test.com')
+      expect(settingManager.get('password')).toBe('right')
+      expect(settingManager.get('token')).toBe('live-token')
+      expect(settingManager.get('expiry')).toBe('2099-01-01T00:00:00Z')
     })
 
     // The registry guarantee above is only worth as much as its failure
