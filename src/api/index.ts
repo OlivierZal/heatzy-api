@@ -15,4 +15,3 @@ export type {
 } from './types.ts'
 
 export { HeatzyAPI } from './heatzy.ts'
-export { SyncManager } from './sync-manager.ts'
