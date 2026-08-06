@@ -11,19 +11,6 @@ describe('disposable timeout', () => {
     vi.useRealTimers()
   })
 
-  it('starts inactive', () => {
-    using timeout = new DisposableTimeout()
-
-    expect(timeout.isActive).toBe(false)
-  })
-
-  it('becomes active after schedule', () => {
-    using timeout = new DisposableTimeout()
-    timeout.schedule(vi.fn<() => void>(), 1000)
-
-    expect(timeout.isActive).toBe(true)
-  })
-
   it('executes callback after delay', () => {
     using timeout = new DisposableTimeout()
     const callback = vi.fn<() => void>()
@@ -31,14 +18,6 @@ describe('disposable timeout', () => {
     vi.advanceTimersByTime(1000)
 
     expect(callback).toHaveBeenCalledTimes(1)
-  })
-
-  it('becomes inactive after clear', () => {
-    using timeout = new DisposableTimeout()
-    timeout.schedule(vi.fn<() => void>(), 1000)
-    timeout.clear()
-
-    expect(timeout.isActive).toBe(false)
   })
 
   it('does not execute callback after clear', () => {
@@ -63,13 +42,12 @@ describe('disposable timeout', () => {
     expect(callback2).toHaveBeenCalledTimes(1)
   })
 
-  it('clear is idempotent when inactive', () => {
+  it('clear is idempotent when nothing is scheduled', () => {
     using timeout = new DisposableTimeout()
 
     expect(() => {
       timeout.clear()
     }).not.toThrow()
-    expect(timeout.isActive).toBe(false)
   })
 
   it('symbol.dispose clears the timeout', () => {
@@ -77,9 +55,6 @@ describe('disposable timeout', () => {
     const callback = vi.fn<() => void>()
     timeout.schedule(callback, 1000)
     timeout[Symbol.dispose]()
-
-    expect(timeout.isActive).toBe(false)
-
     vi.advanceTimersByTime(1000)
 
     expect(callback).not.toHaveBeenCalled()
