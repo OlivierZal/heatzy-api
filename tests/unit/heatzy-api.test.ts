@@ -353,8 +353,9 @@ describe(HeatzyAPI, () => {
       ).rejects.toBeInstanceOf(AuthenticationError)
 
       expect(api.isAuthenticated()).toBe(false)
-      // A rejected attempt persists nothing — neither the refused pair
-      // nor any session artifact.
+      // A rejected attempt persists no credential or session artifact —
+      // neither the refused pair nor a token; the login backoff IS
+      // stored, that being its job.
       expect(settingManager.get('username')).toBeNull()
       expect(settingManager.get('password')).toBeNull()
       expect(settingManager.get('token')).toBeNull()
