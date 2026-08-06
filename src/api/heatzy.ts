@@ -249,6 +249,10 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
    *
    * Use {@link resumeSession} for a best-effort restore from persisted
    * credentials that logs + swallows errors.
+   *
+   * A rejected sign-in leaves the previously persisted credentials and
+   * session untouched: only server-accepted credentials reach the
+   * settings store.
    * @param credentials - Explicit username/password.
    * @throws {@link AuthenticationError} when credentials are rejected.
    * @throws {@link ValidationError} — or whatever the post-auth sync
@@ -258,16 +262,19 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
    */
   public async authenticate(credentials: LoginCredentials): Promise<void> {
     const epoch = this.#logOutEpoch
-    this.#applyCredentials(credentials.username, credentials.password)
-    // Explicit login starts from a clean slate — enforced here
-    // (mirrors the post-auth sync below).
-    this.#clearPersistedSession()
     try {
       await this.#doAuthenticate(credentials)
     } catch (error) {
       this.#armLoginBackoff(error)
       throw error
     }
+    // Persisted only now, so a rejected pair can never displace working
+    // stored credentials. No session clear is needed either:
+    // `#doAuthenticate` overwrites both session keys wholesale, and the
+    // paths that know a session is dead (`logOut`, the reactive
+    // `#reauthenticate`, a raced log-out in `#finishLogin`) each clear
+    // it themselves.
+    this.#applyCredentials(credentials.username, credentials.password)
     await this.#finishLogin(epoch)
   }
 
@@ -629,8 +636,9 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
       }
       throw error
     }
-    // Credentials are already persisted by `authenticate` before this
-    // runs; only the session artifacts are stored here. `expire_at`
+    // Only the session artifacts are stored here — both keys, a
+    // wholesale replacement of any prior session; `authenticate`
+    // persists the credentials once this resolves. `expire_at`
     // arrives as epoch seconds — persisted as ISO 8601 so the shared
     // session-expiry check reads it back absolutely.
     this.token = data.token

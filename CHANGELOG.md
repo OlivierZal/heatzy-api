@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Credentials are persisted only when the server accepts them.** `authenticate` used to write the attempted username/password to the settings store and wipe the persisted session before the sign-in round-trip, so a rejected attempt (a typo, a revoked account) displaced working stored credentials and destroyed the live session. A rejected sign-in now leaves the previously persisted credentials and session untouched; a successful one replaces them atomically (`logOut` and the reactive re-authentication keep clearing the session where its invalidation is actually known).
+
 ## [12.0.0] - 2026-08-06
 
 ### Breaking changes
@@ -73,6 +79,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[unreleased]: https://github.com/OlivierZal/heatzy-api/compare/v12.0.0...HEAD
 [12.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v11.0.1...v12.0.0
 [11.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v11.0.0...v11.0.1
 [11.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v10.0.0...v11.0.0
