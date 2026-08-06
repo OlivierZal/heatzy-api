@@ -137,8 +137,10 @@ fire-and-forget `.catch()`, and the single-flight `.finally()` in
   change when the point holds, or with a reasoned reply when it does
   not — verify claims against sources before acting either way.
 - SonarCloud must be spotless for a PR to merge: quality gate green,
-  zero open issues on its analysis, and 100 % coverage (within the
-  exclusions `sonar-project.properties` declares). A Sonar finding is
+  zero open issues on its analysis, 100 % coverage (within the
+  exclusions `sonar-project.properties` declares), and 0 % duplicated
+  lines on the whole codebase — new and old code alike, not just the
+  new-code gate. A Sonar finding is
   handled like a lint error — the code adapts, or the divergence is
   settled as a documented verdict — never merged over.
 - The SonarCloud project runs **CI-based analysis** (the `ci.yml` scan
