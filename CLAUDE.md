@@ -73,6 +73,25 @@ Architecture, toolchain and process are aligned on the sibling
   custom per-call headers, so `#dispatch` writes only the auth headers;
   melcloud's `configHeaders` merge would be a dead, uncovered branch here.
 
+## Tooling boundary (@olivierzal/configs)
+
+The shared tooling lives in `@olivierzal/configs` (exact pin): the
+eslint `library` preset (plugins are the package's dependencies — no
+plugin devDeps here), the prettier config (`"prettier"` key in
+package.json, no local file), the `tsconfig/library` base, `typedocBase`
+and the vitest `swcPlugin`. The overlays keep ONLY per-repo verdicts:
+the lint ignores (`scripts/`), the Gizwits `wireNamingEntries` splice,
+tsconfig `outDir`/`include`, and the typedoc identity (name, links,
+`intentionallyNotExported`). Do not re-declare family policy locally —
+a rule evaluation or version bump happens in configs, adoption is a
+reviewed pin bump. Never extend `tsconfig/library-build`: its
+`rootDir`/`include` resolve against the base file inside node_modules
+(same trap the configs README documents for `outDir`) — extend
+`tsconfig/library` and keep those keys local. The CI/audit/claude/zizmor
+workflows are stubs calling the family reusables in OlivierZal/configs,
+pinned `@<sha> # vX.Y.Z`; `publish.yml` and `docs.yml` stay local (no
+reusable exists), so the composite action stays too.
+
 ## Lint doctrine
 
 Same doctrine as melcloud-api — code adapts to the rules, never the
