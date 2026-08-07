@@ -90,7 +90,9 @@ reviewed pin bump. Never extend `tsconfig/library-build`: its
 `tsconfig/library` and keep those keys local. The CI/audit/claude/zizmor
 workflows are stubs calling the family reusables in OlivierZal/configs,
 pinned `@<sha> # vX.Y.Z`; `publish.yml` and `docs.yml` stay local (no
-reusable exists), so the composite action stays too.
+reusable exists), so the composite action stays too — and both installs
+pass `npm-token` (the configs dependency lives on GitHub Packages,
+where even reads need auth).
 
 ## Lint doctrine
 
