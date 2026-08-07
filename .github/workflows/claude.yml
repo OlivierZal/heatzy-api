@@ -1,12 +1,14 @@
 # Calls the family workflow of the same name in OlivierZal/configs.
 jobs:
   claude:
+    # Exactly the callable job's declared permissions (its checkout is
+    # read-only; Claude pushes through its GitHub App token, not this one).
     permissions:
       actions: read
-      contents: write
+      contents: read
       id-token: write
-      issues: write
-      pull-requests: write
+      issues: read
+      pull-requests: read
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
     uses: OlivierZal/configs/.github/workflows/claude.yml@c498c9308d041f8df580293edd0f39df255198e0 # v1.2.0
