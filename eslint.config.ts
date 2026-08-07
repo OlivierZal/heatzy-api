@@ -10,12 +10,25 @@ const config: Config[] = defineConfig([
   },
   ...library({
     wireNamingEntries: [
-      // Gizwits split temperature registers mix snake and camel
-      // (`cur_tempH`) — the wire is canonical.
+      // Gizwits attribute payloads are snake_case, and the split
+      // temperature registers mix snake and camel (`cur_tempH`); the
+      // Glow generation's `LOCK_C` breaks even that. The wire is
+      // canonical — these keys are sent and received verbatim.
       {
-        filter: { match: true, regex: '^(cft|cur|eco)_temp[HL]$' },
+        filter: { match: true, regex: '^([a-z]+(_[a-zA-Z]+)+|LOCK_C)$' },
         format: null,
         selector: ['objectLiteralProperty', 'typeProperty'],
+      },
+      // HTTP names its statuses through reason phrases (IANA HTTP
+      // Status Code Registry); the SDK's status map keys them.
+      {
+        filter: {
+          match: true,
+          regex:
+            '^(BadGateway|BadRequest|GatewayTimeout|ServiceUnavailable|Unauthorized)$',
+        },
+        format: ['PascalCase'],
+        selector: 'objectLiteralProperty',
       },
     ],
   }),
