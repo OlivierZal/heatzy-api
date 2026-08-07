@@ -1,5 +1,15 @@
+import { namingConventionEntries } from '@olivierzal/configs/eslint'
 import { library } from '@olivierzal/configs/eslint/library'
 import { type Config, defineConfig } from 'eslint/config'
+
+// The modules that hold a wire vocabulary: the Gizwits payload types
+// and their zod mirror, plus the HTTP status map. Everywhere else the
+// strict core applies.
+const wireContractFiles = [
+  'src/http/status.ts',
+  'src/types/heatzy.ts',
+  'src/validation/schemas.ts',
+]
 
 const config: Config[] = defineConfig([
   {
@@ -32,6 +42,26 @@ const config: Config[] = defineConfig([
       },
     ],
   }),
+  {
+    // The wire exemptions above are what the protocol imposes on the
+    // modules that speak it, not a licence for the whole tree: the
+    // sources that are ours alone take the core back, so a snake_case
+    // name of our own invention is caught here rather than waved
+    // through by a vocabulary it does not belong to. Fixtures keep the
+    // exemption: they carry payloads verbatim.
+    files: ['src/**/*.ts'],
+    ignores: wireContractFiles,
+    rules: {
+      '@typescript-eslint/naming-convention': [
+        'error',
+        ...namingConventionEntries({
+          // Mirrors the library preset's own filter: `device` types
+          // include `false` as a sentinel without being a flag.
+          booleanFilter: { match: false, regex: '^device$' },
+        }),
+      ],
+    },
+  },
 ])
 
 export default config
