@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Breaking:** `engines.node` raised to `>=22.20.0` (was `>=22.19.0`). The floor now states the measured device fleet: every up-to-date Homey Pro runs Node 22.20 (Early 2019) or 22.23 (2023), measured on-device 2026-08, so 22.19 was a number nothing executed. No production dependency of this package declares a floor of its own, so nothing constrained it from below — the previous value was carried over from the sibling client, where `undici` had set it. Nothing changes at runtime (`engines` is advisory absent `engine-strict`), but the package no longer claims support for Node 22.0–22.19.x.
+
 ## [12.0.1] - 2026-08-06
 
 ### Fixed
@@ -79,6 +85,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[Unreleased]: https://github.com/OlivierZal/heatzy-api/compare/v12.0.2...HEAD
 [12.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v12.0.0...v12.0.1
 [12.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v11.0.1...v12.0.0
 [11.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v11.0.0...v11.0.1
