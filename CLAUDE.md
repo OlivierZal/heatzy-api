@@ -190,9 +190,10 @@ fire-and-forget `.catch()`, and the single-flight `.finally()` in
   the reviewable _hotspot_ the CI scanner raises. That hotspot is marked
   SAFE in the dashboard with the documented "retry timing is not
   security-sensitive" rationale (mirrors melcloud-api).
-- Dependabot PRs auto-merge via `gh pr merge --auto`; the `merge_group`
-  triggers in the workflows are inert but harmless (user-owned repo,
-  merge queue is org-only).
+- Dependabot PRs auto-merge via `gh pr merge --auto`. GitHub merge
+  queue is impossible here — the feature is gated on ORGANISATION
+  ownership and this repo is user-owned (verified 2026-08 against the
+  docs source) — so the workflows declare no `merge_group` trigger.
 - The docs site deploys only on release or `gh workflow run docs.yml`.
 - CI: `Test (Node latest)` is `continue-on-error` by design — keep it
   out of required status checks. Sonar coverage runs on the `lts/*` leg
