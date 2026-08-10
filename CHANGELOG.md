@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [13.0.0] - 2026-08-10
 
 ### Changed
 
@@ -85,7 +85,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
-[Unreleased]: https://github.com/OlivierZal/heatzy-api/compare/v12.0.2...HEAD
+[13.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v12.0.2...v13.0.0
 [12.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v12.0.0...v12.0.1
 [12.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v11.0.1...v12.0.0
 [11.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v11.0.0...v11.0.1
