@@ -154,6 +154,13 @@ fire-and-forget `.catch()`, and the single-flight `.finally()` in
   proper noun. Dependabot's prefixes are pinned to `build(deps)` /
   `build(deps-dev)` rather than inferred, which is what had this repo
   land bare `Bump …` titles with no type at all.
+  The **subject** casing stays inferred and cannot be pinned:
+  `commit-message` accepts only `prefix`, `prefix-development` and
+  `include`, so Dependabot keeps matching each repo's own history
+  (`Bump undici` in one, `bump temporal-polyfill` in another). Left
+  alone by decision (2026-08): a Dependabot commit subject is not a
+  contract, the PR title is — and the `PR title` check already holds
+  that one.
 - After every push, monitor the triggered pipelines to completion — the
   PR checks after a push, the publish run after a release — and act on
   the outcome: rerun transient infra failures (a SonarCloud 504 is not
