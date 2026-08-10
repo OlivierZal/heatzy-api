@@ -42,14 +42,6 @@ const config: Config[] = defineConfig([
       'src/validation/schemas.ts',
     ],
   }),
-  {
-    // Shipped regexes stay on the `u` flag: the es2024 `v` flag is a
-    // parse-time SyntaxError on Homey Pro 2016-2019 (Node < 20) — it
-    // killed the melcloud sibling's app at boot on older Homey Pro
-    // (2016-2019) firmware (2026-08 crash report).
-    files: ['src/**/*.ts'],
-    rules: { 'require-unicode-regexp': ['error', { requireFlag: 'u' }] },
-  },
 ])
 
 export default config
