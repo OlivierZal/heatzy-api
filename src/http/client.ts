@@ -61,7 +61,7 @@ const resolveUrl = (baseURL: string, url: string | undefined): string => {
   if (url === undefined || url === '') {
     return baseURL
   }
-  if (/^https?:/iu.test(url)) {
+  if (/^https?:/iv.test(url)) {
     return url
   }
   const resolved = new URL(

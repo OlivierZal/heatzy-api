@@ -96,11 +96,6 @@ where even reads need auth).
 
 ## Lint doctrine
 
-- Shipped regexes stay on the `u` flag — the es2024 `v` flag is a
-  parse-time SyntaxError on Homey Pro 2016-2019 (Node < 20); the
-  melcloud sibling shipped it and its app died at boot (2026-08 crash
-  report). The overlay pins `require-unicode-regexp` to `u`.
-
 Same doctrine as melcloud-api — code adapts to the rules, never the
 reverse; no new disables; config-level `'off'` entries are triage
 verdicts, not suppressions; zero warnings. The only tolerated
