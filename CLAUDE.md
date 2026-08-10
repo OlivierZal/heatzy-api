@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 Typed Node.js client for the Heatzy (Gizwits) API. ESM only,
-Node >= 22.19, published to GitHub Packages. `erasableSyntaxOnly` is on:
+Node >= 22.20, published to GitHub Packages. `erasableSyntaxOnly` is on:
 no runtime enums, no parameter properties, no runtime namespaces.
 Architecture, toolchain and process are aligned on the sibling
 `melcloud-api` repo — when in doubt, mirror it.
