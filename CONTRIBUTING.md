@@ -21,12 +21,14 @@ npm ci
 Run the same suite that CI runs on every pull request:
 
 ```sh title="checks"
-npm run typecheck       # native tsc --noEmit
+npm run typecheck       # native 7.x compiler, --noEmit
 npm run lint            # ESLint with the all + strict-type-checked configs
 npm run format          # prettier --check (run npm run format:fix to write)
 npm test                # vitest run
 npm run test:coverage   # vitest run --coverage (must remain at 100%)
 ```
+
+`typecheck` and `build` call the native compiler by its explicit path, `node ./node_modules/@typescript/native/bin/tsc` — do not shorten it to `tsc` or `tsc6`, which both resolve to the TypeScript 6 compat package and would typecheck against the wrong compiler.
 
 The `prepublishOnly` script chains tests + typecheck + lint + format — publishing locally without these passing is impossible.
 
