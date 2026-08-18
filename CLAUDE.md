@@ -10,9 +10,12 @@ Architecture, toolchain and process are aligned on the sibling
 
 - `npm run lint` / `npm run lint:fix` — ESLint (runs with an 8 GB heap).
 - `npm test` / `npm run test:coverage` — vitest; coverage must stay at 100%.
-- `npm run typecheck` — `tsc` from `@typescript/native` (TypeScript 7);
-  does not cover `*.config.ts` (the lint does). The tooling (typedoc,
-  typescript-eslint) still resolves the separate `typescript` 6.x install.
+- `npm run typecheck` — `tsc` from `@typescript/native`
+  (`npm:typescript@^7`, the native compiler — at 7.x the npm
+  `typescript` package IS native); does not cover `*.config.ts` (the
+  lint does). The tooling (typedoc, typescript-eslint) resolves the TS6
+  JS API, `@typescript/typescript6`, aliased under the `typescript`
+  name — the official side-by-side layout.
 - `npm run build` — purges `dist` before emitting, because `tsc` overwrites
   but never deletes: a module renamed or removed in `src` would otherwise
   survive in `dist`, and `files` ships that directory, so `prepare` would
