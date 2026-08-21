@@ -25,7 +25,10 @@ const logKeys = [
   'errorMessage',
 ]
 
-const REDACTED = '******'
+/**
+ * Placeholder written over any value whose key names a secret.
+ */
+export const REDACTED = '******'
 
 const sensitiveKeys = new Set([
   'authorization',
@@ -38,7 +41,14 @@ const sensitiveKeys = new Set([
   'x-gizwits-user-token',
 ])
 
-const isSensitive = (key: string): boolean =>
+/**
+ * Whether a header or payload key names a secret — the one vocabulary
+ * shared by the call loggers and the {@link HttpError} request
+ * snapshot, so a secret cannot reach a log through either route.
+ * @param key - Header or payload key, in any casing.
+ * @returns `true` when the value behind the key must be redacted.
+ */
+export const isSensitive = (key: string): boolean =>
   sensitiveKeys.has(key.toLowerCase())
 
 // Detect a string that looks like an `application/x-www-form-urlencoded`
