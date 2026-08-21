@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [13.0.1] - 2026-08-21
+
+### Fixed
+
+- **Secrets no longer travel inside a thrown `HttpError`.** The request snapshot the error carries (`config.headers`) held the Gizwits authentication headers verbatim, and because those are DEFAULT headers every non-2xx on an authenticated call leaked the token — into whatever logger the host runs, and from there into the diagnostic reports users paste into issues (a sibling client leaked a live bearer token that way on 2026-08-21). Header values whose key names a secret now read `******`, redacted in the `HttpError` constructor so the leak is gone as a class rather than guarded at each logging site; the vocabulary is the one the call loggers already used.
+
 ## [13.0.0] - 2026-08-10
 
 ### Changed
@@ -91,6 +97,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[13.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v13.0.0...v13.0.1
 [13.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v12.0.2...v13.0.0
 [12.0.2]: https://github.com/OlivierZal/heatzy-api/compare/v12.0.1...v12.0.2
 [12.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v12.0.0...v12.0.1
