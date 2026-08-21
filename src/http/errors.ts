@@ -1,5 +1,23 @@
+import { isSensitive, REDACTED } from '../observability/context.ts'
+
+// The snapshot travels inside a thrown error, so it reaches every
+// logger a host happens to run — including the diagnostic reports users
+// paste into issues. Redacting at construction removes the leak as a
+// class: no call site can retain a Gizwits token by forgetting to
+// sanitize.
+const redactHeaders = (
+  headers: Record<string, string>,
+): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(headers).map(([key, value]) => [
+      key,
+      isSensitive(key) ? REDACTED : value,
+    ]),
+  )
+
 /**
- * Snapshot of the request that triggered an {@link HttpError}.
+ * Snapshot of the request that triggered an {@link HttpError}. Header
+ * values naming a secret read as `******`.
  * @category HTTP
  */
 export interface HttpErrorRequestConfig {
@@ -55,7 +73,10 @@ export class HttpError<T = unknown> extends Error {
     const { config, response } = options
     this.name = 'HttpError'
     this.response = response
-    this.config = config
+    this.config =
+      config?.headers === undefined
+        ? config
+        : { ...config, headers: redactHeaders(config.headers) }
   }
 }
 

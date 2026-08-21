@@ -18,6 +18,20 @@ const extractInit = (): FetchInit => {
 
 const extractHeaders = (): Record<string, string> => cast(extractInit().headers)
 
+const captureHttpError = async (
+  act: () => Promise<unknown>,
+): Promise<HttpError> => {
+  try {
+    await act()
+  } catch (error) {
+    if (isHttpError(error)) {
+      return error
+    }
+    throw error
+  }
+  throw new Error('Expected an HttpError')
+}
+
 const extractUrl = (): string => {
   const first = mockFetch.mock.calls[0]?.[0]
   if (typeof first !== 'string') {
@@ -48,6 +62,59 @@ describe('httpError', () => {
     })
 
     expect(error.config).toBeUndefined()
+  })
+
+  it('redacts header values whose key names a secret', () => {
+    const error = new HttpError('boom', {
+      config: {
+        headers: {
+          Authorization: 'Bearer s3cr3t',
+          'X-Gizwits-User-Token': 'tok3n',
+        },
+      },
+      response: { data: null, headers: {}, status: 401 },
+    })
+
+    expect(error.config?.headers).toStrictEqual({
+      Authorization: '******',
+      'X-Gizwits-User-Token': '******',
+    })
+  })
+
+  it('redacts a sensitive header whatever its casing', () => {
+    const error = new HttpError('boom', {
+      config: { headers: { AUTHORIZATION: 'Bearer s3cr3t', CoOkIe: 'a=1' } },
+      response: { data: null, headers: {}, status: 401 },
+    })
+
+    expect(error.config?.headers).toStrictEqual({
+      AUTHORIZATION: '******',
+      CoOkIe: '******',
+    })
+  })
+
+  it('keeps non-sensitive header values readable', () => {
+    const error = new HttpError('boom', {
+      config: {
+        headers: { 'Content-Type': 'application/json', 'X-Trace': 'abc' },
+      },
+      response: { data: null, headers: {}, status: 500 },
+    })
+
+    expect(error.config?.headers).toStrictEqual({
+      'Content-Type': 'application/json',
+      'X-Trace': 'abc',
+    })
+  })
+
+  it('passes a config carrying no headers through unchanged', () => {
+    const config = { method: 'GET', url: '/where' }
+    const error = new HttpError('boom', {
+      config,
+      response: { data: null, headers: {}, status: 500 },
+    })
+
+    expect(error.config).toBe(config)
   })
 })
 
@@ -190,6 +257,25 @@ describe(HttpClient, () => {
         status: 429,
       },
     })
+  })
+
+  it('redacts the token from the snapshot of a failed request', async () => {
+    const client = new HttpClient({
+      baseURL: BASE_URL,
+      headers: { Authorization: 'Bearer s3cr3t' },
+      timeout: 0,
+    })
+    mockFetch.mockResolvedValueOnce(mockFetchResponse({ err: 'nope' }, {}, 400))
+
+    const error = await captureHttpError(async () =>
+      client.request({ headers: { 'X-Trace': 'abc' }, url: '/x' }),
+    )
+
+    expect(error.config?.headers).toStrictEqual({
+      Authorization: '******',
+      'X-Trace': 'abc',
+    })
+    expect(JSON.stringify(error.config)).not.toContain('s3cr3t')
   })
 
   it('returns text when the response is not JSON', async () => {
