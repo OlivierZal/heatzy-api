@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [14.0.0] - 2026-08-25
+
+### Security
+
+- **13.0.1's headline overclaimed — the sign-in body kept leaking until this release.** "Secrets no longer travel inside a thrown `HttpError`" was true of the request HEADERS only: `config.data` still carried the `/login` body verbatim, so every rejected sign-in put the account's **username and password in clear text** into the thrown error, reachable through the host's own error logging. Query parameters, the response headers and the response body were equally untouched — and an upstream echoes the credential it just rejected. The whole snapshot is now redacted at construction — request headers, body and query parameters, response headers and body alike — the scope the sibling melcloud-api client shipped on 2026-08-21 and this repo should have adopted the same day. If a host log captured an `HttpError` from a rejected sign-in under 13.0.1 or earlier, treat the password as exposed and rotate it.
+
+### Changed
+
+- **BREAKING — a thrown `HttpError` no longer carries a typed, verbatim payload.** `HttpError` loses its `T` type parameter and `response.data` is now `unknown`, because a failed response body is a DIAGNOSTIC payload rather than a contract: its secrets are replaced by `******`, so nothing may rely on its shape. Migration: an `HttpError<Foo>` annotation becomes `HttpError`, and code reading `error.response.data` narrows it itself — nothing in this SDK ever did.
+
 ## [13.0.1] - 2026-08-21
 
 ### Fixed
@@ -97,6 +107,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[14.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v13.0.1...v14.0.0
 [13.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v13.0.0...v13.0.1
 [13.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v12.0.2...v13.0.0
 [12.0.2]: https://github.com/OlivierZal/heatzy-api/compare/v12.0.1...v12.0.2
