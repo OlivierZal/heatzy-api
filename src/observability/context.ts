@@ -30,6 +30,10 @@ const logKeys = [
  */
 export const REDACTED = '******'
 
+// Every key that names a credential on the Gizwits wire — the `/login`
+// body's account pair, the issued token and the header it rides on —
+// plus the generic HTTP carriers. Extend this ONE vocabulary when a
+// new wire field names a credential; never re-declare it elsewhere.
 const sensitiveKeys = new Set([
   'authorization',
   'cookie',
@@ -75,7 +79,15 @@ const redactFormEncoded = (value: string): string | undefined => {
   return keysToRedact.length > 0 ? params.toString() : undefined
 }
 
-const redactValue = (value: unknown): unknown => {
+/**
+ * Redacts every value whose key names a secret, walking nested objects,
+ * arrays and form-encoded strings — the deep counterpart of
+ * {@link isSensitive}, shared with the {@link HttpError} snapshot so a
+ * request body cannot leak a credential the loggers would have hidden.
+ * @param value - Any payload: object, array, string or primitive.
+ * @returns The value with sensitive entries replaced by {@link REDACTED}.
+ */
+export const redactValue = (value: unknown): unknown => {
   if (typeof value === 'string') {
     return redactFormEncoded(value) ?? value
   }

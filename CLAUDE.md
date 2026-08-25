@@ -62,8 +62,25 @@ Architecture, toolchain and process are aligned on the sibling
   `derog_time` minutes, vacation after `derog_time` days, presence runs
   a countdown keyed off the _reported_ `cur_mode` (comfort 90 min,
   comfort−1 60, comfort−2 30). `references/` holds the vendor PDFs.
+- Secrets never travel inside a thrown error. `HttpError` redacts its
+  whole snapshot at construction — request headers, BODY and query
+  parameters, plus the response headers and body — because that object
+  reaches every host logger and lands verbatim in the diagnostic
+  reports users paste into issues. The body matters as much as the
+  header: `/login` posts the account's username and password, so a
+  header-only redaction still leaked the credential on every rejected
+  sign-in. Redaction sits in the constructor rather than at the
+  logging sites so no future call site can reintroduce the leak; the
+  sensitive-key vocabulary is shared with the call loggers
+  (`isSensitive`/`redactValue` in `src/observability/context.ts`),
+  never re-declared. The RESPONSE counts too, headers and body: an
+  upstream echoes the credential it just rejected, which is why
+  `response.data` is typed `unknown` — a failed body is a diagnostic
+  payload, never a contract. What the retry policies read
+  (`retry-after` and friends) passes through untouched. When a wire
+  field names a credential, extend the ONE vocabulary in context.ts.
 
-## Ledger verdicts (deviations from melcloud-api, all deliberate)
+## Ledger (deviations from melcloud-api — deliberate verdicts, plus one recorded failure)
 
 - **No `Result`/`safeRequest`**: every endpoint here is required-path
   (sync, mutations) — there are no best-effort getters like Classic
@@ -85,6 +102,15 @@ Architecture, toolchain and process are aligned on the sibling
 - **No per-call header merge in `#dispatch`**: no Gizwits endpoint sends
   custom per-call headers, so `#dispatch` writes only the auth headers;
   melcloud's `configHeaders` merge would be a dead, uncovered branch here.
+- **Divergence episode, NOT a verdict (2026-08-21 → 2026-08-25)**: the
+  `HttpError` redaction shipped here at its round-1, headers-only scope
+  (13.0.1) and stayed there for four days while melcloud-api's second
+  review round had already established — and documented — that
+  headers-only "still leaked the credential": the `/login` body kept
+  the account's username and password in clear text in every thrown
+  error, under a changelog headline claiming secrets no longer
+  traveled. The lesson: a fix to EITHER twin re-opens the question for
+  BOTH, the same day — never let the siblings' security scopes drift.
 
 ## Tooling boundary (@olivierzal/configs)
 

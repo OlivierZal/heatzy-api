@@ -107,20 +107,104 @@ describe('httpError', () => {
     })
   })
 
-  it('passes a config carrying no headers through unchanged', () => {
-    const config = { method: 'GET', url: '/where' }
+  // The Gizwits sign-in carries the account's username and password in
+  // the BODY, and a credential can ride a query string too: the
+  // snapshot redacts every field, not just the obvious header.
+  it('redacts the credentials in the body and the query', () => {
+    const error = new HttpError('boom', {
+      config: {
+        data: { lang: 'en', password: 'hunter2', username: 'user@example.com' },
+        method: 'post',
+        params: { token: 'in-query', trace: 'keep' },
+        url: '/login',
+      },
+      response: { data: null, headers: {}, status: 400 },
+    })
+
+    expect(error.config?.data).toStrictEqual({
+      lang: 'en',
+      password: '******',
+      username: '******',
+    })
+    expect(error.config?.params).toStrictEqual({
+      token: '******',
+      trace: 'keep',
+    })
+  })
+
+  // What came back is redacted by the same vocabulary: a session cookie
+  // is a credential wherever it sits. Everything the retry policies read
+  // — `retry-after` above all — must survive untouched.
+  it('redacts the secrets the server sent back', () => {
+    const error = new HttpError('boom', {
+      response: {
+        data: null,
+        headers: {
+          'retry-after': '30',
+          'set-cookie': ['session=1', 'flag=2'],
+          'x-gizwits-user-token': 'echoed',
+          'x-trace': 'abc',
+        },
+        status: 500,
+      },
+    })
+
+    expect(error.response.headers['x-gizwits-user-token']).toBe('******')
+    expect(error.response.headers['set-cookie']).toBe('******')
+    expect(error.response.headers['retry-after']).toBe('30')
+    expect(error.response.headers['x-trace']).toBe('abc')
+  })
+
+  // An upstream echoes the credential it just rejected — the failed
+  // response body is a diagnostic payload, redacted like the request.
+  it('redacts the token the response body echoes', () => {
+    const error = new HttpError('boom', {
+      response: {
+        data: { detail: 'token expired', error_code: 9004, token: 'echoed' },
+        headers: {},
+        status: 400,
+      },
+    })
+
+    expect(error.response.data).toStrictEqual({
+      detail: 'token expired',
+      error_code: 9004,
+      token: '******',
+    })
+  })
+
+  it('passes a config without headers through unchanged', () => {
+    const config = {
+      data: { raw: [1, 1, 2] },
+      method: 'POST',
+      params: { verbose: true },
+      url: '/control/did',
+    }
     const error = new HttpError('boom', {
       config,
       response: { data: null, headers: {}, status: 500 },
     })
 
-    expect(error.config).toBe(config)
+    expect(error.config).toStrictEqual(config)
+    // No `headers` key conjured out of the absent one.
+    expect(error.config?.headers).toBeUndefined()
+  })
+
+  it('conjures no data or params keys out of the absent ones', () => {
+    const error = new HttpError('boom', {
+      config: { method: 'GET', url: '/bindings' },
+      response: { data: null, headers: {}, status: 500 },
+    })
+
+    expect(error.config).toStrictEqual({ method: 'GET', url: '/bindings' })
   })
 })
 
 describe(isHttpError, () => {
   it('narrows HttpError instances', () => {
-    const error = new HttpError('boom', {
+    // Typed `unknown`, which is where the guard earns its keep: the
+    // error arrives from a `catch`, not from a constructor call.
+    const error: unknown = new HttpError('boom', {
       response: { data: null, headers: {}, status: 500 },
     })
 
@@ -259,23 +343,80 @@ describe(HttpClient, () => {
     })
   })
 
-  it('redacts the token from the snapshot of a failed request', async () => {
+  // The end-to-end clause: the error a real request throws must carry
+  // no credential from any position of the failed exchange — default
+  // and per-request headers, body, query, response headers and body.
+  it('redacts the credentials riding every position of a failed exchange', async () => {
     const client = new HttpClient({
       baseURL: BASE_URL,
-      headers: { Authorization: 'Bearer s3cr3t' },
+      headers: { 'X-Gizwits-User-token': 'tok3n' },
       timeout: 0,
     })
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({ err: 'nope' }, {}, 400))
-
-    const error = await captureHttpError(async () =>
-      client.request({ headers: { 'X-Trace': 'abc' }, url: '/x' }),
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse(
+        { detail: 'invalid password', token: 'echoed-token' },
+        {
+          'retry-after': '30',
+          'set-cookie': ['session=c00kie'],
+          'x-request-id': 'trace-1',
+        },
+        400,
+      ),
     )
 
+    const error = await captureHttpError(async () =>
+      client.request({
+        data: { password: 'hunter2', username: 'user@example.com' },
+        headers: { Authorization: 'Bearer s3cr3t', 'X-Trace': 'keep-me' },
+        method: 'POST',
+        params: { token: 'in-query', verbose: true },
+        url: '/login',
+      }),
+    )
+
+    expect(error.config?.data).toStrictEqual({
+      password: '******',
+      username: '******',
+    })
     expect(error.config?.headers).toStrictEqual({
       Authorization: '******',
-      'X-Trace': 'abc',
+      'X-Gizwits-User-token': '******',
+      'X-Trace': 'keep-me',
     })
-    expect(JSON.stringify(error.config)).not.toContain('s3cr3t')
+    expect(error.config?.params).toStrictEqual({
+      token: '******',
+      verbose: true,
+    })
+    expect(error.response.data).toStrictEqual({
+      detail: 'invalid password',
+      token: '******',
+    })
+    expect(error.response.headers['set-cookie']).toBe('******')
+    expect(error.response.headers['retry-after']).toBe('30')
+    expect(error.response.headers['x-request-id']).toBe('trace-1')
+
+    // The probe a host logger runs: nothing serializable off the error
+    // may name a secret.
+    const serialized = JSON.stringify(error)
+
+    expect(
+      [
+        'tok3n',
+        's3cr3t',
+        'hunter2',
+        'user@example.com',
+        'in-query',
+        'echoed-token',
+        'c00kie',
+      ].filter((secret) => serialized.includes(secret)),
+    ).toStrictEqual([])
+    // Redaction is a reporting concern, not a transport one: the wire
+    // still carried the real credentials.
+    expect(extractHeaders().Authorization).toBe('Bearer s3cr3t')
+    expect(extractInit().body).toBe(
+      '{"password":"hunter2","username":"user@example.com"}',
+    )
+    expect(extractUrl()).toContain('token=in-query')
   })
 
   it('returns text when the response is not JSON', async () => {
