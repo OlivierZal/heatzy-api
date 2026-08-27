@@ -1,23 +1,8 @@
-/**
- * Shared time unit constants. Single source of truth so callers don't
- * recompute or redefine them.
- */
-
-/**
- * Number of milliseconds in one second.
- */
-export const MS_PER_SECOND = 1000
-/**
- * Number of milliseconds in one minute.
- */
-export const MS_PER_MINUTE = 60_000
-
-const SESSION_REFRESH_AHEAD_MINUTES = 5
-
-/**
- * Forward window applied by the session-refresh check: trigger the session refresh when the persisted token is within
- * this many ms of its real expiry, so no request pays the full re-auth
- * round-trip on its critical path.
- */
-export const SESSION_REFRESH_AHEAD_MS: number =
-  SESSION_REFRESH_AHEAD_MINUTES * MS_PER_MINUTE
+// Thin re-export of @olivierzal/api-core (the constants formerly
+// duplicated here as melcloud-api's near-twin; the core carries the
+// union of both repos' sets).
+export {
+  MS_PER_MINUTE,
+  MS_PER_SECOND,
+  SESSION_REFRESH_AHEAD_MS,
+} from '@olivierzal/api-core/time-units'

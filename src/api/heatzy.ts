@@ -218,8 +218,13 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
       logger,
       syncIntervalMinutes ?? DEFAULT_SYNC_INTERVAL_MINUTES,
     )
-    this.#authRetryPolicy = new AuthRetryPolicy(this.#retryGuard, async () =>
-      this.#reauthenticate(),
+    // Gizwits reports an invalid or expired user token as HTTP 400
+    // (error code 9004 in the body), never 401 — both statuses arm the
+    // reactive re-auth, mirroring the field-proven Axios interceptor.
+    this.#authRetryPolicy = new AuthRetryPolicy(
+      this.#retryGuard,
+      async () => this.#reauthenticate(),
+      [HttpStatus.Unauthorized, HttpStatus.BadRequest],
     )
     this.#applyCredentials(username, password)
   }

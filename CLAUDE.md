@@ -111,6 +111,31 @@ Architecture, toolchain and process are aligned on the sibling
   error, under a changelog headline claiming secrets no longer
   traveled. The lesson: a fix to EITHER twin re-opens the question for
   BOTH, the same day — never let the siblings' security scopes drift.
+  CLOSED by the `@olivierzal/api-core` extraction: the mechanism now
+  lives once, and a redaction fix reaches both SDKs as one release
+  plus a pin bump each.
+
+## Mechanism boundary (@olivierzal/api-core)
+
+The API-client MECHANISMS live in `@olivierzal/api-core` (exact pin,
+production dependency): the HTTP client and `HttpError` (whole-snapshot
+redaction seated in the constructor), the redaction engine, the
+observability shells and `LifecycleEmitter`, the resilience primitives,
+`SyncManager`, the temporal entry point, the time units and the
+`APIError` base. Those modules used to be melcloud-api's byte-identical
+twins ("edit both or neither"); the divergence episode above expired
+that discipline, and the extraction replaced it. This repo keeps ONLY
+its protocol layer: the Gizwits sensitive-key VOCABULARY
+(`src/observability/context.ts` builds the one bound `redaction`
+engine; the `HttpClient` subclass and the `APICall*` shells receive
+it), the auth-failure statuses (`HeatzyAPI` passes `[401, 400]` to the
+core's `AuthRetryPolicy`), the wire types, the schemas, the facades,
+and thin re-export modules that keep internal import paths stable. A
+mechanism change happens in api-core and arrives here as a release +
+exact-pin bump PR; never re-implement one locally. The moved mechanism
+test suites live in api-core too — this repo's
+`observability.test.ts`/`http-client.test.ts` are thin
+vocabulary/wiring suites pinning what is OURS.
 
 ## Tooling boundary (@olivierzal/configs)
 
