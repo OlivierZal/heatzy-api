@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [14.1.0] - 2026-08-27
+
+### Changed
+
+- **The API-client mechanisms are now imported from `@olivierzal/api-core` 1.0.0 (exact pin) instead of living here.** The HTTP client and `HttpError` (whole-snapshot redaction seated in the constructor), the redaction engine, the observability shells and `LifecycleEmitter`, the resilience primitives, `SyncManager`, the temporal entry point, the time units and the `APIError` base become thin re-exports of the shared package. These modules used to be melcloud-api's byte-identical twins ("edit both or neither"); the 2026-08-21 redaction fix took four days to cross to this repo, which expired that discipline — a mechanism now changes once, in api-core, and arrives everywhere as a pin bump. This repo keeps only its protocol layer: the Gizwits sensitive-key vocabulary (`src/observability/context.ts` builds the one bound redaction engine and injects it into every seat), the 400+401 auth-failure statuses `HeatzyAPI` passes to the core's `AuthRetryPolicy`, the wire types, the schemas and the facades. Zero public-surface change: the export set is name-for-name identical before and after (62 = 62 symbols), so no consumer code changes.
+
+### Added
+
+- **`HttpStatus.NotFound` (404) and `HttpStatus.TooManyRequests` (429)** — present in api-core's status vocabulary, now re-exported here.
+- **An optional `zone` parameter on `isSessionExpired`** — offset-less expiry strings can be interpreted in a supplied IANA timezone instead of the runtime's.
+- **`RetryGuard` implements `Disposable`** — usable with `using` for scope-bound release.
+- **`createAPICallErrorData` accepts any `Error`** — widened from `HttpError`; a non-HTTP failure gets error data instead of a type error.
+
 ## [14.0.0] - 2026-08-25
 
 ### Security
@@ -107,6 +120,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[14.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v14.0.0...v14.1.0
 [14.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v13.0.1...v14.0.0
 [13.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v13.0.0...v13.0.1
 [13.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v12.0.2...v13.0.0

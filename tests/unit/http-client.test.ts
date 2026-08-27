@@ -1,121 +1,98 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { HttpClient as CoreHttpClient } from '@olivierzal/api-core'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { HttpClient, HttpError, isHttpError } from '../../src/http/index.ts'
+import {
+  HttpClient,
+  HttpError,
+  HttpStatus,
+  isHttpError,
+} from '../../src/http/index.ts'
 import { cast, mockFetchResponse } from '../helpers.ts'
 
-type FetchInit = NonNullable<Parameters<typeof fetch>[1]>
+// Thin WIRING suite: the transport MECHANISM (URL building, body
+// serialization, signals, parsing — and its full suite) lives in
+// @olivierzal/api-core. What this file pins is the Gizwits layer's
+// own obligation: the subclass seats this SDK's vocabulary on every
+// construction path, so no client — including one a host prebuilds —
+// can throw an unredacted snapshot.
 
 const mockFetch = vi.fn<typeof fetch>()
 vi.stubGlobal('fetch', mockFetch)
 
-const extractInit = (): FetchInit => {
+const extractHeaders = (): Record<string, string> => {
   const init = mockFetch.mock.calls[0]?.[1]
   if (init === undefined) {
     throw new TypeError('mockFetch was not called')
   }
-  return init
+  return cast(init.headers)
 }
 
-const extractHeaders = (): Record<string, string> => cast(extractInit().headers)
+describe(HttpClient, () => {
+  const BASE_URL = 'https://api.test.local'
 
-const captureHttpError = async (
-  act: () => Promise<unknown>,
-): Promise<HttpError> => {
-  try {
-    await act()
-  } catch (error) {
-    if (isHttpError(error)) {
-      return error
-    }
-    throw error
-  }
-  throw new Error('Expected an HttpError')
-}
-
-const extractUrl = (): string => {
-  const first = mockFetch.mock.calls[0]?.[0]
-  if (typeof first !== 'string') {
-    throw new TypeError('expected a string URL')
-  }
-  return first
-}
-
-describe('httpError', () => {
-  it('carries response payload, headers, and status', () => {
-    const error = new HttpError('boom', {
-      config: { method: 'GET', url: '/where' },
-      response: { data: { reason: 'x' }, headers: { 'x-y': 'z' }, status: 500 },
-    })
-
-    expect(error.message).toBe('boom')
-    expect(error.response.status).toBe(500)
-    expect(error.response.data).toStrictEqual({ reason: 'x' })
-    expect(error.response.headers['x-y']).toBe('z')
-    expect(error.config?.url).toBe('/where')
-    expect(error.config?.method).toBe('GET')
-    expect(error.name).toBe('HttpError')
+  beforeEach(() => {
+    mockFetch.mockReset()
   })
 
-  it('omits config when the caller did not pass one', () => {
-    const error = new HttpError('boom', {
-      response: { data: null, headers: {}, status: 500 },
-    })
+  it('is the core transport (instanceof holds across the family)', () => {
+    const client = new HttpClient({ baseURL: BASE_URL, timeout: 0 })
 
-    expect(error.config).toBeUndefined()
+    expect(client).toBeInstanceOf(HttpClient)
+    expect(client).toBeInstanceOf(CoreHttpClient)
+    expect(client.baseURL).toBe(BASE_URL)
   })
 
-  it('redacts header values whose key names a secret', () => {
-    const error = new HttpError('boom', {
+  // The whole-snapshot clause, now proving the SUBCLASS: the error a
+  // real request throws must not carry the credentials that request
+  // just sent — the Gizwits user token (this SDK's vocabulary) and the
+  // bearer token (the core base) alike, with NOTHING passed at the
+  // construction site.
+  it('redacts the credentials of the request that failed', async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse({ error_message: 'token expired' }, {}, 400),
+    )
+    const client = new HttpClient({
+      baseURL: BASE_URL,
+      headers: { 'X-Gizwits-User-Token': 'tok' },
+      timeout: 0,
+    })
+
+    const promise = client.request({
+      headers: { Authorization: 'Bearer secret', 'X-Trace': 'keep-me' },
+      url: '/guarded',
+    })
+
+    await expect(promise).rejects.toMatchObject({
       config: {
         headers: {
-          Authorization: 'Bearer s3cr3t',
-          'X-Gizwits-User-Token': 'tok3n',
+          Authorization: '******',
+          'X-Gizwits-User-Token': '******',
+          'X-Trace': 'keep-me',
         },
       },
-      response: { data: null, headers: {}, status: 401 },
     })
-
-    expect(error.config?.headers).toStrictEqual({
-      Authorization: '******',
-      'X-Gizwits-User-Token': '******',
-    })
+    // Redaction is a reporting concern, not a transport one: the wire
+    // still carried the real credential.
+    expect(extractHeaders().Authorization).toBe('Bearer secret')
   })
 
-  it('redacts a sensitive header whatever its casing', () => {
-    const error = new HttpError('boom', {
-      config: { headers: { AUTHORIZATION: 'Bearer s3cr3t', CoOkIe: 'a=1' } },
-      response: { data: null, headers: {}, status: 401 },
-    })
+  it('throws the shared HttpError class', async () => {
+    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 500))
+    const client = new HttpClient({ baseURL: BASE_URL, timeout: 0 })
 
-    expect(error.config?.headers).toStrictEqual({
-      AUTHORIZATION: '******',
-      CoOkIe: '******',
-    })
+    const promise = client.request({ url: '/boom' })
+
+    await expect(promise).rejects.toThrow(HttpError)
+    await expect(promise).rejects.toSatisfy((error) => isHttpError(error))
   })
+})
 
-  it('keeps non-sensitive header values readable', () => {
-    const error = new HttpError('boom', {
-      config: {
-        headers: { 'Content-Type': 'application/json', 'X-Trace': 'abc' },
-      },
-      response: { data: null, headers: {}, status: 500 },
-    })
-
-    expect(error.config?.headers).toStrictEqual({
-      'Content-Type': 'application/json',
-      'X-Trace': 'abc',
-    })
-  })
-
-  // The Gizwits sign-in carries the account's username and password in
-  // the BODY, and a credential can ride a query string too: the
-  // snapshot redacts every field, not just the obvious header.
-  it('redacts the credentials in the body and the query', () => {
+describe('httpError re-export', () => {
+  it('redacts the login body a rejected sign-in echoes', () => {
     const error = new HttpError('boom', {
       config: {
         data: { lang: 'en', password: 'hunter2', username: 'user@example.com' },
-        method: 'post',
-        params: { token: 'in-query', trace: 'keep' },
+        method: 'POST',
         url: '/login',
       },
       response: { data: null, headers: {}, status: 400 },
@@ -126,491 +103,15 @@ describe('httpError', () => {
       password: '******',
       username: '******',
     })
-    expect(error.config?.params).toStrictEqual({
-      token: '******',
-      trace: 'keep',
-    })
-  })
-
-  // What came back is redacted by the same vocabulary: a session cookie
-  // is a credential wherever it sits. Everything the retry policies read
-  // — `retry-after` above all — must survive untouched.
-  it('redacts the secrets the server sent back', () => {
-    const error = new HttpError('boom', {
-      response: {
-        data: null,
-        headers: {
-          'retry-after': '30',
-          'set-cookie': ['session=1', 'flag=2'],
-          'x-gizwits-user-token': 'echoed',
-          'x-trace': 'abc',
-        },
-        status: 500,
-      },
-    })
-
-    expect(error.response.headers['x-gizwits-user-token']).toBe('******')
-    expect(error.response.headers['set-cookie']).toBe('******')
-    expect(error.response.headers['retry-after']).toBe('30')
-    expect(error.response.headers['x-trace']).toBe('abc')
-  })
-
-  // An upstream echoes the credential it just rejected — the failed
-  // response body is a diagnostic payload, redacted like the request.
-  it('redacts the token the response body echoes', () => {
-    const error = new HttpError('boom', {
-      response: {
-        data: { detail: 'token expired', error_code: 9004, token: 'echoed' },
-        headers: {},
-        status: 400,
-      },
-    })
-
-    expect(error.response.data).toStrictEqual({
-      detail: 'token expired',
-      error_code: 9004,
-      token: '******',
-    })
-  })
-
-  it('passes a config without headers through unchanged', () => {
-    const config = {
-      data: { raw: [1, 1, 2] },
-      method: 'POST',
-      params: { verbose: true },
-      url: '/control/did',
-    }
-    const error = new HttpError('boom', {
-      config,
-      response: { data: null, headers: {}, status: 500 },
-    })
-
-    expect(error.config).toStrictEqual(config)
-    // No `headers` key conjured out of the absent one.
-    expect(error.config?.headers).toBeUndefined()
-  })
-
-  it('conjures no data or params keys out of the absent ones', () => {
-    const error = new HttpError('boom', {
-      config: { method: 'GET', url: '/bindings' },
-      response: { data: null, headers: {}, status: 500 },
-    })
-
-    expect(error.config).toStrictEqual({ method: 'GET', url: '/bindings' })
   })
 })
 
-describe(isHttpError, () => {
-  it('narrows HttpError instances', () => {
-    // Typed `unknown`, which is where the guard earns its keep: the
-    // error arrives from a `catch`, not from a constructor call.
-    const error: unknown = new HttpError('boom', {
-      response: { data: null, headers: {}, status: 500 },
-    })
-
-    expect(isHttpError(error)).toBe(true)
-  })
-
-  it('rejects non-HttpError values', () => {
-    expect(isHttpError(new Error('boom'))).toBe(false)
-    expect(isHttpError('boom')).toBe(false)
-    expect(isHttpError(null)).toBe(false)
-    expect(isHttpError({})).toBe(false)
-  })
-})
-
-describe(HttpClient, () => {
-  const BASE_URL = 'https://api.test.local'
-
-  beforeEach(() => {
-    mockFetch.mockReset()
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
-  const createClient = (): HttpClient =>
-    new HttpClient({ baseURL: BASE_URL, timeout: 0 })
-
-  it('surfaces baseURL and timeout for diagnostic inspection', () => {
-    const client = new HttpClient({ baseURL: BASE_URL, timeout: 5000 })
-
-    expect(client.baseURL).toBe(BASE_URL)
-    expect(client.timeout).toBe(5000)
-  })
-
-  it('returns { data, status, headers } from a JSON response', async () => {
-    mockFetch.mockResolvedValueOnce(
-      mockFetchResponse({ ok: true }, { 'x-trace': 'abc' }, 200),
-    )
-
-    const response = await createClient().request<{ ok: boolean }>({
-      url: '/echo',
-    })
-
-    expect(response.data).toStrictEqual({ ok: true })
-    expect(response.status).toBe(200)
-    expect(response.headers['x-trace']).toBe('abc')
-    expect(mockFetch).toHaveBeenCalledWith(
-      `${BASE_URL}/echo`,
-      expect.objectContaining({ method: 'GET' }),
-    )
-  })
-
-  it('serialises object bodies as JSON and sets Content-Type', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-
-    await createClient().request({
-      data: { hello: 'world' },
-      method: 'post',
-      url: '/send',
-    })
-
-    const init = extractInit()
-
-    expect(init.method).toBe('POST')
-    expect(init.body).toBe('{"hello":"world"}')
-    expect(extractHeaders()['Content-Type']).toBe('application/json')
-  })
-
-  it('preserves a caller-supplied Content-Type on object bodies', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-
-    await createClient().request({
-      data: { count: 1 },
-      headers: { 'Content-Type': 'application/vnd.custom+json' },
-      method: 'POST',
-      url: '/s',
-    })
-
-    expect(extractHeaders()['Content-Type']).toBe('application/vnd.custom+json')
-    expect(extractInit().body).toBe('{"count":1}')
-  })
-
-  it('passes string bodies through without setting Content-Type', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-
-    await createClient().request({
-      data: 'raw=1&plain=2',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      method: 'POST',
-      url: '/form',
-    })
-
-    expect(extractInit().body).toBe('raw=1&plain=2')
-    expect(extractHeaders()['Content-Type']).toBe(
-      'application/x-www-form-urlencoded',
-    )
-  })
-
-  it('passes URLSearchParams bodies through unchanged', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-    const body = new URLSearchParams({ key: '1' })
-
-    await createClient().request({ data: body, method: 'POST', url: '/form' })
-
-    expect(extractInit().body).toBe(body)
-  })
-
-  it('defaults the error config method to GET when none was specified', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 500))
-
-    await expect(
-      createClient().request({ url: '/boom' }),
-    ).rejects.toMatchObject({ config: { method: 'GET' } })
-  })
-
-  it('throws HttpError on non-2xx with body, headers, status, and config', async () => {
-    mockFetch.mockResolvedValueOnce(
-      mockFetchResponse({ err: 'denied' }, { 'retry-after': '3' }, 429),
-    )
-
-    const promise = createClient().request({
-      data: { key: 1 },
-      method: 'POST',
-      url: '/x',
-    })
-
-    await expect(promise).rejects.toThrow(HttpError)
-    await expect(promise).rejects.toMatchObject({
-      config: { method: 'POST', url: '/x' },
-      response: {
-        data: { err: 'denied' },
-        headers: { 'retry-after': '3' },
-        status: 429,
-      },
-    })
-  })
-
-  // The end-to-end clause: the error a real request throws must carry
-  // no credential from any position of the failed exchange — default
-  // and per-request headers, body, query, response headers and body.
-  it('redacts the credentials riding every position of a failed exchange', async () => {
-    const client = new HttpClient({
-      baseURL: BASE_URL,
-      headers: { 'X-Gizwits-User-token': 'tok3n' },
-      timeout: 0,
-    })
-    mockFetch.mockResolvedValueOnce(
-      mockFetchResponse(
-        { detail: 'invalid password', token: 'echoed-token' },
-        {
-          'retry-after': '30',
-          'set-cookie': ['session=c00kie'],
-          'x-request-id': 'trace-1',
-        },
-        400,
-      ),
-    )
-
-    const error = await captureHttpError(async () =>
-      client.request({
-        data: { password: 'hunter2', username: 'user@example.com' },
-        headers: { Authorization: 'Bearer s3cr3t', 'X-Trace': 'keep-me' },
-        method: 'POST',
-        params: { token: 'in-query', verbose: true },
-        url: '/login',
-      }),
-    )
-
-    expect(error.config?.data).toStrictEqual({
-      password: '******',
-      username: '******',
-    })
-    expect(error.config?.headers).toStrictEqual({
-      Authorization: '******',
-      'X-Gizwits-User-token': '******',
-      'X-Trace': 'keep-me',
-    })
-    expect(error.config?.params).toStrictEqual({
-      token: '******',
-      verbose: true,
-    })
-    expect(error.response.data).toStrictEqual({
-      detail: 'invalid password',
-      token: '******',
-    })
-    expect(error.response.headers['set-cookie']).toBe('******')
-    expect(error.response.headers['retry-after']).toBe('30')
-    expect(error.response.headers['x-request-id']).toBe('trace-1')
-
-    // The probe a host logger runs: nothing serializable off the error
-    // may name a secret.
-    const serialized = JSON.stringify(error)
-
-    expect(
-      [
-        'tok3n',
-        's3cr3t',
-        'hunter2',
-        'user@example.com',
-        'in-query',
-        'echoed-token',
-        'c00kie',
-      ].filter((secret) => serialized.includes(secret)),
-    ).toStrictEqual([])
-    // Redaction is a reporting concern, not a transport one: the wire
-    // still carried the real credentials.
-    expect(extractHeaders().Authorization).toBe('Bearer s3cr3t')
-    expect(extractInit().body).toBe(
-      '{"password":"hunter2","username":"user@example.com"}',
-    )
-    expect(extractUrl()).toContain('token=in-query')
-  })
-
-  it('returns text when the response is not JSON', async () => {
-    mockFetch.mockResolvedValueOnce(
-      mockFetchResponse('plain text', { 'content-type': 'text/plain' }, 200),
-    )
-
-    const { data } = await createClient().request({ url: '/t' })
-
-    expect(data).toBe('plain text')
-  })
-
-  it('returns "" on 204 No Content', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse('', {}, 204))
-
-    const { data } = await createClient().request({ url: '/empty' })
-
-    expect(data).toBe('')
-  })
-
-  it('returns "" when content-length is 0', async () => {
-    mockFetch.mockResolvedValueOnce(
-      mockFetchResponse('', { 'content-length': '0' }, 200),
-    )
-
-    const { data } = await createClient().request({ url: '/zero' })
-
-    expect(data).toBe('')
-  })
-
-  it('returns "" on an empty JSON body', async () => {
-    mockFetch.mockResolvedValueOnce(
-      mockFetchResponse('', { 'content-type': 'application/json' }, 200),
-    )
-
-    const { data } = await createClient().request({ url: '/empty-json' })
-
-    expect(data).toBe('')
-  })
-
-  it('appends query params from the config', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-
-    await createClient().request({
-      params: { first: 1, second: 'x', skip: null, skip2: undefined },
-      url: '/q',
-    })
-
-    const url = extractUrl()
-
-    expect(url).toContain(`${BASE_URL}/q?`)
-    expect(url).toContain('first=1')
-    expect(url).toContain('second=x')
-    expect(url).not.toContain('skip')
-  })
-
-  it('merges params with an existing query string', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-
-    await createClient().request({ params: { second: 2 }, url: '/q?first=1' })
-
-    expect(extractUrl()).toBe(`${BASE_URL}/q?first=1&second=2`)
-  })
-
-  it('drops the query string when params resolve to empty', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-
-    await createClient().request({
-      params: { skip: null, skip2: undefined },
-      url: '/q',
-    })
-
-    expect(extractUrl()).toBe(`${BASE_URL}/q`)
-  })
-
-  it('uses the baseURL when url is omitted', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-
-    await createClient().request({})
-
-    expect(extractUrl()).toBe(BASE_URL)
-  })
-
-  it('passes absolute URLs through unchanged', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-
-    await createClient().request({ url: 'https://other.example/path' })
-
-    expect(extractUrl()).toBe('https://other.example/path')
-  })
-
-  it('normalises a non-absolute url missing its leading slash', async () => {
-    const client = new HttpClient({ baseURL: `${BASE_URL}/`, timeout: 0 })
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-
-    await client.request({ url: 'rel' })
-
-    expect(extractUrl()).toBe(`${BASE_URL}/rel`)
-  })
-
-  it('preserves the base path when joining an absolute-style url', async () => {
-    const client = new HttpClient({ baseURL: `${BASE_URL}/app`, timeout: 0 })
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-
-    await client.request({ url: '/bindings' })
-
-    expect(extractUrl()).toBe(`${BASE_URL}/app/bindings`)
-  })
-
-  it('parses a JSON body when content-type is missing', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse('{"ok":1}', {}, 200))
-
-    const { data } = await createClient().request({ url: '/j' })
-
-    expect(data).toStrictEqual({ ok: 1 })
-  })
-
-  it('parses a JSON body when content-type is a non-standard JSON variant', async () => {
-    mockFetch.mockResolvedValueOnce(
-      mockFetchResponse({ ok: 1 }, { 'content-type': 'text/json' }, 200),
-    )
-
-    const { data } = await createClient().request({ url: '/j' })
-
-    expect(data).toStrictEqual({ ok: 1 })
-  })
-
-  it('merges defaultHeaders with per-request headers', async () => {
-    const client = new HttpClient({
-      baseURL: BASE_URL,
-      headers: { 'X-Default': 'd' },
-      timeout: 0,
-    })
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-
-    await client.request({ headers: { 'X-Extra': 'e' }, url: '/h' })
-
-    const headers = extractHeaders()
-
-    expect(headers['X-Default']).toBe('d')
-    expect(headers['X-Extra']).toBe('e')
-  })
-
-  it('passes the caller AbortSignal through', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-    const controller = new AbortController()
-
-    await createClient().request({ signal: controller.signal, url: '/s' })
-
-    expect(extractInit().signal).toBeDefined()
-  })
-
-  it('combines caller signal with a timeout when timeout > 0', async () => {
-    vi.useFakeTimers()
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-    const client = new HttpClient({ baseURL: BASE_URL, timeout: 5000 })
-    const controller = new AbortController()
-
-    await client.request({ signal: controller.signal, url: '/s' })
-
-    expect(extractInit().signal).toBeDefined()
-  })
-
-  it('does not forward a signal when neither caller nor timeout set', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-
-    await createClient().request({ url: '/noabort' })
-
-    expect(extractInit().signal).toBeUndefined()
-  })
-
-  it('forwards the configured dispatcher into fetch', async () => {
-    // Sentinel object — runtime shape is the only thing fetch inspects.
-    const dispatcher = { sentinel: true }
-    const client = new HttpClient({ baseURL: BASE_URL, dispatcher, timeout: 0 })
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({}, {}, 200))
-
-    await client.request({ url: '/d' })
-
-    const init: { dispatcher?: unknown } = cast(extractInit())
-
-    expect(init.dispatcher).toBe(dispatcher)
-  })
-
-  it('surfaces Set-Cookie arrays via getSetCookie()', async () => {
-    const headers = new Headers()
-    headers.append('set-cookie', 'a=1')
-    headers.append('set-cookie', 'b=2')
-    mockFetch.mockResolvedValueOnce(Response.json({}, { headers, status: 200 }))
-
-    const { headers: responseHeaders } = await createClient().request({
-      url: '/c',
-    })
-
-    expect(responseHeaders['set-cookie']).toStrictEqual(['a=1', 'b=2'])
+describe('httpStatus re-export', () => {
+  it('carries the union table this SDK branches on', () => {
+    expect(HttpStatus.BadRequest).toBe(400)
+    expect(HttpStatus.Unauthorized).toBe(401)
+    // Additive arrivals from the union with melcloud-api's vocabulary.
+    expect(HttpStatus.NotFound).toBe(404)
+    expect(HttpStatus.TooManyRequests).toBe(429)
   })
 })
