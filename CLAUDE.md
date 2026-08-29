@@ -137,6 +137,34 @@ test suites live in api-core too — this repo's
 `observability.test.ts`/`http-client.test.ts` are thin
 vocabulary/wiring suites pinning what is OURS.
 
+The next mechanism to cross that boundary is `src/api/heatzy.ts`'s
+session lifecycle and request pipeline, extracted as the core's
+`SessionAPI`. Its witness is `tests/contracts/session-lifecycle.test.ts`,
+the twin of melcloud-api's kernel of the same name: one clause table run
+against the REAL client, never a synthetic subclass (a suite whose hooks
+are `vi.fn`s proves the template calls its own hooks, not that
+`HeatzyAPI` still behaves the same after the move). The kernel must
+cross byte-identical — a clause reworded during the move proves nothing
+— which carries a PRECONDITION recorded in its own header:
+`src/api/heatzy.ts`, `src/api/types.ts`, `src/errors/`, `src/http/` and
+`src/resilience/` must SURVIVE as this repo's own paths, because every
+kernel import resolves through them. `heatzy-api-auth.test.ts` and
+friends stay where the mechanism goes; the kernel does not.
+
+Every clause is worded about the PER-DEVICE registry cycle (`/bindings`
+plus its `/devdata` fan-out), and three of them hold divergences the
+extraction must handle deliberately rather than silently: `[Symbol.dispose]`
+releases the sync timer but NOT the retry guard (melcloud releases both —
+adopting its superset must update that clause in a commit that says so);
+no log label is passed anywhere, so every line arrives unprefixed and a
+default label in the extracted class would rewrite this SDK's diagnostic
+output; and the auth-failure vocabulary is `[401, 400]`, each status
+pinned by its own row. The kernel also closes with three DECLARED
+ABSENCES — the login-throttle window, the rate-limit gate, and the
+mid-ladder probe — each naming the two expressions that make the claim
+checkable, so a quarantine can never hide a harness limitation the way
+melcloud's first cut did.
+
 ## Tooling boundary (@olivierzal/configs)
 
 The shared tooling lives in `@olivierzal/configs` (exact pin): the

@@ -1,6 +1,11 @@
-import { vi } from 'vitest'
+import { type MockInstance, vi } from 'vitest'
 
 import type { HeatzyAPIConfig, SettingManager } from '../src/api/types.ts'
+import type {
+  HttpClient,
+  HttpRequestConfig,
+  HttpResponse,
+} from '../src/http/index.ts'
 import type {
   Attributes,
   DeviceBinding,
@@ -29,6 +34,64 @@ export const mockRequest: ReturnType<
 
 export const LOGIN_BACKOFF_MS = 900_000
 
+export const BINDINGS_PATH = '/bindings'
+export const DEVDATA_PREFIX = '/devdata/'
+export const LOGIN_PATH = '/login'
+
+/**
+ * Splits the transport in two along the only seam this SDK stages
+ * independently: the `/login` round-trip on one side, everything the
+ * session then spends itself on (the registry cycle, a mutation) on the
+ * other.
+ * @param requestSpy - Spy standing in for the transport.
+ * @param root0 - The two responders.
+ * @param root0.login - Answers the sign-in round-trip.
+ * @param root0.rest - Answers every other call.
+ */
+export const stageHeatzyWire = (
+  requestSpy: MockInstance<HttpClient['request']>,
+  {
+    login,
+    rest,
+  }: {
+    login: () => HttpResponse
+    rest: (config: HttpRequestConfig) => HttpResponse
+  },
+): void => {
+  requestSpy.mockImplementation(async (config) => {
+    await Promise.resolve()
+    return config.url === LOGIN_PATH ? login() : rest(config)
+  })
+}
+
+/**
+ * One successful registry cycle on the wire. Heatzy's cycle is
+ * PER-DEVICE: `/bindings` answers the envelope, then the client fans
+ * out one `/devdata/{did}/latest` read per binding — so a single canned
+ * body cannot stand in for the cycle the way a bulk dialect's can.
+ * @param root0 - The call being answered.
+ * @param root0.url - URL the call targeted.
+ * @param root1 - Payload the cycle carries.
+ * @param root1.attributes - Attribute payload every device read answers.
+ * @param root1.bindings - Entries the `/bindings` envelope carries.
+ * @returns The response for that hop of the cycle.
+ */
+export const heatzyRegistryResponse = (
+  { url }: HttpRequestConfig,
+  {
+    attributes,
+    bindings,
+  }: { attributes: Attributes; bindings: readonly DeviceBinding[] },
+): HttpResponse => {
+  if (url === BINDINGS_PATH) {
+    return mockResponse({ devices: bindings })
+  }
+  if (url?.startsWith(DEVDATA_PREFIX) === true) {
+    return mockResponse({ attr: attributes })
+  }
+  return mockResponse({})
+}
+
 // Routes the three Heatzy endpoints to canned success responses so
 // multi-request flows (login → bindings → devdata per binding) resolve
 // without per-call mock choreography.
@@ -41,18 +104,9 @@ export const mockWire = ({
   bindings?: readonly DeviceBinding[]
   loginData?: LoginData
 } = {}): void => {
-  mockRequest.mockImplementation(async (config) => {
-    await Promise.resolve()
-    if (config.url === '/login') {
-      return mockResponse(loginData ?? buildLoginData())
-    }
-    if (config.url === '/bindings') {
-      return mockResponse({ devices: bindings })
-    }
-    if (config.url?.startsWith('/devdata/') === true) {
-      return mockResponse({ attr: attributes })
-    }
-    return mockResponse({})
+  stageHeatzyWire(mockRequest, {
+    login: () => mockResponse(loginData ?? buildLoginData()),
+    rest: (config) => heatzyRegistryResponse(config, { attributes, bindings }),
   })
 }
 
@@ -66,7 +120,7 @@ export const mockRejectedWire = (): void => {
 }
 
 export const loginCalls = (): number =>
-  mockRequest.mock.calls.filter(([config]) => config.url === '/login').length
+  mockRequest.mock.calls.filter(([config]) => config.url === LOGIN_PATH).length
 
 export const createApi = async (
   config: HeatzyAPIConfig = {},
