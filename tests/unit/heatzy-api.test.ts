@@ -74,6 +74,37 @@ describe(HeatzyAPI, () => {
       expect(api.registry.getDevices()).toHaveLength(0)
     })
 
+    // The listing boundary: the ENVELOPE is validated as a list, its
+    // ENTRIES one by one. A drop is never silent, and the two reasons
+    // are worded apart — a wire regression means the schema is wrong, an
+    // unresolved `product_key` means Heatzy shipped a radiator after
+    // this release and the product map needs extending.
+    it('drops the entries it cannot model and names each one', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      const binding = buildBinding('v2')
+      mockRequest.mockResolvedValue(
+        mockResponse({
+          devices: [
+            binding,
+            { dev_alias: 'Malformed', product_name: 'v2' },
+            { ...buildBinding('pro'), product_key: 'unshipped-generation' },
+          ],
+        }),
+      )
+
+      await expect(api.list()).resolves.toStrictEqual([binding])
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Skipping a /bindings entry this SDK cannot read',
+        ),
+      )
+      expect(logger.error).toHaveBeenCalledWith(
+        'Skipping device did-pro: unknown product_key unshipped-generation',
+      )
+    })
+
     it('rejects a malformed /bindings payload with a ValidationError', async () => {
       const { api } = await createAuthedApi()
       mockRequest.mockResolvedValue(mockResponse({ bindings: 'nope' }))

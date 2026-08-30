@@ -20,6 +20,7 @@ import {
   createExplodingSettingManager,
   LOGIN_BACKOFF_MS,
   loginCalls,
+  mockDriftedWire,
   mockRejectedWire,
   mockRequest,
   mockWire,
@@ -282,18 +283,18 @@ describe(HeatzyAPI, () => {
 
     // The registry guarantee above is only worth as much as its failure
     // mode: the post-auth sync must not resolve over a registry it could
-    // not build. A generation Heatzy ships after this SDK is the real
-    // case — `getProduct` throws on the unknown key.
+    // not build. What still qualifies is an ENVELOPE the cycle cannot
+    // read at all — anything a single entry or a single device read can
+    // be wrong about is now absorbed per device, and pinned as such in
+    // the session-lifecycle kernel.
     it('rejects when the enforced post-auth sync cannot build the registry', async () => {
       const { settingManager } = createSettingStore()
       const api = await createApi({ settingManager })
-      mockWire({
-        bindings: [{ ...buildBinding(), product_key: 'unshipped-generation' }],
-      })
+      mockDriftedWire()
 
       await expect(
         api.authenticate({ password: 'secret', username: 'user@test.com' }),
-      ).rejects.toThrow('Invalid product: unshipped-generation')
+      ).rejects.toThrow('Invalid API response shape (GET /bindings)')
 
       // The sign-in half succeeded, so the session stands: the caller
       // must see the sync failure, not a bogus credential problem.
@@ -310,9 +311,7 @@ describe(HeatzyAPI, () => {
       })
       settingManager.set('password', 'secret')
       settingManager.set('username', 'user@test.com')
-      mockWire({
-        bindings: [{ ...buildBinding(), product_key: 'unshipped-generation' }],
-      })
+      mockDriftedWire()
 
       await expect(api.resumeSession()).resolves.toBe(true)
 

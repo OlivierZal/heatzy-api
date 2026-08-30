@@ -10,6 +10,7 @@ import type {
   LoginCredentials,
   LoginData,
 } from '../types/index.ts'
+import { isModelledProduct } from '../constants.ts'
 import { setting, syncDevices } from '../decorators/index.ts'
 import { DeviceRegistry } from '../entities/index.ts'
 import { AuthenticationError } from '../errors/index.ts'
@@ -41,6 +42,7 @@ import {
 } from '../time-units.ts'
 import {
   BindingsSchema,
+  DeviceBindingSchema,
   DeviceDataSchema,
   LoginDataSchema,
   parseOrThrow,
@@ -258,12 +260,18 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
    * A rejected sign-in leaves the previously persisted credentials and
    * session untouched: only server-accepted credentials reach the
    * settings store.
+   * "Reflects server state" means what this SDK MODELS of it: an entry
+   * the SDK cannot read and a device whose live attributes the wire
+   * would not answer are dropped by {@link list} and the fan-out, each
+   * against a log line, and the sign-in still succeeds over the rest.
+   * One radiator never denies the account.
    * @param credentials - Explicit username/password.
    * @throws {@link AuthenticationError} when credentials are rejected.
    * @throws {@link ValidationError} — or whatever the post-auth sync
    * raises — when the sign-in succeeded but the registry could not be
-   * populated. The guarantee above is the reason: resolving here would
-   * report success over an empty registry.
+   * populated AT ALL (a refused `/bindings` call, an envelope that is
+   * not a device list). The guarantee above is the reason: resolving
+   * here would report success over an empty registry.
    */
   public async authenticate(credentials: LoginCredentials): Promise<void> {
     const epoch = this.#logOutEpoch
@@ -298,7 +306,14 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
    * indistinguishable from an account with no bindings, so a caller
    * that needs to know the registry is current must not use this
    * entry point — {@link authenticate} enforces its sync instead.
-   * @returns The fetched `/bindings` entries.
+   *
+   * The list is the ledger of what this cycle modelled: an entry
+   * {@link list} dropped is absent from it, and a device whose live
+   * attributes failed to read is present here while
+   * `registry.devices.getById` answers `undefined` (never seen) or a
+   * model still carrying its previous data (seen before). Both leave a
+   * log line, both are retried by the next cycle.
+   * @returns The `/bindings` entries this SDK models.
    */
   public async fetch(): Promise<readonly DeviceBinding[]> {
     try {
@@ -354,15 +369,25 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   }
 
   /**
-   * Fetches the raw `/bindings` payload (validated against the
-   * envelope schema) without touching the registry.
-   * @returns Every device bound to the account.
+   * Fetches the `/bindings` payload without touching the registry, and
+   * keeps the entries this SDK can model.
+   *
+   * The envelope is validated as a whole — a body that is not a device
+   * list stays a hard {@link ValidationError} — but the entries are
+   * validated ONE BY ONE: this call opens the registry cycle, and the
+   * post-auth cycle propagates, so an atomic array would let a single
+   * unreadable entry read as "cannot sign in at all". Every dropped
+   * entry leaves a log line saying WHY, because a wire regression and a
+   * Heatzy product newer than this SDK call for opposite answers and
+   * must stay distinguishable in the diagnostic reports users paste
+   * into issues.
+   * @returns Every device bound to the account that this SDK models.
    */
   public async list(): Promise<readonly DeviceBinding[]> {
     const { devices } = await this.#requestData<Bindings>('get', '/bindings', {
       schema: BindingsSchema,
     })
-    return devices
+    return devices.flatMap((device) => this.#toModelledBinding(device) ?? [])
   }
 
   /**
@@ -514,10 +539,14 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
 
   // The registry refresh both entry points share, without a
   // best-effort guard: `fetch` downgrades a failure to a logged empty
-  // list, the post-auth path must not. Validation rejections, an
-  // unknown `product_key` and registry bugs all surface here, and they
-  // are permanent — retrying cannot clear them, so a sign-in that
-  // resolved over one would report success on an empty registry.
+  // list, the post-auth path must not. What still surfaces here is what
+  // no partial answer can survive — an envelope that is not a device
+  // list, a `/bindings` call the wire refused outright, a registry bug:
+  // permanent failures retrying cannot clear, so a sign-in that
+  // resolved over one would report success on an empty registry. What a
+  // SINGLE device causes never reaches this point — the listing
+  // boundary and the fan-out degrade per entry, so one radiator this
+  // SDK predates costs that radiator, never the account.
   @syncDevices
   async #syncCycle(): Promise<readonly DeviceBinding[]> {
     const epoch = this.#logOutEpoch
@@ -689,14 +718,7 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
 
   async #fetch(): Promise<readonly DeviceBinding[]> {
     const bindings = await this.list()
-    const attributes = Object.fromEntries(
-      await Promise.all(
-        bindings.map(
-          async ({ did }) => [did, await this.getValues({ id: did })] as const,
-        ),
-      ),
-    )
-    this.#registry.syncDevices(bindings, attributes)
+    this.#registry.syncDevices(bindings, await this.#readAttributes(bindings))
     return bindings
   }
 
@@ -771,6 +793,40 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   // so the triggering request can still attempt its own retry path.
   async #performSessionRefresh(): Promise<void> {
     await this.resumeSession()
+  }
+
+  // The registry cycle's fan-out half, settled leg by leg: one device
+  // the wire cannot answer for — a transient 5xx that outlived the
+  // retry rung, an attribute payload naming a mode this SDK predates —
+  // must not deny the whole account. A failed leg is logged with its
+  // device id and simply left out of the record, which is the
+  // `undefined` `DeviceRegistry.syncDevices` documents: an existing
+  // model keeps its last-known data, a new one waits for the next
+  // cycle. `Promise.allSettled` rather than a caught `Promise.all`
+  // because it also absorbs the ONE line that cannot be guarded — a
+  // host logger that throws while reporting the skip then costs that
+  // one device instead of the account.
+  async #readAttributes(
+    bindings: readonly DeviceBinding[],
+  ): Promise<Record<string, Attributes>> {
+    const settled = await Promise.allSettled(
+      bindings.map(async ({ did }) => {
+        try {
+          return [did, await this.getValues({ id: did })] as const
+        } catch (error) {
+          this.logger.error(
+            `Skipping device ${did}: its live attributes could not be read`,
+            error,
+          )
+          throw error
+        }
+      }),
+    )
+    return Object.fromEntries(
+      settled.flatMap((result) =>
+        result.status === 'fulfilled' ? [result.value] : [],
+      ),
+    )
   }
 
   // Reactive refresh after an expired-token 400/401, before
@@ -881,6 +937,37 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
       // enforced post-auth registry sync.
       this.#emitAuthenticationLostOnce()
     }
+  }
+
+  // One `/bindings` entry, kept only when this SDK can model it: the
+  // shape has to validate AND the `product_key` has to resolve, because
+  // `new Device(...)` calls `getProduct`, which throws on a key this
+  // SDK predates — inside the registry sync, after the wire answered
+  // 200 and after the sign-in stored its token. The registry runs no
+  // guard of its own; this boundary is what it relies on.
+  //
+  // The two drops are worded apart on purpose: a malformed entry is a
+  // wire regression (fix the schema), an unresolved `product_key` is a
+  // radiator Heatzy shipped after this release (extend the product map
+  // in `constants.ts`, with its PDF in `references/`). A silent drop
+  // would make them one indistinguishable symptom — "a device
+  // disappeared".
+  #toModelledBinding(device: unknown): DeviceBinding | null {
+    const parsed = DeviceBindingSchema.safeParse(device)
+    if (!parsed.success) {
+      this.logger.error(
+        `Skipping a /bindings entry this SDK cannot read: ${parsed.error.message}`,
+      )
+      return null
+    }
+    const { did, product_key: productKey } = parsed.data
+    if (!isModelledProduct(productKey)) {
+      this.logger.error(
+        `Skipping device ${did}: unknown product_key ${productKey}`,
+      )
+      return null
+    }
+    return parsed.data
   }
 
   // Try to reuse a persisted token without a full re-authentication:

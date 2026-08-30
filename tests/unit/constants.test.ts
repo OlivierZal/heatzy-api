@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { getProduct, Product } from '../../src/constants.ts'
+import { getProduct, isModelledProduct, Product } from '../../src/constants.ts'
 import { PRODUCT_KEYS } from '../fixtures.ts'
 
 describe(getProduct, () => {
@@ -51,5 +51,19 @@ describe(getProduct, () => {
 
   it('throws on an unknown product key', () => {
     expect(() => getProduct('deadbeef')).toThrow('Invalid product: deadbeef')
+  })
+})
+
+// The non-throwing half of the same question, asked at the listing
+// boundary before a `Device` is built — because the constructor's
+// `getProduct` throws, and one radiator Heatzy shipped after this
+// release must not deny the whole account.
+describe(isModelledProduct, () => {
+  it('says yes to a key the product map resolves', () => {
+    expect(isModelledProduct(PRODUCT_KEYS.pro)).toBe(true)
+  })
+
+  it('says no to a key this SDK predates, without throwing', () => {
+    expect(isModelledProduct('deadbeef')).toBe(false)
   })
 })
