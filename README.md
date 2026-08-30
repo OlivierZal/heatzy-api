@@ -17,7 +17,7 @@ A typed Node.js client for the [Heatzy](https://www.heatzy.com/) (Gizwits) API, 
 - **Strongly typed** — full TypeScript types for the Gizwits wire format, with 100% TSDoc coverage on the public surface.
 - **Every generation supported** — Pilote V1's positional `raw` triplet, V2/V4 derogations, Glow's split temperature registers (incl. Onyx and Shine), and Pro's measures, open-window detection and presence mode — behind one facade family.
 - **Resilient by default** — auto-retry on transient failures, pre-emptive session refresh, and reactive re-login on Gizwits's 400-coded token expiry.
-- **Validated boundaries** — Zod schemas guard every consumed payload, so upstream shape drift surfaces as a typed `ValidationError` instead of a deep `undefined` crash.
+- **Validated boundaries** — Zod schemas guard every consumed payload, so upstream shape drift surfaces as a typed `ValidationError` instead of a deep `undefined` crash. Per device, though: one radiator the SDK cannot read never costs you the other rooms, nor the sign-in.
 - **Registry + facades** — an identity-preserving device registry with product-aware facades (`supportsV2` / `supportsGlow` / `supportsPro` narrowing).
 - **Tree-shakable** — ESM only, `sideEffects: false`.
 
@@ -87,6 +87,24 @@ const api = await HeatzyAPI.create({
   },
 })
 ```
+
+## Partial registries
+
+The registry cycle is `/bindings` plus one `/devdata` read per binding, and it degrades **per device** rather than as a block — a radiator this SDK cannot model must never deny you the account, least of all through the sign-in, whose registry sync is enforced.
+
+- A `/bindings` entry whose shape does not validate, or whose `product_key` this release predates, is dropped at the listing boundary. `list()` and `fetch()` answer what survived.
+- A device whose `/devdata` read fails — a transient 5xx that outlived the retry rung, an attribute payload naming an unknown mode — keeps the model it already had (stale data beats no data) and is skipped when it has never been seen. Its binding stays in the returned list, so the next cycle reads it again.
+
+Nothing is dropped quietly: every skip writes a `logger.error` line naming the device and the reason, and a failed round-trip still reaches the `onRequestError` lifecycle event. To detect a partial cycle programmatically, compare what `fetch()` returned against the registry:
+
+```ts title="partial-registry"
+const bindings = await api.fetch()
+const missing = bindings.filter(
+  ({ did }) => api.registry.devices.getById(did) === undefined,
+)
+```
+
+Only a failure no partial answer can survive — a refused `/bindings` call, or an envelope that is not a device list — fails the whole cycle, and `authenticate()` still rejects on those.
 
 ## Resilience & retries
 

@@ -18,7 +18,7 @@ import type {
   SyncCallback,
 } from '../../src/api/types.ts'
 import { Mode } from '../../src/constants.ts'
-import { AuthenticationError } from '../../src/errors/index.ts'
+import { AuthenticationError, ValidationError } from '../../src/errors/index.ts'
 import {
   type HttpRequestConfig,
   type HttpResponse,
@@ -101,9 +101,18 @@ const UNEXPECTED_SIGN_IN = 'unexpected sign-in'
 const REPORTER_REFUSED = 'diagnostic sink refused'
 
 // A generation Heatzy ships after this SDK: `getProduct` throws on the
-// unknown hash, so the cycle dies INSIDE `registry.syncDevices` — after
-// the wire answered 200 and after the sign-in stored the token.
+// unknown hash, which is why the listing boundary refuses to hand such
+// an entry to the registry at all.
 const UNSHIPPED_PRODUCT_KEY = 'unshipped-generation'
+
+// A heating mode this SDK predates: `AttributesSchema.mode` is a closed
+// literal union, so the device read carrying it fails validation while
+// its 200 says nothing about the session.
+const UNSHIPPED_MODE = 'cft3'
+
+// The device whose live attributes come back unreadable in the
+// fan-out clause — the SIBLING of a device that answers normally.
+const UNREADABLE_DEVICE_ID = 'did-v2'
 
 const CREDENTIALS = { password: 'pass', username: 'user@test.com' }
 
@@ -119,12 +128,31 @@ const BASE_PERSISTED_KEYS = [
 const REGISTRY_BINDINGS = [buildBinding('pro')]
 
 // A 200 the session survives and the registry does not — the shape that
-// separates "the session stands" from "the cycle landed". The wire
-// answers it in full, fan-out included; `registry.syncDevices` then
-// throws on the unshipped `product_key`.
-const DRIFTED_BINDINGS = [
-  { ...buildBinding('pro'), product_key: UNSHIPPED_PRODUCT_KEY },
+// separates "the session stands" from "the cycle landed". It has to be
+// an ENVELOPE failure: everything a single ENTRY can be wrong about is
+// now absorbed per entry, so only a body that is not a device list at
+// all leaves the cycle nothing to salvage.
+const DRIFTED_ENVELOPE = { devices: 'not-a-device-list' }
+
+// A listing this SDK models in part: one entry it reads, one wire
+// regression (no `did`), one radiator Heatzy shipped after this
+// release. The two drops must cost themselves and nothing else.
+const PARTIAL_BINDINGS = [
+  buildBinding('pro'),
+  { dev_alias: 'Malformed', product_name: 'v2' },
+  { ...buildBinding('v2'), product_key: UNSHIPPED_PRODUCT_KEY },
 ]
+
+// Two entries this SDK models in full — the fan-out is where one of
+// them then comes back unreadable.
+const FAN_OUT_BINDINGS = [buildBinding('pro'), buildBinding('v2')]
+
+const bindingsFor = (outcome: WireOutcome): readonly unknown[] => {
+  if (outcome === 'partial-listing') {
+    return PARTIAL_BINDINGS
+  }
+  return outcome === 'partial-fan-out' ? FAN_OUT_BINDINGS : REGISTRY_BINDINGS
+}
 
 /**
  * What the sign-in round-trip answers. Gizwits rejects a credential
@@ -193,10 +221,17 @@ interface SessionUnderTest {
 /**
  * What the transport answers for every non-sign-in call — the registry
  * cycle's two hops and, where the clause needs one, a mutation.
+ *
+ * Three of them answer 200 and still deny the cycle something:
+ * `drifted-registry` denies it everything (the envelope is not a device
+ * list), while `partial-listing` and `partial-fan-out` deny it exactly
+ * one device — at the listing boundary and in the fan-out respectively.
  */
 type WireOutcome =
   | 'drifted-registry'
   | 'ok'
+  | 'partial-fan-out'
+  | 'partial-listing'
   | 'refuse-registry'
   | 'unauthorized-once'
   | 'unavailable'
@@ -323,6 +358,24 @@ const answerLogin = (): HttpResponse => {
 }
 
 /**
+ * The 200s that deny the cycle something: the whole registry, or
+ * exactly one device. Scoped to the hop each one is about — the
+ * envelope for the drifted body, one leg of the fan-out for the
+ * unreadable device, whose sibling must keep answering normally.
+ * @param url - URL the call targeted.
+ * @returns The degraded response, or `null` when this hop is ordinary.
+ */
+const answerDegraded = (url: string): HttpResponse | null => {
+  if (url === BINDINGS_PATH && heatzyWire.outcome === 'drifted-registry') {
+    return mockResponse(DRIFTED_ENVELOPE)
+  }
+  return url === `${DEVDATA_PREFIX}${UNREADABLE_DEVICE_ID}/latest` &&
+    heatzyWire.outcome === 'partial-fan-out'
+    ? mockResponse({ attr: { mode: UNSHIPPED_MODE } })
+    : null
+}
+
+/**
  * The transport answer a staged {@link WireOutcome} produces. A refusal
  * is thrown, which the client's async wrapper turns into a rejected
  * round-trip.
@@ -347,13 +400,13 @@ const answerWire = (config: HttpRequestConfig): HttpResponse => {
   ) {
     throw createServerError(heatzyWire.authFailureStatus, url)
   }
-  return heatzyRegistryResponse(config, {
-    attributes: proAttributes,
-    bindings:
-      heatzyWire.outcome === 'drifted-registry'
-        ? DRIFTED_BINDINGS
-        : REGISTRY_BINDINGS,
-  })
+  return (
+    answerDegraded(url) ??
+    heatzyRegistryResponse(config, {
+      attributes: proAttributes,
+      bindings: bindingsFor(heatzyWire.outcome),
+    })
+  )
 }
 
 const stageHeatzy = ({
@@ -559,6 +612,66 @@ const describeSessionLifecycleContract = (
       expect(settingManager.get('loginBackoffUntil')).toBe('')
     })
 
+    // The account-denial property, listing half — this dialect's form of
+    // melcloud-api 54.0.0. The enforced cycle PROPAGATES, so an entry
+    // this SDK cannot model used to read as "cannot sign in at all": a
+    // malformed sibling took the atomic array down with it, and an
+    // unresolved `product_key` threw out of the `Device` constructor
+    // mid-sync. Both are now dropped at the boundary, and dropped
+    // LOUDLY — the two lines are asserted apart because they call for
+    // opposite answers (fix the schema vs. extend the product map), and
+    // a silent drop would leave one indistinguishable symptom.
+    it('signs in over a listing it only partly models, keeping the entries it does', async () => {
+      const logger = createLogger()
+      const { settingManager } = createSettingStore()
+      driver.stage({ login: 'accept', wire: 'partial-listing' })
+      const { api, deviceCount } = await driver.create({
+        logger,
+        settingManager,
+      })
+
+      await expect(api.authenticate(CREDENTIALS)).resolves.toBeUndefined()
+
+      expect(deviceCount()).toBe(1)
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Skipping a /bindings entry this SDK cannot read',
+        ),
+      )
+      expect(logger.error).toHaveBeenCalledWith(
+        `Skipping device ${UNREADABLE_DEVICE_ID}: unknown product_key ${UNSHIPPED_PRODUCT_KEY}`,
+      )
+      // An entry that was never going to be modelled costs no wire call
+      // either: only the surviving binding was fanned out to.
+      expect(driver.deviceReadCount()).toBe(1)
+    })
+
+    // The same property, fan-out half — the one this dialect owns
+    // alone, because only a PER-DEVICE cycle can lose a single device
+    // after the listing succeeded. The legs settle independently, so
+    // the device that answered is modelled and the one that did not is
+    // named in the log with the error it failed on.
+    it('signs in when one device read comes back unreadable, keeping the devices that answered', async () => {
+      const logger = createLogger()
+      const { settingManager } = createSettingStore()
+      driver.stage({ login: 'accept', wire: 'partial-fan-out' })
+      const { api, deviceCount } = await driver.create({
+        logger,
+        settingManager,
+      })
+
+      await expect(api.authenticate(CREDENTIALS)).resolves.toBeUndefined()
+
+      // Both legs were spent — the failure is the leg's, not the
+      // cycle's — and exactly one of them produced a model.
+      expect(driver.deviceReadCount()).toBe(2)
+      expect(deviceCount()).toBe(1)
+      expect(logger.error).toHaveBeenCalledWith(
+        `Skipping device ${UNREADABLE_DEVICE_ID}: its live attributes could not be read`,
+        expect.any(ValidationError),
+      )
+    })
+
     // The gate's negative half (heatzy.ts:541-546). A transport failure
     // is not a rejected credential: the retry paths own those, and
     // pausing sign-ins over a blip would lock a working account out for
@@ -621,13 +734,16 @@ const describeSessionLifecycleContract = (
     it('returns true from resumeSession when the session was established before the enforced cycle threw', async () => {
       const { settingManager } = createSettingStore()
       driver.stage({ login: 'accept', wire: 'drifted-registry' })
-      const { api } = await driver.create({ settingManager })
+      const { api, deviceCount } = await driver.create({ settingManager })
       seedCredentials(settingManager)
 
       await expect(api.resumeSession()).resolves.toBe(true)
 
       expect(api.isAuthenticated()).toBe(true)
       expect(driver.registryCycleCount()).toBe(1)
+      // The cycle really did fail: signed in over nothing at all, which
+      // is what makes the `true` above a statement about the SESSION.
+      expect(deviceCount()).toBe(0)
     })
 
     it('returns false from resumeSession when the sign-in is refused and no session stands', async () => {

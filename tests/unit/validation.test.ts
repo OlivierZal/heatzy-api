@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { ValidationError } from '../../src/errors/index.ts'
 import {
   BindingsSchema,
+  DeviceBindingSchema,
   DeviceDataSchema,
   LoginDataSchema,
   parseOrThrow,
@@ -66,15 +67,41 @@ describe('bindingsSchema', () => {
     })
   })
 
+  // The envelope validates the LIST, never its entries: an atomic array
+  // would let one unreadable device invalidate every sibling, and the
+  // enforced post-auth cycle would turn that into "cannot sign in at
+  // all". `HeatzyAPI.list` validates the entries one by one instead.
+  it('accepts an entry it cannot model next to one it can', () => {
+    const parsed = BindingsSchema.parse({
+      devices: [buildBinding('pro'), { did: 42 }],
+    })
+
+    expect(parsed.devices).toHaveLength(2)
+  })
+
+  it('rejects a devices field that is not a list', () => {
+    expect(() =>
+      BindingsSchema.parse({ devices: 'not-a-device-list' }),
+    ).toThrow(/devices/v)
+  })
+})
+
+describe('deviceBindingSchema', () => {
+  it('accepts an entry and preserves loose extra keys', () => {
+    expect(
+      DeviceBindingSchema.parse({ ...buildBinding('pro'), extra_key: 'kept' }),
+    ).toMatchObject({ did: 'did-pro', extra_key: 'kept' })
+  })
+
   it('rejects an empty did', () => {
     expect(() =>
-      BindingsSchema.parse({ devices: [buildBinding('pro', { did: '' })] }),
+      DeviceBindingSchema.parse(buildBinding('pro', { did: '' })),
     ).toThrow(/did/v)
   })
 
   it('rejects a missing dev_alias', () => {
     expect(() =>
-      BindingsSchema.parse({ devices: [omitKey(buildBinding(), 'dev_alias')] }),
+      DeviceBindingSchema.parse(omitKey(buildBinding(), 'dev_alias')),
     ).toThrow(/dev_alias/v)
   })
 })

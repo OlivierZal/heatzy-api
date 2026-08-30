@@ -3,6 +3,7 @@ import { z } from 'zod'
 import type {
   Attributes,
   Bindings,
+  DeviceBinding,
   DeviceData,
   LoginData,
 } from '../types/index.ts'
@@ -55,7 +56,11 @@ const AttributesSchema: z.ZodType<Attributes> = z.looseObject({
   window_switch: SwitchSchema.optional(),
 })
 
-const DeviceBindingSchema = z.looseObject({
+/**
+ * One `/bindings` entry — applied ONE BY ONE at the listing boundary,
+ * never inside the envelope's array (see {@link BindingsSchema}).
+ */
+export const DeviceBindingSchema: z.ZodType<DeviceBinding> = z.looseObject({
   dev_alias: z.string(),
   did: z.string().min(1),
   product_key: z.string().min(1),
@@ -63,10 +68,19 @@ const DeviceBindingSchema = z.looseObject({
 })
 
 /**
- * `/bindings` response envelope.
+ * `/bindings` response ENVELOPE — the device list is validated as a
+ * list, its entries left `unknown`.
+ *
+ * The registry cycle opens here, and the enforced post-auth cycle
+ * propagates its failures, so an atomic `z.array(DeviceBindingSchema)`
+ * would let one unreadable entry invalidate every sibling and read as
+ * "cannot sign in at all". `HeatzyAPI.list` therefore validates the
+ * entries individually against {@link DeviceBindingSchema} and drops
+ * — loudly — whatever it cannot model. A body that is not a device
+ * list at all is still a hard failure: nothing survives it to salvage.
  */
 export const BindingsSchema: z.ZodType<Bindings> = z.looseObject({
-  devices: z.array(DeviceBindingSchema),
+  devices: z.array(z.unknown()),
 })
 
 /**

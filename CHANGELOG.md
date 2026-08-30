@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [15.0.0] - 2026-08-30
+
+### Breaking changes
+
+- **One device this SDK cannot model no longer denies the whole account.** The registry cycle degraded as a block, in three independent places, and every one of them was reached from the ENFORCED post-auth cycle (`authenticate()` → `#finishLogin` → `#syncCycle`), which has propagated since 11.0.0 — so each read to the user as "cannot sign in at all", over credentials the server had just accepted and a token already stored:
+
+  1. `/bindings` was validated ATOMICALLY (`z.array(DeviceBindingSchema)`): one malformed entry invalidated every sibling.
+  2. The `/devdata` fan-out was a `Promise.all` over a throwing `getValues`, and `AttributesSchema.mode` is a REQUIRED closed literal union — so one device reporting an unmodelled mode, or one transient 5xx that outlived the retry rung, rejected the whole cycle.
+  3. `Device`'s constructor resolves `getProduct(binding.product_key)`, which THROWS on an unknown key — so one just-released Heatzy radiator on the account took the sign-in down with it, mid-sync, leaving the registry half-built and unpruned.
+
+  All three now degrade at the boundary, so what survives is what this SDK models: the `/bindings` entries are validated one by one and dropped individually, an entry whose `product_key` does not resolve is dropped before a model is built, and the `/devdata` legs settle independently (`Promise.allSettled`), feeding the registry the `undefined` it has always documented — an existing model keeps its last-known data, a new one waits for the next cycle. `DeviceRegistry.syncDevices`'s tolerance ("a binding whose attributes are missing keeps its existing model untouched … and is skipped when new") was unreachable from the client under `Promise.all`; it is now what the fan-out actually feeds.
+
+  **No drop is silent.** Each one writes a `logger.error` line naming the device, and the two listing reasons are worded apart on purpose — a malformed entry is a wire regression (the schema is wrong), an unresolved `product_key` is a product newer than this release (extend the map in `constants.ts`, with its PDF in `references/`) — because a silent drop would leave one indistinguishable symptom, "a device disappeared", in the diagnostic reports users paste into issues.
+
+  What still fails the whole cycle is what no partial answer can survive: a refused `/bindings` call, or an envelope that is not a device list at all. Migration: code that branched on `authenticate()` rejecting for a device the SDK could not model now takes the SUCCESS path with a partial registry; `fetch()`'s returned list is the ledger of what the cycle modelled, and a device whose live read failed is present there while `registry.devices.getById` answers `undefined` or a model still carrying its previous data. Nothing calls the wire more often — an unmodelled entry is now dropped _before_ its `/devdata` read is spent — no retry policy changed, and the failed round-trip still reaches `events.onRequestError` and the call logger, so a transient 5xx on one device stays visible and is retried by the next cycle.
+
+  melcloud-api shipped this shape on 2026-08-29 (its 54.0.0) for its bulk Classic listing, and its changelog claimed "the heatzy twin has no equivalent exposure: its sync is per-device". That claim was false three ways over, as above: per-device describes the fan-out, not the listing that opens it — and the fan-out was the _worst_ of the three, because it also lost a device to a transient 5xx. A fix to either twin re-opens the question for both, the same day.
+
+- **`Bindings.devices` is `readonly unknown[]`.** The published type names the envelope AS IT COMES OFF THE WIRE: a device list whose entries are not yet anyone's contract. Its schema (internal) validates the list and leaves the entries alone; they are validated one by one at the listing boundary — the first exposure above, restated as a type. Migration: code annotating a hand-parsed `/bindings` body with `Bindings` now holds `unknown[]` and narrows the entries itself; `DeviceBinding` is unchanged and stays the type of a modelled entry. Nothing else changed shape — `list()` and `fetch()` still answer `readonly DeviceBinding[]`.
+
+- **`list()` answers the entries this SDK models, not every entry the wire carried.** Its doc promised "every device bound to the account"; it now promises every device bound to the account _that this SDK models_, and says in the log which ones it dropped and why. The registry has always relied on exactly that: it builds a model per entry with no runtime guard of its own, which is the reason exposure 3 existed.
+
+### Added
+
+- **`isModelledProduct(productKey)`** — the non-throwing form of `getProduct`, asked at the `/bindings` boundary before a `Device` is built, and published beside it because `DeviceRegistry.syncDevices` carries the same precondition for a caller synchronizing hand-built bindings. `getProduct` still throws: extending the product map stays the fix for a new radiator, this only keeps one from denying the account until then.
+
+### Changed
+
+- **The session-lifecycle kernel gains the account-denial clauses, and its 200-that-denies-the-registry is repointed.** `tests/contracts/session-lifecycle.test.ts` pins both halves of the property — a listing this SDK only partly models, and a fan-out leg that comes back unreadable — each asserting the sign-in still succeeds, that exactly the modelled devices survive, and that every drop was named in the log. The kernel's `drifted-registry` outcome used to be an unshipped `product_key`, which no longer fails anything; it is now a `/bindings` body that is not a device list, which is both the only remaining whole-cycle registry failure and the shape melcloud-api's twin kernel already staged (`Areas: 'not-an-array'`). A deliberate clause change, in the commit that says so — not a rewording smuggled through a neutrality-critical move.
+
 ## [14.1.0] - 2026-08-27
 
 ### Changed
@@ -120,6 +150,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[15.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v14.1.0...v15.0.0
 [14.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v14.0.0...v14.1.0
 [14.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v13.0.1...v14.0.0
 [13.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v13.0.0...v13.0.1

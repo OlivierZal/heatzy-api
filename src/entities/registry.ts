@@ -47,9 +47,17 @@ export class DeviceRegistry {
    * Upserts the device registry from fresh wire data; entries absent
    * from `bindings` are pruned. A binding whose attributes are missing
    * from `attributes` keeps its existing model untouched (stale data
-   * beats no data) and is skipped when new — mirroring a device that
-   * answered `/bindings` but not `/devdata`.
-   * @param bindings - Fresh `/bindings` entries.
+   * beats no data) and is skipped when new — the tolerance
+   * `HeatzyAPI`'s `/devdata` fan-out feeds, one settled leg per device,
+   * so a device that answered `/bindings` but not `/devdata` costs
+   * itself and no sibling.
+   *
+   * Every binding is expected to be one this SDK models: {@link Device}
+   * resolves its `product_key` in its constructor and THROWS on a key
+   * this SDK predates. The listing boundary (`HeatzyAPI.list`) is what
+   * guarantees that; a caller synchronizing hand-built bindings owns
+   * the same precondition.
+   * @param bindings - Fresh `/bindings` entries this SDK models.
    * @param attributes - Live attribute payloads keyed by `did`.
    */
   public syncDevices(

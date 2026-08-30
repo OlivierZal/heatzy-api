@@ -128,3 +128,20 @@ export const getProduct = (productKey: string): Product => {
   }
   return product
 }
+
+/**
+ * Whether a `product_key` names a generation this SDK models — the
+ * question {@link getProduct} answers by throwing.
+ *
+ * Asked at the `/bindings` boundary, BEFORE a model is built: `Device`
+ * resolves its product in its constructor, so a key this SDK predates
+ * would otherwise take the whole registry cycle down with it — and,
+ * since the post-auth cycle propagates, the sign-in with it. Extending
+ * the product map stays the fix; this only keeps one new radiator from
+ * denying the account until then.
+ * @param productKey - The wire `product_key` hash.
+ * @returns Whether the key resolves to a product generation.
+ * @category Constants
+ */
+export const isModelledProduct = (productKey: string): boolean =>
+  productByKey.has(productKey)

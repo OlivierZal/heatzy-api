@@ -50,7 +50,25 @@ Architecture, toolchain and process are aligned on the sibling
 - Product generations resolve from opaque `product_key` hashes
   (`src/constants.ts`); V3 devices identify as V2, Onyx and Shine as
   Glow. An unknown key throws — extend the map when Heatzy ships a new
-  product, with the PDF added to `references/`.
+  product, with the PDF added to `references/`. `isModelledProduct` is
+  the non-throwing form the listing boundary asks FIRST, so an
+  unextended map costs that one radiator and never the account.
+- **The registry cycle degrades per device, at the boundary.** The
+  cycle (`/bindings` + one `/devdata` read per binding) is reached from
+  the ENFORCED post-auth sync, which propagates — so anything that
+  failed the cycle as a block read as "cannot sign in at all". Three
+  such blocks were fixed in 15.0.0: the atomic `/bindings` array, the
+  `Promise.all` fan-out, and `getProduct`'s throw inside the `Device`
+  constructor. Entries are now validated and dropped ONE BY ONE at the
+  listing boundary (`HeatzyAPI.list`), and the fan-out settles leg by
+  leg (`Promise.allSettled`) feeding the registry the `undefined` it
+  documents. `DeviceRegistry` runs no guard of its own — it builds a
+  model per entry — so the boundary is what it relies on. Every drop
+  writes a log line, and the listing's two reasons are worded APART: a
+  malformed entry means the schema is wrong, an unresolved
+  `product_key` means the product map is stale, and a silent drop
+  would leave one indistinguishable symptom. Only an envelope that is
+  not a device list still fails the whole cycle.
 - V1 products speak a positional `raw: [1, 1, mode]` triplet on
   `/control` and only accept the four base modes; every other
   generation posts named `attrs`. The base facade owns the V1 dialect,
@@ -114,6 +132,17 @@ Architecture, toolchain and process are aligned on the sibling
   CLOSED by the `@olivierzal/api-core` extraction: the mechanism now
   lives once, and a redaction fix reaches both SDKs as one release
   plus a pin bump each.
+- **Second divergence episode, also NOT a verdict (2026-08-30)**: the
+  twin's 54.0.0 changelog cleared this repo in one line — "the heatzy
+  twin has no equivalent exposure: its sync is per-device" — and that
+  claim was false three ways over (15.0.0). "Per-device" describes the
+  `/devdata` fan-out, not the `/bindings` listing that opens it, and the
+  fan-out was the worst of the three exposures because a transient 5xx
+  on one device denied the account too. The lesson generalizes the
+  first: a fix to either twin re-opens the question for BOTH the same
+  day, and a changelog line clearing the sibling is a claim to VERIFY
+  against its code, never a verdict to inherit. Neither twin's owner
+  may write the other's exemption.
 
 ## Mechanism boundary (@olivierzal/api-core)
 
@@ -152,8 +181,16 @@ kernel import resolves through them. `heatzy-api-auth.test.ts` and
 friends stay where the mechanism goes; the kernel does not.
 
 Every clause is worded about the PER-DEVICE registry cycle (`/bindings`
-plus its `/devdata` fan-out), and three of them hold divergences the
-extraction must handle deliberately rather than silently: `[Symbol.dispose]`
+plus its `/devdata` fan-out), the account-denial pair added in 15.0.0
+included: a listing this SDK only partly models and a fan-out leg that
+comes back unreadable each end in a SUCCESSFUL sign-in over exactly the
+modelled devices, every drop named in the log. The `drifted-registry`
+outcome — the 200 the session survives and the registry does not — is a
+`/bindings` body that is not a device list, the only whole-cycle
+registry failure left and the shape melcloud's twin kernel already
+stages; it used to be an unshipped `product_key`, which the boundary now
+absorbs. Three clauses hold divergences the extraction must handle
+deliberately rather than silently: `[Symbol.dispose]`
 releases the sync timer but NOT the retry guard (melcloud releases both —
 adopting its superset must update that clause in a commit that says so);
 no log label is passed anywhere, so every line arrives unprefixed and a

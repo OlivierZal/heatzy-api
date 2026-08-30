@@ -1,18 +1,31 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { SyncCallback } from '../../src/api/types.ts'
+import type { RequestErrorEvent, SyncCallback } from '../../src/api/types.ts'
 import { HeatzyAPI } from '../../src/api/heatzy.ts'
-import { buildBinding, proAttributes } from '../fixtures.ts'
+import { buildBinding, buildLoginData, proAttributes } from '../fixtures.ts'
 import {
   createApi,
   createAuthedApi,
+  heatzyRegistryResponse,
   mockRejectedWire,
   mockRequest,
   mockWire,
+  stageHeatzyWire,
   wireSetup,
   wireTeardown,
 } from '../heatzy-api-harness.ts'
-import { createLogger, createSettingStore, mockResponse } from '../helpers.ts'
+import {
+  createLogger,
+  createServerError,
+  createSettingStore,
+  mockResponse,
+} from '../helpers.ts'
+
+// Long enough for the transient-retry rung to exhaust its four
+// attempts (1 s initial delay, 16 s cap) and hand the failure back.
+const TRANSIENT_RETRY_WINDOW_MS = 30_000
+
+const UNREADABLE_DEVICE_PATH = '/devdata/did-v2/latest'
 
 describe(HeatzyAPI, () => {
   beforeEach(wireSetup)
@@ -36,6 +49,75 @@ describe(HeatzyAPI, () => {
           url: '/devdata/did-pro/latest',
         }),
       )
+
+      const device = api.registry.devices.getById('did-pro')
+
+      expect(device?.name).toBe('Radiator pro')
+      expect(device?.data).toStrictEqual(proAttributes)
+    })
+
+    // The fan-out settles leg by leg, so a device the wire will not
+    // answer for costs itself and no sibling. A transient 5xx is the
+    // case that must not become permanently invisible: the retry rung
+    // still spends its attempts, the skip names the device, the failed
+    // round-trip still reaches `onRequestError` — and the binding stays
+    // in the returned list, so the next cycle reads that device again.
+    it('keeps the devices that answered when one device read fails, and says which', async () => {
+      const logger = createLogger()
+      const onRequestError = vi.fn<(event: RequestErrorEvent) => void>()
+      const { api } = await createAuthedApi({
+        events: { onRequestError },
+        logger,
+      })
+      stageHeatzyWire(mockRequest, {
+        login: () => mockResponse(buildLoginData()),
+        rest: (config) => {
+          if (config.url === UNREADABLE_DEVICE_PATH) {
+            throw createServerError(503, config.url)
+          }
+          return heatzyRegistryResponse(config, {
+            attributes: proAttributes,
+            bindings: [buildBinding('pro'), buildBinding('v2')],
+          })
+        },
+      })
+
+      const cycle = api.fetch()
+      await vi.advanceTimersByTimeAsync(TRANSIENT_RETRY_WINDOW_MS)
+
+      await expect(cycle).resolves.toHaveLength(2)
+
+      expect(api.registry.getDevices()).toHaveLength(1)
+      expect(api.registry.devices.getById('did-pro')).toBeDefined()
+      expect(logger.error).toHaveBeenCalledWith(
+        'Skipping device did-v2: its live attributes could not be read',
+        expect.any(Error),
+      )
+      expect(onRequestError).toHaveBeenCalledWith(
+        expect.objectContaining({ url: UNREADABLE_DEVICE_PATH }),
+      )
+    })
+
+    // The registry tolerance the fan-out now actually feeds: a device
+    // that answered `/bindings` but not `/devdata` keeps the model it
+    // had, untouched — stale data beats no data, and beats pruning a
+    // device that is merely quiet.
+    it('leaves an existing model on its last-known data when its device read fails', async () => {
+      const { api } = await createAuthedApi()
+      mockWire({ bindings: [buildBinding('pro')] })
+      await api.fetch()
+      stageHeatzyWire(mockRequest, {
+        login: () => mockResponse(buildLoginData()),
+        rest: (config) =>
+          config.url === '/devdata/did-pro/latest'
+            ? mockResponse({ attr: { mode: 'cft3' } })
+            : heatzyRegistryResponse(config, {
+                attributes: proAttributes,
+                bindings: [buildBinding('pro', { dev_alias: 'Renamed' })],
+              }),
+      })
+
+      await api.fetch()
 
       const device = api.registry.devices.getById('did-pro')
 

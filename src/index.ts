@@ -31,6 +31,7 @@ export {
 export {
   DerogationMode,
   getProduct,
+  isModelledProduct,
   Mode,
   Product,
   Switch,

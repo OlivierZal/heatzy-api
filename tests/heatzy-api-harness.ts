@@ -6,11 +6,7 @@ import type {
   HttpRequestConfig,
   HttpResponse,
 } from '../src/http/index.ts'
-import type {
-  Attributes,
-  DeviceBinding,
-  LoginData,
-} from '../src/types/index.ts'
+import type { Attributes, LoginData } from '../src/types/index.ts'
 import { HeatzyAPI } from '../src/api/heatzy.ts'
 import { Temporal } from '../src/temporal.ts'
 import { buildBinding, buildLoginData, proAttributes } from './fixtures.ts'
@@ -74,6 +70,9 @@ export const stageHeatzyWire = (
  * @param root1 - Payload the cycle carries.
  * @param root1.attributes - Attribute payload every device read answers.
  * @param root1.bindings - Entries the `/bindings` envelope carries.
+ * Typed `unknown` because the envelope is: entries are validated one
+ * by one at the listing boundary, so a clause can stage one the SDK
+ * cannot model next to one it can.
  * @returns The response for that hop of the cycle.
  */
 export const heatzyRegistryResponse = (
@@ -81,7 +80,7 @@ export const heatzyRegistryResponse = (
   {
     attributes,
     bindings,
-  }: { attributes: Attributes; bindings: readonly DeviceBinding[] },
+  }: { attributes: Attributes; bindings: readonly unknown[] },
 ): HttpResponse => {
   if (url === BINDINGS_PATH) {
     return mockResponse({ devices: bindings })
@@ -101,12 +100,29 @@ export const mockWire = ({
   loginData,
 }: {
   attributes?: Attributes
-  bindings?: readonly DeviceBinding[]
+  bindings?: readonly unknown[]
   loginData?: LoginData
 } = {}): void => {
   stageHeatzyWire(mockRequest, {
     login: () => mockResponse(loginData ?? buildLoginData()),
     rest: (config) => heatzyRegistryResponse(config, { attributes, bindings }),
+  })
+}
+
+// A 200 the session survives and the registry does not: a `/bindings`
+// body that is not a device LIST at all. It is the one registry
+// failure no partial answer can absorb — the per-entry boundary has
+// nothing to salvage from it, so the envelope schema refuses the whole
+// cycle, after the sign-in already stored its token.
+export const mockDriftedWire = (): void => {
+  stageHeatzyWire(mockRequest, {
+    login: () => mockResponse(buildLoginData()),
+    rest: (config) =>
+      mockResponse(
+        config.url === BINDINGS_PATH
+          ? { devices: 'not-a-device-list' }
+          : { attr: proAttributes },
+      ),
   })
 }
 

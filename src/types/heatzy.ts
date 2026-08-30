@@ -25,11 +25,15 @@ export interface Attributes extends PostAttributes {
 }
 
 /**
- * `/bindings` response envelope: every device bound to the account.
+ * `/bindings` response envelope, as it comes off the wire: a device
+ * LIST whose entries are still unknown. They are validated one by one
+ * at the listing boundary (`HeatzyAPI.list`, which answers
+ * {@link DeviceBinding}s) rather than atomically inside the array, so
+ * one entry this SDK cannot model never invalidates its siblings.
  * @category Types
  */
 export interface Bindings {
-  readonly devices: readonly DeviceBinding[]
+  readonly devices: readonly unknown[]
 }
 
 /**
