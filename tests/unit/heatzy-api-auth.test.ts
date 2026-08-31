@@ -11,7 +11,10 @@ import {
 import type { HeatzyAPISettings } from '../../src/api/types.ts'
 import type { HttpResponse } from '../../src/http/index.ts'
 import { HeatzyAPI, toAuthFailure } from '../../src/api/heatzy.ts'
-import { AuthenticationError } from '../../src/errors/index.ts'
+import {
+  AuthenticationError,
+  RegistrySyncError,
+} from '../../src/errors/index.ts'
 import { Temporal } from '../../src/temporal.ts'
 import { buildBinding, buildLoginData, proAttributes } from '../fixtures.ts'
 import {
@@ -286,16 +289,30 @@ describe(HeatzyAPI, () => {
     // not build. What still qualifies is an ENVELOPE the cycle cannot
     // read at all — anything a single entry or a single device read can
     // be wrong about is now absorbed per device, and pinned as such in
-    // the session-lifecycle kernel.
-    it('rejects when the enforced post-auth sync cannot build the registry', async () => {
+    // the session-lifecycle kernel. The failure surfaces as a
+    // `RegistrySyncError` carrying the cycle's own error as `cause`, so
+    // a caller can branch on "signed in, stale list" by type.
+    it('rejects with RegistrySyncError when the enforced post-auth sync cannot build the registry', async () => {
       const { settingManager } = createSettingStore()
       const api = await createApi({ settingManager })
       mockDriftedWire()
 
-      await expect(
-        api.authenticate({ password: 'secret', username: 'user@test.com' }),
-      ).rejects.toThrow('Invalid API response shape (GET /bindings)')
+      const signIn = api.authenticate({
+        password: 'secret',
+        username: 'user@test.com',
+      })
 
+      await expect(signIn).rejects.toBeInstanceOf(RegistrySyncError)
+      // The cause is the cycle's own `ValidationError`, boundary label
+      // intact — the wrap adds the type without eating the evidence.
+      await expect(signIn).rejects.toHaveProperty(
+        ['cause', 'name'],
+        'ValidationError',
+      )
+      await expect(signIn).rejects.toHaveProperty(
+        ['cause', 'context'],
+        'GET /bindings',
+      )
       // The sign-in half succeeded, so the session stands: the caller
       // must see the sync failure, not a bogus credential problem.
       expect(api.isAuthenticated()).toBe(true)
@@ -406,6 +423,74 @@ describe(HeatzyAPI, () => {
       expect(settingManager.get('loginBackoffUntil')).toBe('')
 
       await expect(api.resumeSession()).resolves.toBe(true)
+    })
+  })
+
+  // `resumeSession` is single-flight: the memoized in-flight handle
+  // (the `#ensureSession` pattern one lifecycle layer up) collapses
+  // concurrent lifecycle callers onto one sign-in round-trip. The
+  // third clause pins the deliberate asymmetry: a caller joining AFTER
+  // the shared sign-in was accepted, while the enforced registry cycle
+  // still runs, reads the determined verdict instead of awaiting the
+  // shared promise — the one real caller in that window is the
+  // reactive token-failure path the cycle itself triggered
+  // (`#reauthenticate` → `resumeSession`), and awaiting there would
+  // wait on its own caller.
+  describe('resumeSession() single-flight', () => {
+    it('shares one in-flight attempt across concurrent callers', async () => {
+      const { settingManager } = createSettingStore()
+      const api = await createApi({ settingManager })
+      settingManager.set('password', 'secret')
+      settingManager.set('username', 'user@test.com')
+      mockWire()
+
+      const verdicts = await Promise.all([
+        api.resumeSession(),
+        api.resumeSession(),
+      ])
+
+      expect(verdicts).toStrictEqual([true, true])
+      expect(loginCalls()).toBe(1)
+    })
+
+    it('releases the in-flight slot after the attempt settles', async () => {
+      const { settingManager } = createSettingStore()
+      const api = await createApi({ settingManager })
+      settingManager.set('password', 'secret')
+      settingManager.set('username', 'user@test.com')
+      mockWire()
+
+      await api.resumeSession()
+      await api.resumeSession()
+
+      expect(loginCalls()).toBe(2)
+    })
+
+    it('answers a caller joining after the sign-in verdict without awaiting the enforced cycle', async () => {
+      const { settingManager } = createSettingStore()
+      const api = await createApi({ settingManager })
+      settingManager.set('password', 'secret')
+      settingManager.set('username', 'user@test.com')
+      const bindingsGate: PromiseWithResolvers<HttpResponse> =
+        Promise.withResolvers()
+      mockRequest.mockImplementation(async (config) => {
+        await Promise.resolve()
+        return config.url === '/login'
+          ? mockResponse(buildLoginData())
+          : bindingsGate.promise
+      })
+
+      const sharedResume = api.resumeSession()
+      // Let the sign-in round-trip land; the enforced cycle is now
+      // suspended on the gated `/bindings` answer.
+      await vi.advanceTimersByTimeAsync(0)
+
+      await expect(api.resumeSession()).resolves.toBe(true)
+
+      bindingsGate.resolve(mockResponse({ devices: [] }))
+
+      await expect(sharedResume).resolves.toBe(true)
+      expect(loginCalls()).toBe(1)
     })
   })
 
