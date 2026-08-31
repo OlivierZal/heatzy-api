@@ -13,7 +13,7 @@ import type {
 import { isModelledProduct } from '../constants.ts'
 import { setting, syncDevices } from '../decorators/index.ts'
 import { DeviceRegistry } from '../entities/index.ts'
-import { AuthenticationError } from '../errors/index.ts'
+import { AuthenticationError, RegistrySyncError } from '../errors/index.ts'
 import { fireAndForget } from '../fire-and-forget.ts'
 import {
   type HttpResponse,
@@ -277,6 +277,21 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   // authenticated again (including the post-auth sync of a re-login).
   #hasEmittedAuthenticationLost = false
 
+  // Verdict recorded against the STORED credential: the server
+  // definitively refused it (a real rejection — on this dialect any
+  // `AuthenticationError`, since no throttle error type exists to
+  // exclude and a transport blip is never mapped to one) and no
+  // sign-in has been accepted since. The stored token deliberately
+  // stays — a refusal changes the verdict, never the session (the
+  // 12.0.1 rule; only the REACTIVE `#reauthenticate` clears, because
+  // the 400/9004 names the token itself) — so this record is what
+  // lets `#settleSyncCycle` stop serving a token whose account died
+  // server-side, where `isAuthenticated()` keeps reading `true` for
+  // the token's remaining life. In-memory on purpose, like the loss
+  // episode marker above: a restart re-witnesses the refusal on its
+  // first gated sign-in.
+  #isCredentialRefused = false
+
   // Bumped by every logOut so async work that was in flight when the
   // user signed out (a background resume, a sync cycle) can detect the
   // sign-out on completion and discard what it stored — the explicit
@@ -288,6 +303,17 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   #refreshPromise: Promise<void> | null = null
 
   readonly #registry: DeviceRegistry
+
+  // Baseline of `#acceptedSignIns` when the in-flight resume began:
+  // lets a caller joining the flight read the verdict the instant the
+  // sign-in round-trip is accepted, without awaiting the enforced
+  // registry cycle still running behind it (see `resumeSession`).
+  #resumeAcceptedBefore = 0
+
+  // Single in-flight resume handle — the `#refreshPromise` pattern
+  // one lifecycle layer up: concurrent resume paths share ONE sign-in
+  // round-trip and read the shared attempt's verdict.
+  #resumePromise: Promise<boolean> | null = null
 
   readonly #retryGuard = new RetryGuard(DEFAULT_AUTH_RETRY_COOLDOWN_MS)
 
@@ -382,11 +408,18 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
    * One radiator never denies the account.
    * @param credentials - Explicit username/password.
    * @throws {@link AuthenticationError} when credentials are rejected.
-   * @throws {@link ValidationError} — or whatever the post-auth sync
-   * raises — when the sign-in succeeded but the registry could not be
-   * populated AT ALL (a refused `/bindings` call, an envelope that is
-   * not a device list). The guarantee above is the reason: resolving
-   * here would report success over an empty registry.
+   * @throws {@link RegistrySyncError} when the sign-in succeeded but
+   * the registry could not be populated AT ALL (a refused `/bindings`
+   * call, an envelope that is not a device list) — the cycle's own
+   * failure rides its `cause`. The guarantee above is the reason:
+   * resolving here would report success over an empty registry. The
+   * credential check happened FIRST, so the session is left signed in
+   * and the credentials persisted: this rejection says "signed in,
+   * but the registry could not be verified", never "sign-in refused".
+   * The dedicated type is what lets callers branch on that difference
+   * without re-deriving it from `isAuthenticated()` — a discriminator
+   * that misreads a transport blip during an account switch over a
+   * pre-existing live token as "signed in, stale list".
    */
   public async authenticate(credentials: LoginCredentials): Promise<void> {
     const epoch = this.#logOutEpoch
@@ -400,6 +433,9 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
     // below can un-accept it: `#finishLogin` may still reject, but on
     // the registry, never on the credential.
     this.#acceptedSignIns += 1
+    // An accepted pair also closes any recorded refusal episode: the
+    // stored credential is the one the server just took.
+    this.#isCredentialRefused = false
     // Persisted only now, so a rejected pair can never displace working
     // stored credentials. No session clear is needed either:
     // `#doAuthenticate` overwrites both session keys wholesale, and the
@@ -578,9 +614,27 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
    *
    * Reads `username`/`password` from the SettingManager and signs
    * in. Unlike {@link authenticate}, failures are **logged and
-   * swallowed** — the method never throws. Use this from lifecycle
+   * swallowed** — the method never throws. That covers the enforced
+   * post-auth sync too: `authenticate` surfaces what the enforced
+   * registry cycle raises as a {@link RegistrySyncError}, and this
+   * method catches it like any other rejection rather than letting a
+   * registry failure reach a lifecycle caller. Use it from lifecycle
    * hooks (init, auth retry, `#ensureSession`) where a stale or
    * missing persisted credential must not crash the caller.
+   *
+   * SINGLE-FLIGHT: concurrent calls share one attempt — the lifecycle
+   * paths that race at boot (a background `initialize`, the first
+   * request's `#ensureSession`, a reactive token failure) collapse
+   * onto ONE sign-in round-trip, and every caller's verdict describes
+   * that shared attempt. Without the memo, two callers could both
+   * pass the login-backoff gate before either refusal armed it,
+   * spending two sign-ins against a login endpoint whose lockout
+   * hammering only prolongs.
+   *
+   * A refusal it swallows is also RECORDED (a definitive rejection —
+   * never a transport failure): the stored token stays untouched, but
+   * the sync-cycle epilogue stops reading the session as signed-in
+   * until a sign-in is accepted again.
    *
    * On success, the registry is populated (delegates to
    * {@link authenticate}).
@@ -592,19 +646,26 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
    * check the logger / `isAuthenticated` if the distinction matters).
    */
   public async resumeSession(): Promise<boolean> {
-    if (this.#isLoginBackedOff()) {
-      return false
+    if (this.#resumePromise !== null) {
+      // Joining a flight whose sign-in round-trip is ALREADY accepted
+      // (the counter moved past the flight's baseline): the verdict is
+      // determined — an accepted sign-in stays a resume whatever its
+      // enforced registry cycle goes on to do — so answer it without
+      // awaiting. The one caller that arrives here DURING that cycle
+      // is the reactive token-failure path the cycle itself triggered,
+      // and awaiting the shared promise would have it wait on its own
+      // caller.
+      if (this.#acceptedSignIns !== this.#resumeAcceptedBefore) {
+        return true
+      }
+      return this.#resumePromise
     }
-    const credentials = this.#resolvePersistedCredentials()
-    if (credentials === null) {
-      return false
-    }
-    const acceptedBefore = this.#acceptedSignIns
+    this.#resumeAcceptedBefore = this.#acceptedSignIns
+    this.#resumePromise = this.#attemptResumeSession()
     try {
-      await this.authenticate(credentials)
-      return true
-    } catch (error) {
-      return this.#reportResumeFailure(error, acceptedBefore)
+      return await this.#resumePromise
+    } finally {
+      this.#resumePromise = null
     }
   }
 
@@ -708,6 +769,26 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
     this.logger.error(
       `Automatic sign-ins paused for ${String(Math.round(LOGIN_BACKOFF_FAILURE_MS / MS_PER_MINUTE))} minutes after a rejected login`,
     )
+  }
+
+  // The resume attempt proper — `resumeSession` memoizes it so that
+  // concurrent lifecycle paths share one sign-in round-trip instead of
+  // racing the login-backoff gate.
+  async #attemptResumeSession(): Promise<boolean> {
+    if (this.#isLoginBackedOff()) {
+      return false
+    }
+    const credentials = this.#resolvePersistedCredentials()
+    if (credentials === null) {
+      return false
+    }
+    const acceptedBefore = this.#acceptedSignIns
+    try {
+      await this.authenticate(credentials)
+      return true
+    } catch (error) {
+      return this.#reportResumeFailure(error, acceptedBefore)
+    }
   }
 
   /**
@@ -864,7 +945,20 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
       return
     }
     this.#setLoginBackoffUntil(null)
-    await this.#syncCycle()
+    try {
+      await this.#syncCycle()
+    } catch (error) {
+      // The credential check succeeded FIRST, so this rejection must
+      // stay distinguishable BY TYPE from a refused sign-in — the
+      // wrap is what spares consumers the judge-by-the-session
+      // fallback (`isAuthenticated()`), whose false positive is a
+      // transport blip during an account switch over a pre-existing
+      // live token.
+      throw new RegistrySyncError(
+        'Signed in, but the registry could not be verified',
+        { cause: error },
+      )
+    }
   }
 
   #getAuthHeaders(): Record<string, string> {
@@ -889,6 +983,16 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
     return (
       Number.isFinite(until) && Temporal.Now.instant().epochMilliseconds < until
     )
+  }
+
+  // The composite verdict the sync-cycle epilogue consults: a session
+  // only counts as signed-in while no definitive refusal stands
+  // against the stored credential. `isAuthenticated()` alone cannot
+  // say that, because a refusal deliberately leaves the token in
+  // place — the token answers "a session stands", never "the
+  // credential does".
+  #isSessionServable(): boolean {
+    return this.isAuthenticated() && !this.#isCredentialRefused
   }
 
   #logError(error: unknown): void {
@@ -984,7 +1088,20 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   //   stored credentials was told "resumed".
   #reportResumeFailure(error: unknown, acceptedBefore: number): boolean {
     this.logger.error('Session resume failed:', error)
-    return this.#acceptedSignIns !== acceptedBefore
+    if (this.#acceptedSignIns !== acceptedBefore) {
+      return true
+    }
+    // A DEFINITIVE refusal — any `AuthenticationError` on this
+    // dialect, which maps only the 400/401 login rejections and has
+    // no throttle type to exclude; a transport blip never qualifies —
+    // is recorded as a verdict on the stored credential. The record
+    // is what lets the cycle epilogue see a dead credential behind a
+    // token the refusal deliberately did not clear; the next ACCEPTED
+    // sign-in lifts it.
+    if (error instanceof AuthenticationError) {
+      this.#isCredentialRefused = true
+    }
+    return false
   }
 
   async #request<T = unknown>(
@@ -1067,14 +1184,18 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   // the pre-sign-out session and repopulated the registry — re-run the
   // wipe so the sign-out sticks, and leave the timer disarmed.
   // Unauthenticated with nothing to recover from (e.g. a settings page
-  // probing a never-configured API) stays silent AND disarmed.
+  // probing a never-configured API) stays silent AND disarmed. The
+  // signed-in read is the RECORDED verdict, not the bare session: a
+  // stored credential the server has definitively refused falls
+  // through to the loss branch even while a still-standing token keeps
+  // `isAuthenticated()` reading `true`.
   #settleSyncCycle(epoch: number): void {
     if (this.#logOutEpoch !== epoch) {
       this.#clearPersistedSession()
       this.#clearRegistry()
       return
     }
-    if (this.isAuthenticated()) {
+    if (this.#isSessionServable()) {
       this.#markLossRecovered()
       this.#syncManager.planNext()
       return

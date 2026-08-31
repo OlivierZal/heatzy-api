@@ -49,6 +49,7 @@ export {
   AttributeNotFoundError,
   AuthenticationError,
   isAPIError,
+  RegistrySyncError,
   ValidationError,
 } from './errors/index.ts'
 export {

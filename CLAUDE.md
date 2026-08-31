@@ -101,6 +101,38 @@ Architecture, toolchain and process are aligned on the sibling
   "resumed". What a refusal must NOT do is clear: the verdict changes,
   the stored session does not. The verdict, the accepted half, and the
   clearing dialect half are all kernel-pinned.
+- **melcloud's 55.0.0 session fixes crossed the same day (16.0.0),
+  decided per MECHANISM, never as a block.** The three verdicts:
+  1. `RegistrySyncError` CROSSED. The enforced post-auth cycle is
+     `#finishLogin` → `#syncCycle` on this dialect (no separate
+     `enforceRegistrySync` hook), so the wrap sits in `#finishLogin`'s
+     catch, cause preserved — and a refused credential structurally
+     CANNOT be wrapped, because `#doAuthenticate` throws before the
+     cycle is ever spent. Exported from `src/errors/` and the root
+     barrel like its siblings, ready to cross into api-core with them.
+  2. The `resumeSession` single-flight CROSSED. com.heatzy boots with
+     `shouldResumeSessionInBackground: true`, so the double-sign-in
+     boot window (background `initialize()` vs the first request's
+     `#ensureSession` refresh) exists here identically. The deliberate
+     asymmetry crossed with it and is REACHED the same way: a caller
+     joining after the accepted sign-in, while the enforced cycle
+     still runs, reads the determined verdict — the one real caller in
+     that window is `#reauthenticate`, triggered by that very cycle's
+     400/401, and awaiting the shared promise would wait on its own
+     caller.
+  3. The `#isCredentialRefused` record CROSSED — after VERIFICATION,
+     not by copying. melcloud justified the flag by "Classic never
+     wipes on a refusal"; this dialect DOES wipe, but only on the
+     REACTIVE path (`#reauthenticate` clears FIRST). The REFUSAL path
+     is a different path and clears nothing (`authenticate`'s catch =
+     `#armLoginBackoff` + rethrow, the 12.0.1 rule), so a refusal
+     witnessed over a standing token was unreportable here identically
+     — for the token's remaining life rather than forever, a
+     difference of degree, not of kind. Two dialect adaptations, both
+     deliberate: the record's guard excludes no throttle type (none
+     exists here — see the Ledger), and the record is consulted only
+     in the sync-cycle epilogue (`#isSessionServable`), this dialect
+     having no `ensureAuthenticated`.
 - V1 products speak a positional `raw: [1, 1, mode]` triplet on
   `/control` and only accept the four base modes; every other
   generation posts named `attrs`. The base facade owns the V1 dialect,
@@ -140,7 +172,10 @@ Architecture, toolchain and process are aligned on the sibling
   adding the gate without wire evidence is over-engineering.
 - **No `AuthenticationThrottledError`**: no observed login-throttle
   error code on Gizwits; the single 15-minute login backoff covers
-  rejected sign-ins.
+  rejected sign-ins. Corollary (16.0.0): the refusal record's guard is
+  bare `instanceof AuthenticationError` — melcloud's throttle
+  exclusion has nothing to exclude here, every `AuthenticationError`
+  being definitive by construction.
 - **No `logLabel`**: a single client — nothing to disambiguate in logs.
 - **Single `.` export**: one dialect → no `/classic`-style subpaths.
 - **No `NoChangesError`**: an empty/no-op `setValues` resolves silently
@@ -237,7 +272,12 @@ registry failure left and the shape melcloud's twin kernel already
 stages; it used to be an unshipped `product_key`, which the boundary now
 absorbs. Since 16.0.0 the twin tables pin the SAME `resumeSession`
 verdicts — the refused-re-sign-in flip that unblocked the extraction —
-and four clauses hold divergences the extraction must handle
+plus the 55.0.0 crossings: the `RegistrySyncError` wrap pair (failure
+wrapped with its cause preserved; a refused credential never wrapped),
+the refusal-record episode (loss surfaced once per settling cycle over
+a standing token, recovery announced on the next accepted sign-in, a
+transport blip recording nothing), and the `resumeSession`
+single-flight rows. Four clauses hold divergences the extraction must handle
 deliberately rather than silently: `[Symbol.dispose]`
 releases the sync timer but NOT the retry guard (melcloud releases both —
 adopting its superset must update that clause in a commit that says so);

@@ -18,7 +18,11 @@ import type {
   SyncCallback,
 } from '../../src/api/types.ts'
 import { Mode } from '../../src/constants.ts'
-import { AuthenticationError, ValidationError } from '../../src/errors/index.ts'
+import {
+  AuthenticationError,
+  RegistrySyncError,
+  ValidationError,
+} from '../../src/errors/index.ts'
 import {
   type HttpRequestConfig,
   type HttpResponse,
@@ -249,6 +253,39 @@ const byName = (left: string, right: string): number =>
 const seedCredentials = (settingManager: SettingManager): void => {
   settingManager.set('password', CREDENTIALS.password)
   settingManager.set('username', CREDENTIALS.username)
+}
+
+/**
+ * Opens the observation every loss/recovery clause shares: a store
+ * seeded with credentials, both lifecycle spies wired, and the client
+ * created under the given staging.
+ * @param driver - The dialect leg under test.
+ * @param stage - Wire staging active while the client boots.
+ * @returns The client and the two lifecycle spies.
+ */
+const createObservedSession = async (
+  driver: SessionLifecycleDriver,
+  stage: Parameters<SessionLifecycleDriver['stage']>[0],
+): Promise<{
+  api: HeatzyAPI
+  onAuthenticationLost: ReturnType<
+    typeof vi.fn<NonNullable<LifecycleEvents['onAuthenticationLost']>>
+  >
+  onAuthenticationRestored: ReturnType<
+    typeof vi.fn<NonNullable<LifecycleEvents['onAuthenticationRestored']>>
+  >
+}> => {
+  const onAuthenticationLost =
+    vi.fn<NonNullable<LifecycleEvents['onAuthenticationLost']>>()
+  const onAuthenticationRestored =
+    vi.fn<NonNullable<LifecycleEvents['onAuthenticationRestored']>>()
+  const { settingManager } = createSettingStore(CREDENTIALS)
+  driver.stage(stage)
+  const { api } = await driver.create({
+    events: { onAuthenticationLost, onAuthenticationRestored },
+    settingManager,
+  })
+  return { api, onAuthenticationLost, onAuthenticationRestored }
 }
 
 const standingSessionKeys = (
@@ -594,10 +631,45 @@ const describeSessionLifecycleContract = (
       const { api } = await driver.create({ settingManager })
 
       await expect(api.authenticate(CREDENTIALS)).rejects.toThrow(
-        REGISTRY_REFUSED,
+        RegistrySyncError,
       )
 
       expect(driver.registryCycleCount()).toBe(1)
+    })
+
+    // The enforced-sync failure carries its own TYPE because consumers
+    // could not tell it from a refused credential without re-deriving
+    // the verdict from `isAuthenticated()` — the judge-by-the-session
+    // discriminator this repo already retired once, with a real false
+    // positive: a transport failure during a sign-in over a
+    // PRE-EXISTING live token (a user switching accounts) reads
+    // "signed in, stale list" while the new pair was never accepted.
+    it('wraps an enforced-sync failure in RegistrySyncError, the cycle failure preserved as its cause', async () => {
+      const { settingManager } = createSettingStore()
+      driver.stage({ login: 'accept', wire: 'refuse-registry' })
+      const { api } = await driver.create({ settingManager })
+
+      const signIn = api.authenticate(CREDENTIALS)
+
+      await expect(signIn).rejects.toBeInstanceOf(RegistrySyncError)
+      // The wrap adds the type without eating the evidence: the
+      // cycle's own failure stays readable on `cause`. What the
+      // established session goes on to answer is the drifted-registry
+      // clause's business, not this one's.
+      await expect(signIn).rejects.toMatchObject({
+        cause: new AuthenticationError(REGISTRY_REFUSED),
+      })
+    })
+
+    it('never wraps a refused credential in RegistrySyncError', async () => {
+      const { settingManager } = createSettingStore()
+      driver.stage({ login: 'refuse', wire: 'ok' })
+      const { api } = await driver.create({ settingManager })
+
+      const signIn = api.authenticate(CREDENTIALS)
+
+      await expect(signIn).rejects.toBeInstanceOf(AuthenticationError)
+      await expect(signIn).rejects.not.toBeInstanceOf(RegistrySyncError)
     })
 
     it('never arms the login backoff when only the registry cycle failed', async () => {
@@ -606,7 +678,7 @@ const describeSessionLifecycleContract = (
       const { api } = await driver.create({ settingManager })
 
       await expect(api.authenticate(CREDENTIALS)).rejects.toThrow(
-        REGISTRY_REFUSED,
+        RegistrySyncError,
       )
 
       expect(settingManager.get('loginBackoffUntil')).toBe('')
@@ -734,6 +806,79 @@ const describeSessionLifecycleContract = (
         'Session resume failed:',
         expect.any(AuthenticationError),
       )
+    })
+
+    // The refusal is RECORDED even though the stored token is not
+    // cleared — the refusal path clears nothing (the 12.0.1 rule);
+    // only the REACTIVE `#reauthenticate` wipes, and that is a
+    // different path. Without the record, the cycle epilogue keyed on
+    // `isAuthenticated()` alone, so a server-side password change left
+    // the host reading "signed in" over a dead account for the
+    // token's remaining life — `onAuthenticationLost` could never fire
+    // while the token stood.
+    it('surfaces onAuthenticationLost once per episode when a cycle settles on a refused credential over a standing token', async () => {
+      const { api, onAuthenticationLost } = await createObservedSession(
+        driver,
+        { login: 'accept', wire: 'ok' },
+      )
+      driver.stage({ login: 'refuse', wire: 'ok' })
+
+      await expect(api.resumeSession()).resolves.toBe(false)
+      // The cycle epilogue owns the surfacing, so nothing has been
+      // announced yet.
+      expect(onAuthenticationLost).not.toHaveBeenCalled()
+
+      await api.fetch()
+      await api.fetch()
+
+      expect(api.isAuthenticated()).toBe(true)
+      expect(onAuthenticationLost).toHaveBeenCalledTimes(1)
+      // The boot sign-in, the refused one — and nothing more: the rung
+      // that could spend a third is held by the backoff the refusal
+      // armed.
+      expect(driver.loginCount()).toBe(2)
+    })
+
+    // The episode the clause above opens is closed by an ACCEPTED
+    // sign-in and nothing else: `authenticate` lifts the record before
+    // its enforced cycle settles, so that cycle's epilogue is the one
+    // that announces the recovery. Distinct from the alternation
+    // clause below, whose loss episode never had a standing token.
+    it('serves the session again and announces the recovery once a sign-in is accepted after a refusal', async () => {
+      const { api, onAuthenticationLost, onAuthenticationRestored } =
+        await createObservedSession(driver, { login: 'accept', wire: 'ok' })
+      driver.stage({ login: 'refuse', wire: 'ok' })
+
+      await expect(api.resumeSession()).resolves.toBe(false)
+
+      await api.fetch()
+      driver.stage({ login: 'accept', wire: 'ok' })
+
+      await api.authenticate(CREDENTIALS)
+
+      expect(api.isAuthenticated()).toBe(true)
+      expect(onAuthenticationLost).toHaveBeenCalledTimes(1)
+      expect(onAuthenticationRestored).toHaveBeenCalledTimes(1)
+    })
+
+    // The record's negative half: a transport failure is not a verdict
+    // on the pair, so it must neither be recorded nor surface a loss
+    // over a session that still works. (melcloud's twin clause also
+    // holds a throttle row; this dialect has no throttle error type to
+    // stage — see DECLARED ABSENCES, entry 1.)
+    it('keeps serving the standing session when a re-sign-in merely failed at transport', async () => {
+      const { api, onAuthenticationLost } = await createObservedSession(
+        driver,
+        { login: 'accept', wire: 'ok' },
+      )
+      driver.stage({ login: 'unreachable', wire: 'ok' })
+
+      await expect(api.resumeSession()).resolves.toBe(false)
+
+      await api.fetch()
+
+      expect(api.isAuthenticated()).toBe(true)
+      expect(onAuthenticationLost).not.toHaveBeenCalled()
     })
 
     // The other shape `resumeSession` catches, and the one that must
@@ -967,6 +1112,40 @@ const describeSessionLifecycleContract = (
       expect(cycles).toHaveLength(CONCURRENT_CALLERS)
       expect(driver.loginCount()).toBe(1)
     })
+
+    // `resumeSession` itself is single-flight, one lifecycle layer
+    // above the refresh handle: com.heatzy boots with
+    // `shouldResumeSessionInBackground`, so the background
+    // `initialize()` and the first request's `#ensureSession` used to
+    // race it — two sign-ins could pass the backoff gate before either
+    // refusal armed it, against a login endpoint whose lockout
+    // hammering only prolongs. Every caller's verdict describes the
+    // one shared attempt.
+    it.each([
+      { expectedCycles: 1, isResumed: true, login: 'accept' },
+      { expectedCycles: 0, isResumed: false, login: 'refuse' },
+    ] as const)(
+      'collapses concurrent resumeSession calls onto one sign-in round-trip (login: $login)',
+      async ({ expectedCycles, isResumed, login }) => {
+        const { settingManager } = createSettingStore()
+        driver.stage({ login, wire: 'ok' })
+        const { api } = await driver.create({ settingManager })
+        seedCredentials(settingManager)
+
+        const verdicts = await Promise.all([
+          api.resumeSession(),
+          api.resumeSession(),
+          api.resumeSession(),
+          api.resumeSession(),
+        ])
+
+        expect(verdicts).toStrictEqual(
+          Array.from({ length: CONCURRENT_CALLERS }, () => isResumed),
+        )
+        expect(driver.loginCount()).toBe(1)
+        expect(driver.registryCycleCount()).toBe(expectedCycles)
+      },
+    )
 
     it.each(AUTH_FAILURE_CASES)(
       'runs one guarded reauth on an HTTP $label and replays the request exactly once',
@@ -1311,8 +1490,14 @@ describeSessionLifecycleContract('HeatzyAPI', heatzyDriver)
 //        LOGIN_BACKOFF_FAILURE_MS`, a bare constant sum. Nothing reads a
 //        server-announced duration, so there is no window to honour, no
 //        default to fall back to, and no cap to enforce.
-//    Should Gizwits ever surface a throttle code, the three rows come
-//    back with it.
+//    The same two expressions also decide the missing throttle rung of
+//    the refusal RECORD (melcloud excludes its
+//    `AuthenticationThrottledError` from the recorded verdict, a
+//    lockout saying nothing about the pair): with one error type and
+//    no window, every `AuthenticationError` here IS definitive, so
+//    `#reportResumeFailure`'s guard needs no exclusion.
+//    Should Gizwits ever surface a throttle code, the three rows — and
+//    the exclusion — come back with it.
 //
 // 2. THE RATE-LIMIT GATE (melcloud's 429 clause: arm on `Retry-After`,
 //    refuse the next request locally, reopen on the announced window).
