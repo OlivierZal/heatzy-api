@@ -75,11 +75,13 @@ describe(HeatzyAPI, () => {
     })
 
     // The listing boundary: the ENVELOPE is validated as a list, its
-    // ENTRIES one by one. A drop is never silent, and the two reasons
-    // are worded apart — a wire regression means the schema is wrong, an
-    // unresolved `product_key` means Heatzy shipped a radiator after
-    // this release and the product map needs extending.
-    it('drops the entries it cannot model and names each one', async () => {
+    // ENTRIES one by one. A drop is never silent — the cycle reports
+    // ONE aggregated line naming every dropped entry (a listing-wide
+    // regression must not storm the host logger), and the two verdicts
+    // inside it are worded apart — a wire regression means the schema
+    // is wrong, an unresolved `product_key` means Heatzy shipped a
+    // radiator after this release and the product map needs extending.
+    it('drops the entries it cannot model and names each one in a single line', async () => {
       const logger = createLogger()
       const { api } = await createAuthedApi({ logger })
       const binding = buildBinding('v2')
@@ -95,13 +97,29 @@ describe(HeatzyAPI, () => {
 
       await expect(api.list()).resolves.toStrictEqual([binding])
 
+      expect(logger.error).toHaveBeenCalledTimes(1)
       expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'Skipping a /bindings entry this SDK cannot read',
-        ),
+        'Dropped 2 of 3 /bindings entries: device unknown (an entry this SDK cannot read), device did-pro (unknown product_key unshipped-generation)',
       )
+    })
+
+    // The report still NAMES what it can: an unreadable entry that at
+    // least spells a string `did` is reported under it, and only the
+    // shapes that spell none — a non-object, `null`, no `did` key, a
+    // non-string one — fall back to `unknown`.
+    it('salvages the did of an unreadable entry when the wire spelled one', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      mockRequest.mockResolvedValue(
+        mockResponse({
+          devices: [null, 'bogus', { did: 404 }, { did: 'did-named' }],
+        }),
+      )
+
+      await expect(api.list()).resolves.toStrictEqual([])
+
       expect(logger.error).toHaveBeenCalledWith(
-        'Skipping device did-pro: unknown product_key unshipped-generation',
+        'Dropped 4 of 4 /bindings entries: device unknown (an entry this SDK cannot read), device unknown (an entry this SDK cannot read), device unknown (an entry this SDK cannot read), device did-named (an entry this SDK cannot read)',
       )
     })
 

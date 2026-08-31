@@ -107,6 +107,114 @@ export const toAuthFailure = (error: unknown): AuthenticationError | null =>
     : null
 
 /**
+ * One `/bindings` entry the listing boundary dropped. The two verdicts
+ * are worded APART because they call for opposite responses: a
+ * malformed entry is a wire regression (fix the schema), an unresolved
+ * `product_key` is a radiator Heatzy shipped after this release
+ * (extend the product map in `constants.ts`, with its PDF in
+ * `references/`). A silent or undifferentiated drop would leave one
+ * indistinguishable symptom — "a device disappeared".
+ */
+interface DroppedBinding {
+  /**
+   * The entry's `did`, or `null` when the wire did not spell a string
+   * one — the entry is still reported, unnamed.
+   */
+  readonly did: string | null
+  /**
+   * Which verdict the entry failed, pre-worded — the unmodelled form
+   * names the offending `product_key`, so the report says which map
+   * entry is missing.
+   */
+  readonly verdict: string
+}
+
+/**
+ * The one filter of a listing cycle: it keeps the entries this SDK
+ * models and remembers what it rejected, so the boundary can name the
+ * drops instead of performing them in silence.
+ */
+interface DroppedBindingCollector {
+  /**
+   * The modelled form of one raw `/bindings` entry, or `null` when the
+   * boundary drops it. Rejections are recorded, never merely returned.
+   */
+  readonly keep: (device: unknown) => DeviceBinding | null
+  /**
+   * The cycle's one report line, or `null` when nothing was dropped.
+   */
+  readonly summarize: () => string | null
+}
+
+const UNREADABLE_ENTRY_VERDICT = 'an entry this SDK cannot read'
+
+const describeDroppedBinding = ({ did, verdict }: DroppedBinding): string =>
+  `device ${did ?? 'unknown'} (${verdict})`
+
+// The `did` of an entry the schema refused, salvaged so the report can
+// still name the device: a drop is only actionable when the user can
+// tell WHICH radiator went missing.
+const salvageDid = (device: unknown): string | null =>
+  typeof device === 'object' &&
+  device !== null &&
+  'did' in device &&
+  typeof device.did === 'string'
+    ? device.did
+    : null
+
+/**
+ * Opens a collector for ONE listing cycle.
+ *
+ * An entry is kept only when this SDK can model it: the shape has to
+ * validate AND the `product_key` has to resolve, because
+ * `new Device(...)` calls `getProduct`, which throws on a key this SDK
+ * predates — inside the registry sync, after the wire answered 200 and
+ * after the sign-in stored its token. The registry runs no guard of
+ * its own; this boundary is what it relies on.
+ *
+ * The volume verdict lives here: `/bindings` carries every device of
+ * the account and runs on every sync cycle, so a line per dropped
+ * entry would storm the host's logger — hardest exactly when a wire
+ * regression takes the whole payload down and the diagnostic report
+ * most needs to stay readable. The collector emits ONE aggregated line
+ * per cycle instead, bounded by the cycle rather than by the listing's
+ * size, and that line still names every dropped entry with its
+ * verdict: the ids are what makes it actionable, since a consumer
+ * degrades a pruned device to a warning over frozen values and the
+ * report has to say WHICH device went stale and why.
+ * @returns A collecting filter plus the cycle's report line.
+ */
+const createDroppedBindingCollector = (): DroppedBindingCollector => {
+  const dropped: DroppedBinding[] = []
+  let total = 0
+  return {
+    keep: (device: unknown): DeviceBinding | null => {
+      total += 1
+      const parsed = DeviceBindingSchema.safeParse(device)
+      if (!parsed.success) {
+        dropped.push({
+          did: salvageDid(device),
+          verdict: UNREADABLE_ENTRY_VERDICT,
+        })
+        return null
+      }
+      const { did, product_key: productKey } = parsed.data
+      if (!isModelledProduct(productKey)) {
+        dropped.push({ did, verdict: `unknown product_key ${productKey}` })
+        return null
+      }
+      return parsed.data
+    },
+    summarize: (): string | null =>
+      dropped.length === 0
+        ? null
+        : `Dropped ${String(dropped.length)} of ${String(total)} /bindings entries: ${dropped
+            .map((entry) => describeDroppedBinding(entry))
+            .join(', ')}`,
+  }
+}
+
+/**
  * Heatzy (Gizwits) API client. Handles authentication, session
  * persistence and restore, device syncing, and the `/bindings`,
  * `/devdata` and `/control` endpoint calls. Uses a private
@@ -147,6 +255,13 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
   public get timezone(): string | undefined {
     return this.#config.timezone
   }
+
+  // Bumped the instant `#doAuthenticate` resolves — the one moment at
+  // which the SIGN-IN ROUND-TRIP is known accepted, whatever the
+  // enforced post-auth sync goes on to do. `resumeSession` compares it
+  // across the call, which is what lets it tell an accepted sign-in
+  // from a refused one when BOTH leave a live session behind.
+  #acceptedSignIns = 0
 
   readonly #api: HttpClient
 
@@ -281,6 +396,10 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
       this.#armLoginBackoff(error)
       throw error
     }
+    // The sign-in round-trip is ACCEPTED from here on, and nothing
+    // below can un-accept it: `#finishLogin` may still reject, but on
+    // the registry, never on the credential.
+    this.#acceptedSignIns += 1
     // Persisted only now, so a rejected pair can never displace working
     // stored credentials. No session clear is needed either:
     // `#doAuthenticate` overwrites both session keys wholesale, and the
@@ -376,18 +495,31 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
    * list stays a hard {@link ValidationError} — but the entries are
    * validated ONE BY ONE: this call opens the registry cycle, and the
    * post-auth cycle propagates, so an atomic array would let a single
-   * unreadable entry read as "cannot sign in at all". Every dropped
-   * entry leaves a log line saying WHY, because a wire regression and a
-   * Heatzy product newer than this SDK call for opposite answers and
-   * must stay distinguishable in the diagnostic reports users paste
-   * into issues.
+   * unreadable entry read as "cannot sign in at all". The drops are
+   * reported as ONE aggregated line per cycle naming every dropped
+   * entry with its verdict, because a wire regression and a Heatzy
+   * product newer than this SDK call for opposite answers and must
+   * stay distinguishable in the diagnostic reports users paste into
+   * issues — while a listing-wide regression must not storm the host
+   * logger exactly when that report most needs to stay readable.
    * @returns Every device bound to the account that this SDK models.
    */
   public async list(): Promise<readonly DeviceBinding[]> {
     const { devices } = await this.#requestData<Bindings>('get', '/bindings', {
       schema: BindingsSchema,
     })
-    return devices.flatMap((device) => this.#toModelledBinding(device) ?? [])
+    const { keep, summarize } = createDroppedBindingCollector()
+    const bindings = devices.flatMap((device) => keep(device) ?? [])
+    const summary = summarize()
+    if (summary !== null) {
+      // `error`, not `log`: a device the account owns has left the
+      // registry, and the consumer degrades it to a warning over
+      // frozen values without being told why. This line is the only
+      // trace of the drop, and it lands verbatim in the diagnostic
+      // report a user pastes into an issue.
+      this.logger.error(summary)
+    }
+    return bindings
   }
 
   /**
@@ -452,11 +584,12 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
    *
    * On success, the registry is populated (delegates to
    * {@link authenticate}).
-   * @returns `true` when a sign-in round-trip succeeded and the
-   * instance is now authenticated; `false` for "no persisted
-   * credentials" or "sign-in failed" (both indistinguishable by
-   * the return value alone — check the logger / `isAuthenticated`
-   * if the distinction matters).
+   * @returns `true` when the sign-in round-trip was ACCEPTED —
+   * including one whose enforced post-auth sync then failed, because
+   * the session it established stands; `false` for "no persisted
+   * credentials", "sign-ins are backed off" and "the server refused
+   * the credentials" (indistinguishable by the return value alone —
+   * check the logger / `isAuthenticated` if the distinction matters).
    */
   public async resumeSession(): Promise<boolean> {
     if (this.#isLoginBackedOff()) {
@@ -466,16 +599,12 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
     if (credentials === null) {
       return false
     }
+    const acceptedBefore = this.#acceptedSignIns
     try {
       await this.authenticate(credentials)
       return true
     } catch (error) {
-      this.logger.error('Session resume failed:', error)
-      // Judge by the session, not by the throw: `authenticate` also
-      // rejects when the sign-in succeeded and its enforced sync then
-      // failed. Reporting that as a lost session would prompt the user
-      // to log back in over credentials that just worked.
-      return this.isAuthenticated()
+      return this.#reportResumeFailure(error, acceptedBefore)
     }
   }
 
@@ -838,6 +967,26 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
     return this.resumeSession()
   }
 
+  // The verdict `resumeSession` puts on a rejection it swallowed:
+  // judged by the SIGN-IN ROUND-TRIP — not by the throw, and not by
+  // the session either, because BOTH failures can leave a live session
+  // standing and only the round-trip separates them.
+  // - ACCEPTED, then the enforced registry cycle threw: the session
+  //   was established, so a `false` here would have `initialize()`
+  //   emit a spurious `onAuthenticationLost`, prompting the user to
+  //   sign in again over credentials that had just worked.
+  // - REFUSED, over a session that predates the attempt: nothing was
+  //   refreshed, so a `true` here hands the caller the credential the
+  //   server has just rejected. No internal path ever consumed that
+  //   wrong `true` — the reactive `#reauthenticate` clears the token
+  //   FIRST, Gizwits naming it in the 400/9004 — but `resumeSession`
+  //   is PUBLIC, and a host calling it over a live token with refused
+  //   stored credentials was told "resumed".
+  #reportResumeFailure(error: unknown, acceptedBefore: number): boolean {
+    this.logger.error('Session resume failed:', error)
+    return this.#acceptedSignIns !== acceptedBefore
+  }
+
   async #request<T = unknown>(
     method: string,
     url: string,
@@ -937,37 +1086,6 @@ export class HeatzyAPI implements Disposable, HeatzyAPIAdapter {
       // enforced post-auth registry sync.
       this.#emitAuthenticationLostOnce()
     }
-  }
-
-  // One `/bindings` entry, kept only when this SDK can model it: the
-  // shape has to validate AND the `product_key` has to resolve, because
-  // `new Device(...)` calls `getProduct`, which throws on a key this
-  // SDK predates — inside the registry sync, after the wire answered
-  // 200 and after the sign-in stored its token. The registry runs no
-  // guard of its own; this boundary is what it relies on.
-  //
-  // The two drops are worded apart on purpose: a malformed entry is a
-  // wire regression (fix the schema), an unresolved `product_key` is a
-  // radiator Heatzy shipped after this release (extend the product map
-  // in `constants.ts`, with its PDF in `references/`). A silent drop
-  // would make them one indistinguishable symptom — "a device
-  // disappeared".
-  #toModelledBinding(device: unknown): DeviceBinding | null {
-    const parsed = DeviceBindingSchema.safeParse(device)
-    if (!parsed.success) {
-      this.logger.error(
-        `Skipping a /bindings entry this SDK cannot read: ${parsed.error.message}`,
-      )
-      return null
-    }
-    const { did, product_key: productKey } = parsed.data
-    if (!isModelledProduct(productKey)) {
-      this.logger.error(
-        `Skipping device ${did}: unknown product_key ${productKey}`,
-      )
-      return null
-    }
-    return parsed.data
   }
 
   // Try to reuse a persisted token without a full re-authentication:

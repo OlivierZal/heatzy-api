@@ -95,7 +95,7 @@ The registry cycle is `/bindings` plus one `/devdata` read per binding, and it d
 - A `/bindings` entry whose shape does not validate, or whose `product_key` this release predates, is dropped at the listing boundary. `list()` and `fetch()` answer what survived.
 - A device whose `/devdata` read fails — a transient 5xx that outlived the retry rung, an attribute payload naming an unknown mode — keeps the model it already had (stale data beats no data) and is skipped when it has never been seen. Its binding stays in the returned list, so the next cycle reads it again.
 
-Nothing is dropped quietly: every skip writes a `logger.error` line naming the device and the reason, and a failed round-trip still reaches the `onRequestError` lifecycle event. To detect a partial cycle programmatically, compare what `fetch()` returned against the registry:
+Nothing is dropped quietly: the listing's drops are reported as **one aggregated `logger.error` line per cycle** naming every dropped device and its verdict (a listing-wide regression must not storm your logger exactly when the diagnostic report needs to stay readable), each skipped `/devdata` read writes its own line naming the device, and a failed round-trip still reaches the `onRequestError` lifecycle event. To detect a partial cycle programmatically, compare what `fetch()` returned against the registry:
 
 ```ts title="partial-registry"
 const bindings = await api.fetch()
