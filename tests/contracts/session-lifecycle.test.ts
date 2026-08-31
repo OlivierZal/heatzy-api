@@ -469,7 +469,7 @@ const heatzyDriver: SessionLifecycleDriver = {
 
 // Gizwits reports an invalid or expired user token as HTTP 400 (error
 // code 9004 in the body) as well as 401, which is why `HeatzyAPI` hands
-// `AuthRetryPolicy` the pair `[401, 400]` (heatzy.ts:224-228). Both rows
+// `AuthRetryPolicy` the pair `[401, 400]` (heatzy.ts:341-345). Both rows
 // run the same reactive recovery: drop the status the wire actually uses
 // and every expired Gizwits token becomes a hard failure the user has to
 // resolve by signing in again.
@@ -489,7 +489,7 @@ const PERSISTENCE_HOSTS = [
   { hasUnset: true, label: 'a host that deletes the cleared key' },
 ] as const
 
-// The two branches of `initialize()` (heatzy.ts:339-346), in the order
+// The two branches of `initialize()` (heatzy.ts:473-480), in the order
 // its doc insists on: probe a persisted token first, spend a sign-in
 // only when there is nothing to probe. Both end authenticated over a
 // populated registry, and the counts are what tell them apart.
@@ -516,7 +516,7 @@ const INITIALIZE_RUNGS = [
 ] as const
 
 // The transient-retry rung is the innermost policy and is mounted for
-// GET only (heatzy.ts:572-574): replaying a POST that may have landed
+// GET only (heatzy.ts:730-732): replaying a POST that may have landed
 // server-side is a duplicate write in disguise. Both rows run against
 // the same 503.
 const TRANSIENT_RUNG_CASES = [
@@ -618,10 +618,13 @@ const describeSessionLifecycleContract = (
     // malformed sibling took the atomic array down with it, and an
     // unresolved `product_key` threw out of the `Device` constructor
     // mid-sync. Both are now dropped at the boundary, and dropped
-    // LOUDLY — the two lines are asserted apart because they call for
-    // opposite answers (fix the schema vs. extend the product map), and
-    // a silent drop would leave one indistinguishable symptom.
-    it('signs in over a listing it only partly models, keeping the entries it does', async () => {
+    // LOUDLY — as ONE aggregated line per cycle (a listing-wide
+    // regression must not storm the host logger exactly when the
+    // diagnostic report most needs to stay readable), with the two
+    // verdicts worded apart inside it because they call for opposite
+    // answers (fix the schema vs. extend the product map): a silent or
+    // undifferentiated drop would leave one indistinguishable symptom.
+    it('signs in over a listing it only partly models, naming every drop in one line', async () => {
       const logger = createLogger()
       const { settingManager } = createSettingStore()
       driver.stage({ login: 'accept', wire: 'partial-listing' })
@@ -634,12 +637,7 @@ const describeSessionLifecycleContract = (
 
       expect(deviceCount()).toBe(1)
       expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'Skipping a /bindings entry this SDK cannot read',
-        ),
-      )
-      expect(logger.error).toHaveBeenCalledWith(
-        `Skipping device ${UNREADABLE_DEVICE_ID}: unknown product_key ${UNSHIPPED_PRODUCT_KEY}`,
+        `Dropped 2 of 3 /bindings entries: device unknown (an entry this SDK cannot read), device ${UNREADABLE_DEVICE_ID} (unknown product_key ${UNSHIPPED_PRODUCT_KEY})`,
       )
       // An entry that was never going to be modelled costs no wire call
       // either: only the surviving binding was fanned out to.
@@ -672,7 +670,7 @@ const describeSessionLifecycleContract = (
       )
     })
 
-    // The gate's negative half (heatzy.ts:541-546). A transport failure
+    // The gate's negative half (heatzy.ts:699-704). A transport failure
     // is not a rejected credential: the retry paths own those, and
     // pausing sign-ins over a blip would lock a working account out for
     // fifteen minutes at a time.
@@ -708,15 +706,29 @@ const describeSessionLifecycleContract = (
       expect(driver.registryCycleCount()).toBe(0)
     })
 
-    it('reports the standing session from resumeSession, not the throw', async () => {
+    // One of the two shapes `resumeSession` catches, and the one a
+    // session cannot judge: the server REFUSED the credentials while a
+    // session established before the attempt is still standing. A
+    // `true` there reports a re-sign-in that never happened, and the
+    // caller spends the credential Gizwits has just rejected. This
+    // dialect's own reactive path never consumed that wrong `true` —
+    // its `#reauthenticate` clears the refused token FIRST, so the
+    // session it left behind never stood — but `resumeSession` is
+    // PUBLIC, and a host calling it over a live token with refused
+    // stored credentials was told "resumed". The session itself is
+    // untouched: only the VERDICT is at stake, which is what makes the
+    // two shapes distinguishable by the sign-in round-trip alone.
+    it('reports a refused re-sign-in as a failed resume, standing session or not', async () => {
       const logger = createLogger()
       const { settingManager } = createSettingStore(CREDENTIALS)
       driver.stage({ login: 'accept', wire: 'ok' })
       const { api } = await driver.create({ logger, settingManager })
       driver.stage({ login: 'refuse', wire: 'ok' })
 
-      await expect(api.resumeSession()).resolves.toBe(true)
+      await expect(api.resumeSession()).resolves.toBe(false)
 
+      // The refusal left the previous session alone — this clause is
+      // about the verdict, never about clearing.
       expect(api.isAuthenticated()).toBe(true)
       expect(logger.error).toHaveBeenCalledWith(
         'Session resume failed:',
@@ -724,13 +736,19 @@ const describeSessionLifecycleContract = (
       )
     })
 
-    // The other reachable form of `resumeSession`'s
-    // `return this.isAuthenticated()` (heatzy.ts:453) — an ACCEPTED
-    // credential whose enforced registry cycle then threw. The token is
-    // stored by `#doAuthenticate` (heatzy.ts:649) BEFORE `#finishLogin`
-    // spends the cycle, so the client is signed in while the registry
-    // stays empty; reporting that as a lost session would prompt the
-    // user to log back in over credentials that just worked.
+    // The other shape `resumeSession` catches, and the one that must
+    // still answer `true` — an ACCEPTED credential whose enforced
+    // registry cycle then threw, the shape 11.0.0 was cut for. Its
+    // session stands for a reason the refused shape above cannot
+    // claim: this sign-in round-trip really did happen. The token is
+    // stored by `#doAuthenticate` BEFORE `#finishLogin` spends the
+    // cycle, so the client is signed in while the registry stays
+    // empty; reporting that as a lost session would prompt the user to
+    // log back in over credentials that just worked. The verdict is
+    // the round-trip counter's, not a re-reading of the session — the
+    // 11.0.0 shorthand "judge by the session" claimed BOTH shapes for
+    // one `isAuthenticated()` reading and shipped the refused one
+    // wrong.
     it('returns true from resumeSession when the session was established before the enforced cycle threw', async () => {
       const { settingManager } = createSettingStore()
       driver.stage({ login: 'accept', wire: 'drifted-registry' })
@@ -774,9 +792,9 @@ const describeSessionLifecycleContract = (
       },
     )
 
-    // The probe is BEST-EFFORT by contract (heatzy.ts:886-899): it runs
+    // The probe is BEST-EFFORT by contract (heatzy.ts:1091-1104): it runs
     // `fetch()`, never the propagating `#syncCycle`. Nothing else pins
-    // that choice, yet `initialize()` has no try/catch (:339-346) and
+    // that choice, yet `initialize()` has no try/catch (:473-480) and
     // `create()` awaits it through `start()` — so the propagating hook
     // would turn a boot-time blip into a REJECTED `create()`, and a
     // probe that cleared on failure would destroy a session that was
@@ -977,6 +995,39 @@ const describeSessionLifecycleContract = (
       },
     )
 
+    // The same rung when the recovery FAILS. `AuthRetryPolicy` replays
+    // on the strength of `#reauthenticate()` alone, so a hook that
+    // answered `true` over a refused re-sign-in would replay the
+    // request with a credential the server just rejected. This dialect
+    // holds the shield twice over, and both halves are pinned here:
+    // `#reauthenticate` clears the refused token FIRST — the
+    // DIALECT-SPECIFIC half, right on Gizwits because the 400/9004
+    // names the token itself, where melcloud's Classic deliberately
+    // does NOT clear (its 401 can name an endpoint rather than the
+    // session) — and the resume verdict is the round-trip's, so the
+    // refusal reads `false` with or without that clearing.
+    it('never replays an expired-token failure when the re-sign-in was refused, and clears the refused token', async () => {
+      const { settingManager } = createSettingStore({
+        ...CREDENTIALS,
+        ...driver.persistedSession(),
+      })
+      driver.stage({ wire: 'ok' })
+      const { api } = await driver.create({ settingManager })
+      const probed = driver.registryCycleCount()
+      driver.stage({
+        authFailureStatus: HttpStatus.BadRequest,
+        login: 'refuse',
+        wire: 'unauthorized-once',
+      })
+
+      await expect(api.fetch()).resolves.toStrictEqual([])
+
+      // The rejected cycle, and nothing after it.
+      expect(driver.registryCycleCount() - probed).toBe(1)
+      expect(driver.loginCount()).toBe(1)
+      expect(standingSessionKeys(driver, settingManager)).toStrictEqual([])
+    })
+
     it.each(TRANSIENT_RUNG_CASES)(
       '$label',
       async ({ retriedMethods, send }) => {
@@ -1031,7 +1082,7 @@ const describeSessionLifecycleContract = (
       expect(driver.loginCount()).toBe(1)
     })
 
-    // The per-request lifecycle (`#runWithEvents`, heatzy.ts:830-852).
+    // The per-request lifecycle (`#runWithEvents`, heatzy.ts:1035-1057).
     // `durationMs` is asserted by SHAPE and never by value: the
     // extraction moves this clock to `performance.now()`, which no fake
     // timer controls — but a measurement that came back `NaN` or
@@ -1071,7 +1122,7 @@ const describeSessionLifecycleContract = (
       ).toStrictEqual(durations)
     })
 
-    // The transport-resolution gate (heatzy.ts:80-87) adopts a
+    // The transport-resolution gate (heatzy.ts:82-89) adopts a
     // pre-built client only when it IS this repo's `HttpClient` — the
     // subclass that seats the Gizwits redaction vocabulary. Anything
     // else, the bare core client included, is re-wrapped. The
@@ -1153,8 +1204,8 @@ const describeSessionLifecycleContract = (
     )
 
     // This SDK passes NO log label: `this.logger` IS the host logger
-    // (heatzy.ts:210), handed unwrapped to every seat including the
-    // `SyncManager` (:216-220). So every line it writes arrives
+    // (heatzy.ts:327), handed unwrapped to every seat including the
+    // `SyncManager` (:333-337). So every line it writes arrives
     // unprefixed — and those strings land verbatim in the diagnostic
     // reports users paste into issues. The extracted class makes the
     // label OPTIONAL, and a default would rewrite this SDK's whole log
@@ -1197,7 +1248,7 @@ const describeSessionLifecycleContract = (
     // authenticated armed the auto-sync, and nothing may survive the
     // dispose. The GUARD half is the deliberate divergence from the
     // twin — melcloud-api releases its `RetryGuard` on dispose, this
-    // SDK does not (heatzy.ts:460-462). The extraction adopts
+    // SDK does not (heatzy.ts:614-616). The extraction adopts
     // melcloud's superset, so this is exactly the clause that must then
     // be updated DELIBERATELY, in a commit that says so, rather than
     // flipping silently inside a neutrality-critical move. The spy is
@@ -1248,14 +1299,14 @@ describeSessionLifecycleContract('HeatzyAPI', heatzyDriver)
 //    fallback window, the announced one, and the cap on an absurd one).
 //    No throttle type exists here to carry a window, and none can be
 //    constructed. Decide it by reading:
-//      - `toAuthFailure` (heatzy.ts:98-105) — whose `new
-//        AuthenticationError(…)` at :102 is the ONLY one in `src/`
+//      - `toAuthFailure` (heatzy.ts:100-107) — whose `new
+//        AuthenticationError(…)` at :104 is the ONLY one in `src/`
 //        (`grep -rn 'new AuthenticationError' src/` returns that single
 //        line). Its whole body is `status === BadRequest || status ===
 //        Unauthorized ? new AuthenticationError(…) : null`: one type,
 //        no window argument, no throttle branch — and `grep -rni
 //        throttl src/` returns nothing at all.
-//      - `#armLoginBackoff` (heatzy.ts:547-549) — the ONLY writer of the
+//      - `#armLoginBackoff` (heatzy.ts:705-707) — the ONLY writer of the
 //        gate: `Temporal.Now.instant().epochMilliseconds +
 //        LOGIN_BACKOFF_FAILURE_MS`, a bare constant sum. Nothing reads a
 //        server-announced duration, so there is no window to honour, no
@@ -1269,7 +1320,7 @@ describeSessionLifecycleContract('HeatzyAPI', heatzyDriver)
 //      - `HeatzyAPI`'s public surface — there is no `isRateLimited`
 //        member to observe, and `RateLimitGate` is imported nowhere in
 //        `src/`.
-//      - `#buildPolicy` (heatzy.ts:567-599) — the complete pipeline is
+//      - `#buildPolicy` (heatzy.ts:725-757) — the complete pipeline is
 //        `#authRetryPolicy` alone on a mutation, and
 //        `#authRetryPolicy.run(() => transientPolicy.run(attempt))` on a
 //        GET. Two rungs, both accounted for by clauses above; a 429
@@ -1283,9 +1334,9 @@ describeSessionLifecycleContract('HeatzyAPI', heatzyDriver)
 //    before a sign-in is spent). Unrepresentable here for the same
 //    reason it is on melcloud's Classic leg — the two hooks are ONE
 //    expression. Decide it by reading:
-//      - `isAuthenticated()` (heatzy.ts:352-354) — `return this.token
+//      - `isAuthenticated()` (heatzy.ts:486-488) — `return this.token
 //        !== ''`.
-//      - `#tryReuseSession`'s guard (heatzy.ts:894) — `if (this.token
+//      - `#tryReuseSession`'s guard (heatzy.ts:1099) — `if (this.token
 //        === '')`.
 //    One cannot read false while the other reads true, so the state that
 //    clause describes does not exist; `initialize()`'s two branches

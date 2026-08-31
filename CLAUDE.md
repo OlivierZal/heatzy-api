@@ -63,12 +63,44 @@ Architecture, toolchain and process are aligned on the sibling
   listing boundary (`HeatzyAPI.list`), and the fan-out settles leg by
   leg (`Promise.allSettled`) feeding the registry the `undefined` it
   documents. `DeviceRegistry` runs no guard of its own — it builds a
-  model per entry — so the boundary is what it relies on. Every drop
-  writes a log line, and the listing's two reasons are worded APART: a
-  malformed entry means the schema is wrong, an unresolved
-  `product_key` means the product map is stale, and a silent drop
-  would leave one indistinguishable symptom. Only an envelope that is
-  not a device list still fails the whole cycle.
+  model per entry — so the boundary is what it relies on. Listing
+  drops are reported as ONE aggregated line per cycle naming every
+  dropped device with its verdict — never one line per entry, because
+  the listing carries every device of the account on every cycle and a
+  listing-wide regression must not storm the host logger exactly when
+  the diagnostic report most needs to stay readable (16.0.0, the shape
+  melcloud-api settled under the identical rationale in its 54.0.0).
+  The two verdicts stay worded APART inside that line: a malformed
+  entry means the schema is wrong, an unresolved `product_key` means
+  the product map is stale, and an undifferentiated drop would leave
+  one indistinguishable symptom. The `/devdata` fan-out keeps its
+  per-device line — its failures each cost a wire call, so their
+  volume is bounded by the failed reads, never by the listing's size.
+  Only an envelope that is not a device list still fails the whole
+  cycle.
+- **`resumeSession()` judges by the SIGN-IN ROUND-TRIP, never by the
+  session** — two different failures both leave a live session
+  standing, and only the round-trip separates them. An ACCEPTED
+  sign-in whose enforced post-auth sync then threw IS a resume
+  (answering `false` there had `initialize()` emit a spurious
+  `onAuthenticationLost` over credentials that had just worked — the
+  11.0.0 fix, still correct). A REFUSED sign-in over a session that
+  predates the attempt is NOT: a `true` hands the caller the
+  credential Gizwits has just rejected. They are distinguishable right
+  there, with no heuristic: the `#acceptedSignIns` counter is bumped
+  the instant `#doAuthenticate` resolves and compared across the call
+  (16.0.0, the mechanism of melcloud-api 55.0.0). Do NOT restate this
+  as "judge by the session": this repo INVENTED that shorthand in
+  11.0.0, melcloud copied it in 54.0.0 and shipped the refused shape
+  wrong. Here the wrong `true` never bit an internal path, because the
+  reactive `#reauthenticate` clears the refused token FIRST — right on
+  Gizwits, where the 400/9004 names the token itself, and the OPPOSITE
+  of melcloud's Classic, whose 401 can name an endpoint rather than
+  the session — but `resumeSession` is PUBLIC, and a host calling it
+  over a live token with refused stored credentials was told
+  "resumed". What a refusal must NOT do is clear: the verdict changes,
+  the stored session does not. The verdict, the accepted half, and the
+  clearing dialect half are all kernel-pinned.
 - V1 products speak a positional `raw: [1, 1, mode]` triplet on
   `/control` and only accept the four base modes; every other
   generation posts named `attrs`. The base facade owns the V1 dialect,
@@ -143,6 +175,18 @@ Architecture, toolchain and process are aligned on the sibling
   day, and a changelog line clearing the sibling is a claim to VERIFY
   against its code, never a verdict to inherit. Neither twin's owner
   may write the other's exemption.
+- **Third divergence episode, closed in ONE DAY (2026-08-30 →
+  2026-08-31)**: melcloud's 55.0.0 rejected the `resumeSession`
+  verdict this repo still carried — the "judge by the session"
+  shorthand born HERE in 11.0.0, copied there in 54.0.0 — and until
+  16.0.0 the twin CONTRACT KERNELS pinned OPPOSITE verdicts for the
+  same staged scenario (a refused re-sign-in over a standing session),
+  a contradiction no single extracted `SessionAPI` could satisfy. The
+  refinement crossed back the next day (16.0.0), which is what the
+  first two episodes' lesson demands — and it extends that lesson in
+  the one direction they never tested: it applies to fixes of ideas a
+  twin EXPORTED, not only to mechanisms it copied. Being the
+  shorthand's author is no exemption from re-importing its repair.
 
 ## Mechanism boundary (@olivierzal/api-core)
 
@@ -184,19 +228,25 @@ Every clause is worded about the PER-DEVICE registry cycle (`/bindings`
 plus its `/devdata` fan-out), the account-denial pair added in 15.0.0
 included: a listing this SDK only partly models and a fan-out leg that
 comes back unreadable each end in a SUCCESSFUL sign-in over exactly the
-modelled devices, every drop named in the log. The `drifted-registry`
+modelled devices — the listing half asserting the cycle's ONE
+aggregated drop line verbatim (16.0.0), the fan-out half its per-device
+line. The `drifted-registry`
 outcome — the 200 the session survives and the registry does not — is a
 `/bindings` body that is not a device list, the only whole-cycle
 registry failure left and the shape melcloud's twin kernel already
 stages; it used to be an unshipped `product_key`, which the boundary now
-absorbs. Three clauses hold divergences the extraction must handle
+absorbs. Since 16.0.0 the twin tables pin the SAME `resumeSession`
+verdicts — the refused-re-sign-in flip that unblocked the extraction —
+and four clauses hold divergences the extraction must handle
 deliberately rather than silently: `[Symbol.dispose]`
 releases the sync timer but NOT the retry guard (melcloud releases both —
 adopting its superset must update that clause in a commit that says so);
 no log label is passed anywhere, so every line arrives unprefixed and a
 default label in the extracted class would rewrite this SDK's diagnostic
-output; and the auth-failure vocabulary is `[401, 400]`, each status
-pinned by its own row. The kernel also closes with three DECLARED
+output; the auth-failure vocabulary is `[401, 400]`, each status
+pinned by its own row; and the reactive `#reauthenticate` clears the
+refused token FIRST, pinned as the dialect-specific half opposite
+melcloud's non-clearing Classic. The kernel also closes with three DECLARED
 ABSENCES — the login-throttle window, the rate-limit gate, and the
 mid-ladder probe — each naming the two expressions that make the claim
 checkable, so a quarantine can never hide a harness limitation the way

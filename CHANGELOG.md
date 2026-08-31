@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [16.0.0] - 2026-08-31
+
+### Breaking changes
+
+- **`resumeSession()` reports a refused re-sign-in as a failed resume, standing session or not.** The 11.0.0 verdict — "judge by the session, not by the throw" — claimed BOTH swallowed shapes for one `isAuthenticated()` reading, and shipped one of them wrong: when the server REFUSES the stored credentials while a session established before the attempt still stands, the old code answered `true` — reporting a re-sign-in that never happened and handing the caller the credential Gizwits had just rejected. No internal path ever consumed that wrong `true` (the reactive `#reauthenticate` clears the refused token FIRST, because a Gizwits 400/9004 names the token itself — that in-repo shield is kept, and now kernel-pinned as the dialect-specific half), but `resumeSession()` is public: a host calling it over a live token with refused stored credentials was told "resumed". The verdict is now the SIGN-IN ROUND-TRIP's, the mechanism ported from melcloud-api 55.0.0: a counter bumped the instant `#doAuthenticate` resolves, compared across the call. An ACCEPTED sign-in whose enforced post-auth sync then failed still answers `true` — that half of 11.0.0 was and stays correct, since the session it established stands. What a refusal must NOT do is clear: only the verdict changes, the stored session does not. Migration: a host reading `true` as "the stored credentials still work" now gets the answer it always thought it had; one that wanted "is a session standing" reads `isAuthenticated()` instead.
+
+  Major by this repo's own versioning precedent, matched to the twin's: the return value of a public method changes meaning for a reachable class of inputs — the contract-shaped change melcloud-api called major (55.0.0, 2026-08-30). The retired shorthand was born here (11.0.0), copied there (54.0.0), refined there (55.0.0) — and the refinement crossed back in one day, per the ledger's own lesson: a fix to either twin re-opens the question for BOTH, the same day.
+
+### Changed
+
+- **Listing drops are reported as ONE aggregated line per cycle.** `list()` used to write one `logger.error` line per dropped `/bindings` entry; melcloud-api settled the opposite shape the same day it shipped its own boundary (54.0.0), under a volume rationale that applies here verbatim: the listing carries every device of the account on every sync cycle, so a listing-wide wire regression stormed the host logger exactly when the diagnostic report most needed to stay readable. One line per cycle now names every dropped entry with its verdict, the two verdicts still worded apart (`an entry this SDK cannot read` = wire regression, fix the schema; `unknown product_key …` = a radiator newer than this release, extend the product map in `constants.ts`) — and an unreadable entry that at least spells a string `did` is now named by it, where the old per-entry line could only quote the Zod message. The `/devdata` fan-out keeps its per-device line: its failures cost a wire call each, so their volume is bounded by the devices that individually failed, never by the listing's size. Only the log SHAPE changed — what is dropped, kept, retried and returned is exactly 15.0.0.
+
+- **The session-lifecycle kernel aligns its `resumeSession` verdicts with the melcloud twin, and pins the reactive shield.** The clause "reports the standing session from resumeSession, not the throw" pinned the WRONG verdict — refused re-sign-in over a standing session → `true` — so the twin CONTRACT KERNELS held OPPOSITE verdicts for the same staged scenario, which no single extracted `SessionAPI` could satisfy. It is flipped to "reports a refused re-sign-in as a failed resume, standing session or not" (→ `false`, session untouched), the accepted-then-sync-failed → `true` clause stays, and a new clause pins the negative reactive rung the twin also holds: an expired-token failure whose re-sign-in is refused is never replayed, and the refused token is cleared FIRST — the DIALECT-SPECIFIC half, opposite of melcloud's Classic, which deliberately does not clear because its 401 can name an endpoint rather than the session. Deliberate clause changes, in the commit that says so — not rewordings smuggled through a neutrality-critical move.
+
 ## [15.0.0] - 2026-08-30
 
 ### Breaking changes
@@ -150,6 +164,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[16.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v15.0.0...v16.0.0
 [15.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v14.1.0...v15.0.0
 [14.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v14.0.0...v14.1.0
 [14.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v13.0.1...v14.0.0
