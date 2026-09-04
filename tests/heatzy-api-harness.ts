@@ -21,9 +21,6 @@ import {
 
 const wire = createMockHttpClient('https://euapi.gizwits.com/app')
 
-export const mockHttpClient: ReturnType<typeof createMockHttpClient>['client'] =
-  wire.client
-
 export const mockRequest: ReturnType<
   typeof createMockHttpClient
 >['requestSpy'] = wire.requestSpy
@@ -142,7 +139,7 @@ export const createApi = async (
   HeatzyAPI.create({
     logger: createLogger(),
     syncIntervalMinutes: false,
-    transport: mockHttpClient,
+    transport: wire.client,
     ...config,
   })
 

@@ -198,7 +198,7 @@ export const mockFetchResponse = (
   )
 }
 
-export const createHttpError = ({
+const createHttpError = ({
   message,
   method = 'get',
   responseHeaders = {},

@@ -3,4 +3,4 @@
 // entry for the whole family, so exactly one polyfill copy is loaded
 // and core-built Temporal values are `instanceof`-compatible with this
 // SDK's.
-export { Intl, Temporal } from '@olivierzal/api-core/temporal'
+export { Temporal } from '@olivierzal/api-core/temporal'
