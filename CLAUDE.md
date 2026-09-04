@@ -447,11 +447,13 @@ for `src/decorators/**`. `src/temporal.ts` is the only sanctioned
   the project's Administration settings. If it is on, the CI scanner
   aborts with `exit 3` ("running CI analysis while Automatic Analysis is
   enabled") and fails the required `Test (Node lts/*)` leg — and
-  autoscan miscategorizes the `S2245` `Math.random` jitter in
-  `retry-backoff.ts` as a _vulnerability_ (quality gate red) instead of
-  the reviewable _hotspot_ the CI scanner raises. That hotspot is marked
-  SAFE in the dashboard with the documented "retry timing is not
-  security-sensitive" rationale (mirrors melcloud-api).
+  autoscan miscategorized the `S2245` `Math.random` jitter as a
+  _vulnerability_ (quality gate red) instead of the reviewable
+  _hotspot_ the CI scanner raised, back when the retry backoff lived
+  in this repo's `retry-backoff.ts`. That code is `@olivierzal/api-core`'s
+  since the 16.1.0 extraction (its shim swept in 16.1.1), and the
+  "retry timing is not security-sensitive" verdict is recorded there;
+  the disable-autoscan rule outlives the example.
 - Dependabot PRs auto-merge via `gh pr merge --auto`. GitHub merge
   queue is impossible here — the feature is gated on ORGANISATION
   ownership and this repo is user-owned (verified 2026-08 against the

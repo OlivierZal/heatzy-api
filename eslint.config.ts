@@ -19,28 +19,12 @@ const config: Config[] = defineConfig([
         format: null,
         selector: ['objectLiteralProperty', 'typeProperty'],
       },
-      // HTTP names its statuses through reason phrases (IANA HTTP
-      // Status Code Registry); the SDK's status map keys them.
-      {
-        filter: {
-          match: true,
-          regex:
-            '^(BadGateway|BadRequest|GatewayTimeout|ServiceUnavailable|Unauthorized)$',
-        },
-        format: ['PascalCase'],
-        selector: 'objectLiteralProperty',
-      },
     ],
     // The modules that hold a wire vocabulary: the Gizwits payload
-    // types and their zod mirror, plus the HTTP status map. Everywhere
-    // else the strict core applies, so a snake_case name of our own
-    // invention is caught rather than waved through by a vocabulary it
-    // does not belong to.
-    wireNamingFiles: [
-      'src/http/status.ts',
-      'src/types/heatzy.ts',
-      'src/validation/schemas.ts',
-    ],
+    // types and their zod mirror. Everywhere else the strict core
+    // applies, so a snake_case name of our own invention is caught
+    // rather than waved through by a vocabulary it does not belong to.
+    wireNamingFiles: ['src/types/heatzy.ts', 'src/validation/schemas.ts'],
   }),
 ])
 

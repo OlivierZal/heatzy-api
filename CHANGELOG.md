@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [16.1.1] - 2026-09-05
+
+### Removed
+
+- **The SessionAPI adoption's stranded residue is swept.** Seven zero-importer forwards left standing by 16.1.0 are removed: five thin `src/resilience/` shim modules (`disposable-timeout`, `retry-backoff`, `policy`, `auth-retry-policy`, `transient-retry-policy`) and `src/fire-and-forget.ts` are deleted outright — the resilience barrel keeps only the `RetryGuard` and `isSessionExpired` forwards, the two paths the session-lifecycle kernel and `HeatzyAPI` still resolve through — and the `Intl` forward is dropped from the surviving `src/temporal.ts` (nothing in this repo formats through it; melcloud-api's own `temporal.ts` serves its consumers). Two test exports orphaned by the 16.1.0 suite surgery (`createHttpError`, `mockHttpClient`) lose their `export`, and the eslint overlay drops the reason-phrase `wireNamingEntries` splice — the status map it covered is `@olivierzal/api-core`'s since the extraction, and `src/http/status.ts` is a bare re-export with no keys left to exempt.
+
+- **The session-lifecycle kernel cites by symbol, never by line.** The kernel carried seventeen line-number citations (`heatzy.ts:341-345` and kin) that rotted when the adoption moved the cited members into the core — several pointed at members no longer in the file at all. They are replaced with the symbol names that survive a move, and the header now carries the same CITATION RULE melcloud-api's kernel adopted on 2026-08-30. The clause texts, the staged wires and every assertion are untouched — only citations changed, and the kernel stays green.
+
+Patch, not minor: nothing observable changes. Every deleted module was imported by nothing (verified family-wide), none was reachable from the package's single `.` export, and the test/tooling edits touch no shipped code — the public surface and every runtime behavior keep their 16.1.0 contract byte for byte.
+
 ## [16.1.0] - 2026-09-04
 
 ### Changed
@@ -194,6 +204,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[16.1.1]: https://github.com/OlivierZal/heatzy-api/compare/v16.1.0...v16.1.1
 [16.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.0.0...v16.1.0
 [16.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v15.0.0...v16.0.0
 [15.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v14.1.0...v15.0.0
