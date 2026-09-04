@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [16.1.0] - 2026-09-04
+
+### Changed
+
+- **`HeatzyAPI` is now a subclass of `@olivierzal/api-core`'s `SessionAPI` (1.1.0).** The session lifecycle and request pipeline this repo carried — the login backoff, the logOut-epoch protocol, the single-flight session refresh and resume, the accepted-sign-ins verdict counter, the refusal record, the loss episodes, the resilience pipeline, the sync-cycle template and its settling epilogue — are DELETED here and inherited from the core, exactly as extracted (the extraction reconciled this repo's 16.0.0 and melcloud-api's 55.0.0 before either SDK adopted). What stays is the Gizwits dialect behind the core's hooks: `doAuthenticate` (the verbatim `/login` exchange, `expire_at` epoch-seconds → ISO 8601), `getAuthHeaders` (the `X-Gizwits-User-token` header), `hasPersistedSession`/`isAuthenticated`/`needsSessionRefresh` (the token as the sole session artifact), `performSessionRefresh` (full re-login, the only refresh Gizwits offers), the CLEARING `reauthenticate` (the 400/9004 names the token itself — the dialect half opposite melcloud's non-clearing Classic, kernel-pinned), `enforceRegistrySync`/`syncRegistry`/`reuseSucceeded` (the per-device registry cycle and the probe's judge-by-the-credential verdict), and `clearPersistedSession`/`clearRegistry`. The subclass passes the core `[401, 400]` (both statuses arm the reactive re-auth), NO `logLabel` (every log line stays unprefixed, as pinned) and NO `rateLimitHours` (no rate-limit rung is built — ledger verdict), and hands it the Gizwits-bound redaction engine, so the request/response log lines the inherited dispatch emits keep masking the user-token header exactly as this repo's own dispatch did — the seam whose omission this adoption caught in the unreleased core, fixed there (`SessionAPIOptions.redaction`) before any SDK adopted, and now pinned here through the real client. The session-lifecycle kernel crossed the move byte-identical but for the one clause below; the public surface is unchanged name for name (64 exports before and after), with the core's protected seam (hooks, `dispatch`/`request`, the template methods, the `expiry` accessor) newly visible to subclassers as inherited members.
+
+- **`[Symbol.dispose]()` now also releases the auth-retry guard.** The one deliberate behavior change of the adoption, taken with the move rather than smuggled through it: this SDK used to release only the auto-sync timer, melcloud both, and the extracted core carries melcloud's superset. Inert in practice — the released window only affects a replay budget, and a disposed instance is documented unusable — and the kernel clause that pinned the old divergence is updated to pin the superset, in this commit, as that clause's own comment always demanded.
+
+- **The observability shells left with the mechanism.** The pre-bound `APICallRequestData`/`APICallResponseData`/`createAPICallErrorData`/`LifecycleEmitter` bindings (internal modules, never part of the public API) existed to seat the Gizwits vocabulary into this repo's own dispatch; the core now takes the engine directly (`SessionAPIOptions.redaction`), so the shells are deleted and `src/observability/context.ts` — the vocabulary and the one bound engine — is what remains. `AuthenticationError`, `RegistrySyncError` and the `setting` decorator are now the core's own, re-exported under their unchanged public names so `instanceof` and the persistence contract hold across the SDK and the core alike.
+
+Minor, not major: no exported name moves or changes meaning, every public method keeps its 16.0.0 contract (the kernel is the witness), and the additions — the inherited protected seam and the dispose superset — are strictly additive. The exact `@olivierzal/api-core` pin advances to 1.1.0, which this release is the adoption of.
+
 ## [16.0.0] - 2026-08-31
 
 ### Breaking changes
@@ -182,6 +194,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[16.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.0.0...v16.1.0
 [16.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v15.0.0...v16.0.0
 [15.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v14.1.0...v15.0.0
 [14.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v14.0.0...v14.1.0

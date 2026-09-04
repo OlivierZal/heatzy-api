@@ -1425,15 +1425,17 @@ const describeSessionLifecycleContract = (
 
     // The timer half is behavioural: the cycle that settled
     // authenticated armed the auto-sync, and nothing may survive the
-    // dispose. The GUARD half is the deliberate divergence from the
-    // twin — melcloud-api releases its `RetryGuard` on dispose, this
-    // SDK does not (heatzy.ts:614-616). The extraction adopts
-    // melcloud's superset, so this is exactly the clause that must then
-    // be updated DELIBERATELY, in a commit that says so, rather than
-    // flipping silently inside a neutrality-critical move. The spy is
-    // restored here because the vitest config clears mocks, never
-    // restores them.
-    it('releases the sync timer on dispose and leaves the retry guard alone', async () => {
+    // dispose. The GUARD half was this kernel's recorded divergence —
+    // this SDK used to release the timer and leave its `RetryGuard`
+    // alone — updated HERE, in the adoption commit, by the recorded
+    // decision: the extracted `SessionAPI` carries melcloud's superset
+    // and releases the guard too, a flip that is inert on this dialect
+    // because the one behaviour it changes — a re-opened retry
+    // window — is only visible to a caller the disposal contract
+    // forbids ("the instance must not be reused after disposal"). The
+    // spy is restored here because the vitest config clears mocks,
+    // never restores them.
+    it('releases the sync timer and the retry guard on dispose', async () => {
       const releaseGuard = vi.spyOn(RetryGuard.prototype, Symbol.dispose)
       onTestFinished(() => {
         releaseGuard.mockRestore()
@@ -1456,7 +1458,7 @@ const describeSessionLifecycleContract = (
 
       expect(armed).toBeGreaterThan(0)
       expect(remaining).toBe(0)
-      expect(releaseGuard).not.toHaveBeenCalled()
+      expect(releaseGuard).toHaveBeenCalledTimes(1)
       expect(driver.registryCycleCount()).toBe(settled)
     })
   })
