@@ -25,9 +25,6 @@ const config = {
     ],
     hostedBaseUrl: 'https://olivierzal.github.io/heatzy-api/',
     intentionallyNotExported: [
-      // Internal infrastructure leaked through a public decorator
-      // signature (tagged `@internal` in source).
-      'HasSettingManager',
       // The sync-params vocabulary this SDK instantiates the core's
       // lifecycle generics with; consumers name the aliases
       // (`LifecycleEvents`, `SyncCallback`), never the parameter shape.

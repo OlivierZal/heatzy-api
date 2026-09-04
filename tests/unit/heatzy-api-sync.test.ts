@@ -4,22 +4,24 @@ import type { RequestErrorEvent, SyncCallback } from '../../src/api/types.ts'
 import { HeatzyAPI } from '../../src/api/heatzy.ts'
 import { buildBinding, buildLoginData, proAttributes } from '../fixtures.ts'
 import {
-  createApi,
   createAuthedApi,
   heatzyRegistryResponse,
-  mockRejectedWire,
   mockRequest,
   mockWire,
   stageHeatzyWire,
   wireSetup,
   wireTeardown,
 } from '../heatzy-api-harness.ts'
-import {
-  createLogger,
-  createServerError,
-  createSettingStore,
-  mockResponse,
-} from '../helpers.ts'
+import { createLogger, createServerError, mockResponse } from '../helpers.ts'
+
+// Thin SYNC WIRING suite since the SessionAPI adoption: the sync-cycle
+// template — timer arming and disposal, the best-effort downgrade, the
+// loss episodes the settling epilogue surfaces — is the core's, pinned
+// by its own suite and, through the real client, by the
+// session-lifecycle kernel. What this file pins is the PER-DEVICE
+// cycle this dialect owns: the `/bindings` + `/devdata` fan-out, its
+// leg-by-leg degradation, the `@syncDevices` notification, and the
+// abortSignal wiring from `HeatzyAPIConfig` into every request.
 
 // Long enough for the transient-retry rung to exhaust its four
 // attempts (1 s initial delay, 16 s cap) and hand the failure back.
@@ -125,19 +127,6 @@ describe(HeatzyAPI, () => {
       expect(device?.data).toStrictEqual(proAttributes)
     })
 
-    it('logs and returns an empty list when the fetch fails', async () => {
-      const logger = createLogger()
-      const { api } = await createAuthedApi({ logger })
-      mockRequest.mockRejectedValue(new Error('network down'))
-
-      await expect(api.fetch()).resolves.toStrictEqual([])
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'Failed to fetch devices:',
-        expect.any(Error),
-      )
-    })
-
     it('notifies onSyncComplete after each fetch', async () => {
       const onSyncComplete = vi.fn<SyncCallback>().mockResolvedValue(undefined)
       const { api } = await createAuthedApi({ events: { onSyncComplete } })
@@ -146,79 +135,6 @@ describe(HeatzyAPI, () => {
 
       expect(onSyncComplete).toHaveBeenCalledTimes(1)
       expect(onSyncComplete).toHaveBeenCalledWith()
-    })
-
-    it('re-arms the auto-sync timer after an authenticated cycle', async () => {
-      const { settingManager } = createSettingStore({ token: 'user-token' })
-      mockWire()
-      const api = await createApi({ settingManager, syncIntervalMinutes: 1 })
-      mockRequest.mockClear()
-      await vi.advanceTimersByTimeAsync(60_000)
-
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.objectContaining({ method: 'get', url: '/bindings' }),
-      )
-
-      api[Symbol.dispose]()
-    })
-
-    it('emits onAuthenticationLost once per loss episode and disarms the auto-sync', async () => {
-      const onAuthenticationLost = vi.fn<() => void>()
-      const { settingManager } = createSettingStore()
-      const api = await createApi({
-        events: { onAuthenticationLost },
-        settingManager,
-        syncIntervalMinutes: 1,
-      })
-      settingManager.set('password', 'secret')
-      settingManager.set('username', 'user@test.com')
-      mockRejectedWire()
-
-      await expect(api.fetch()).resolves.toStrictEqual([])
-      await expect(api.fetch()).resolves.toStrictEqual([])
-
-      expect(onAuthenticationLost).toHaveBeenCalledTimes(1)
-
-      mockRequest.mockClear()
-      await vi.advanceTimersByTimeAsync(120_000)
-
-      expect(mockRequest).not.toHaveBeenCalled()
-    })
-
-    it('alternates onAuthenticationLost and onAuthenticationRestored across episodes', async () => {
-      const onAuthenticationLost = vi.fn<() => void>()
-      const onAuthenticationRestored = vi.fn<() => void>()
-      const { settingManager } = createSettingStore()
-      const api = await createApi({
-        events: { onAuthenticationLost, onAuthenticationRestored },
-        settingManager,
-      })
-      settingManager.set('password', 'secret')
-      settingManager.set('username', 'user@test.com')
-      mockRejectedWire()
-
-      await expect(api.fetch()).resolves.toStrictEqual([])
-
-      expect(onAuthenticationLost).toHaveBeenCalledTimes(1)
-      expect(onAuthenticationRestored).not.toHaveBeenCalled()
-
-      mockWire()
-      await api.authenticate({ password: 'secret', username: 'user@test.com' })
-
-      expect(onAuthenticationRestored).toHaveBeenCalledTimes(1)
-
-      await api.fetch()
-
-      expect(onAuthenticationRestored).toHaveBeenCalledTimes(1)
-
-      // Refill the auth-retry guard, then fail a new cycle: a fresh
-      // loss episode announces itself again.
-      vi.advanceTimersByTime(1500)
-      mockRejectedWire()
-
-      await expect(api.fetch()).resolves.toStrictEqual([])
-
-      expect(onAuthenticationLost).toHaveBeenCalledTimes(2)
     })
   })
 
@@ -240,39 +156,6 @@ describe(HeatzyAPI, () => {
       await api.getValues({ id: 'did-pro' })
 
       expect(mockRequest.mock.lastCall?.[0]).not.toHaveProperty('signal')
-    })
-  })
-
-  describe('timers and disposal', () => {
-    it('arms and disarms the auto-sync timer via setSyncInterval', async () => {
-      const api = await createApi()
-      api.setSyncInterval(10)
-
-      expect(vi.getTimerCount()).toBe(1)
-
-      api.setSyncInterval(false)
-
-      expect(vi.getTimerCount()).toBe(0)
-    })
-
-    it('clearSync cancels a pending auto-sync', async () => {
-      const api = await createApi()
-      api.setSyncInterval(10)
-      api.clearSync()
-
-      expect(vi.getTimerCount()).toBe(0)
-    })
-
-    it('releases the auto-sync timer on disposal', async () => {
-      const { settingManager } = createSettingStore({ token: 'user-token' })
-      mockWire()
-      const api = await createApi({ settingManager, syncIntervalMinutes: 1 })
-      api[Symbol.dispose]()
-      mockRequest.mockClear()
-      await vi.advanceTimersByTimeAsync(120_000)
-
-      expect(mockRequest).not.toHaveBeenCalled()
-      expect(vi.getTimerCount()).toBe(0)
     })
   })
 })

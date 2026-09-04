@@ -15,15 +15,6 @@ import type {
 } from '../types/index.ts'
 
 /**
- * Parameters carried by this SDK's sync notification: any device ids
- * the cascade was scoped to.
- * @category Configuration
- */
-interface SyncParams {
-  ids?: string[] | undefined
-}
-
-/**
  * The API surface facades depend on — a structural slice of
  * {@link HeatzyAPI} that keeps the facade layer decoupled from the
  * client's lifecycle machinery (and trivially mockable in tests).
@@ -178,6 +169,18 @@ export type LifecycleEvents = CoreLifecycleEvents<SyncParams>
  * @category Configuration
  */
 export type SyncCallback = CoreSyncCallback<SyncParams>
+
+/**
+ * Parameters carried by this SDK's sync notification: any device ids
+ * the cascade was scoped to. Module-level export only — consumers name
+ * the aliases ({@link LifecycleEvents}, {@link SyncCallback}), never
+ * the parameter shape; `HeatzyAPI` needs the name to instantiate the
+ * core's `SessionAPI` with it.
+ * @category Configuration
+ */
+export interface SyncParams {
+  ids?: string[] | undefined
+}
 
 /**
  * Transport configuration. Discriminated by presence of an

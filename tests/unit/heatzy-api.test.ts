@@ -1,16 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type {
-  RequestCompleteEvent,
-  RequestErrorEvent,
-  RequestRetryEvent,
-  RequestStartEvent,
-  SyncCallback,
-} from '../../src/api/types.ts'
+import type { SyncCallback } from '../../src/api/types.ts'
 import type { DevicePostDataAny } from '../../src/types/index.ts'
 import { HeatzyAPI } from '../../src/api/heatzy.ts'
 import { Mode } from '../../src/constants.ts'
 import { ValidationError } from '../../src/errors/index.ts'
+import { REDACTED } from '../../src/observability/context.ts'
 import { buildBinding, buildLoginData, proAttributes } from '../fixtures.ts'
 import {
   createApi,
@@ -19,7 +14,7 @@ import {
   wireSetup,
   wireTeardown,
 } from '../heatzy-api-harness.ts'
-import { createLogger, createServerError, mockResponse } from '../helpers.ts'
+import { createLogger, defined, mockResponse } from '../helpers.ts'
 
 describe(HeatzyAPI, () => {
   beforeEach(wireSetup)
@@ -191,94 +186,7 @@ describe(HeatzyAPI, () => {
     })
   })
 
-  describe('request lifecycle events', () => {
-    it('emits onRequestStart and onRequestComplete with a shared correlationId', async () => {
-      const onRequestComplete = vi.fn<(event: RequestCompleteEvent) => void>()
-      const onRequestStart = vi.fn<(event: RequestStartEvent) => void>()
-      const { api } = await createAuthedApi({
-        events: { onRequestComplete, onRequestStart },
-      })
-      mockRequest.mockResolvedValue(mockResponse({ attr: proAttributes }))
-      await api.getValues({ id: 'did-pro' })
-
-      expect(onRequestStart).toHaveBeenCalledTimes(1)
-      expect(onRequestComplete).toHaveBeenCalledTimes(1)
-
-      const startEvent = onRequestStart.mock.calls[0]?.[0]
-      const completeEvent = onRequestComplete.mock.calls[0]?.[0]
-
-      expect(startEvent?.correlationId).toBeTypeOf('string')
-      expect(startEvent?.method).toBe('GET')
-      expect(startEvent?.url).toBe('/devdata/did-pro/latest')
-      expect(completeEvent?.correlationId).toBe(startEvent?.correlationId)
-      expect(completeEvent?.status).toBe(200)
-      expect(completeEvent?.durationMs).toBeTypeOf('number')
-    })
-
-    it('emits onRequestError when a request fails permanently', async () => {
-      const onRequestError = vi.fn<(event: RequestErrorEvent) => void>()
-      const { api } = await createAuthedApi({ events: { onRequestError } })
-      const failure = createServerError(500, '/devdata/did-pro/latest')
-      mockRequest.mockRejectedValue(failure)
-
-      await expect(api.getValues({ id: 'did-pro' })).rejects.toThrow(
-        'Status 500',
-      )
-
-      expect(onRequestError).toHaveBeenCalledTimes(1)
-
-      const errorEvent = onRequestError.mock.calls[0]?.[0]
-
-      expect(errorEvent?.error).toBe(failure)
-      expect(errorEvent?.durationMs).toBeTypeOf('number')
-    })
-
-    it('emits onRequestRetry for a transient 502 GET with the same correlationId', async () => {
-      const logger = createLogger()
-      const onRequestRetry = vi.fn<(event: RequestRetryEvent) => void>()
-      const onRequestStart = vi.fn<(event: RequestStartEvent) => void>()
-      const { api } = await createAuthedApi({
-        events: { onRequestRetry, onRequestStart },
-        logger,
-      })
-      mockRequest
-        .mockRejectedValueOnce(createServerError(502, '/bindings'))
-        .mockResolvedValueOnce(mockResponse({ devices: [] }))
-      const listPromise = api.list()
-      await vi.advanceTimersByTimeAsync(2000)
-
-      await expect(listPromise).resolves.toStrictEqual([])
-
-      expect(onRequestRetry).toHaveBeenCalledTimes(1)
-
-      const retryEvent = onRequestRetry.mock.calls[0]?.[0]
-
-      expect(retryEvent?.attempt).toBe(1)
-      expect(retryEvent?.delayMs).toBeTypeOf('number')
-      expect(retryEvent?.correlationId).toBe(
-        onRequestStart.mock.calls[0]?.[0]?.correlationId,
-      )
-      expect(logger.log).toHaveBeenCalledWith(
-        expect.stringContaining('Transient server error on /bindings'),
-      )
-    })
-
-    it('does not retry transient failures on POST', async () => {
-      const onRequestRetry = vi.fn<(event: RequestRetryEvent) => void>()
-      const { api } = await createAuthedApi({ events: { onRequestRetry } })
-      mockRequest.mockRejectedValue(createServerError(502, '/control/did-pro'))
-
-      await expect(
-        api.updateValues({
-          id: 'did-pro',
-          postData: { attrs: { mode: Mode.eco } },
-        }),
-      ).rejects.toThrow('Status 502')
-
-      expect(onRequestRetry).not.toHaveBeenCalled()
-      expect(mockRequest).toHaveBeenCalledTimes(1)
-    })
-
+  describe('sync notification wiring', () => {
     it('forwards the notifySync payload to events.onSyncComplete', async () => {
       const onSyncComplete = vi.fn<SyncCallback>().mockResolvedValue(undefined)
       const api = await createApi({ events: { onSyncComplete } })
@@ -286,35 +194,36 @@ describe(HeatzyAPI, () => {
 
       expect(onSyncComplete).toHaveBeenCalledWith({ ids: ['did-pro'] })
     })
+  })
 
-    it('swallows a misbehaving onSyncComplete callback', async () => {
+  describe('dispatch log redaction', () => {
+    // The request/response log lines come from the CORE's inherited
+    // dispatch since the SessionAPI adoption; they serialize through
+    // the engine this SDK hands the core at construction (the
+    // `redaction` option). Pinned through the REAL client because this
+    // is the exact seam the adoption briefly lost: the base vocabulary
+    // matches keys exactly, so without the bound engine the Gizwits
+    // user-token header rides into every diagnostic log line in clear.
+    it('masks the user-token header in the core dispatch log lines through the bound engine', async () => {
       const logger = createLogger()
-      const onSyncComplete = vi.fn<SyncCallback>().mockImplementation(() => {
-        throw new Error('observer rogue')
-      })
-      const api = await createApi({ events: { onSyncComplete }, logger })
+      const { api, settingManager } = await createAuthedApi({ logger })
+      settingManager.set('token', 'top-secret-token')
+      mockRequest.mockResolvedValue(mockResponse({ attr: proAttributes }))
 
-      await expect(api.notifySync()).resolves.toBeUndefined()
+      await api.getValues({ id: 'did-pro' })
 
-      expect(logger.error).toHaveBeenCalledWith(
-        'LifecycleEvents.onSyncComplete callback threw — ignoring',
-        expect.any(Error),
+      const lines = vi
+        .mocked(logger.log)
+        .mock.calls.map(([line]): unknown => line)
+        .filter((line): line is string => typeof line === 'string')
+      const requestLine = defined(
+        lines.find((line) => line.includes('"API request"')),
       )
-    })
 
-    it('swallows an onSyncComplete rejection', async () => {
-      const logger = createLogger()
-      const onSyncComplete = vi
-        .fn<SyncCallback>()
-        .mockRejectedValue(new Error('observer rejected'))
-      const api = await createApi({ events: { onSyncComplete }, logger })
-
-      await expect(api.notifySync()).resolves.toBeUndefined()
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'LifecycleEvents.onSyncComplete callback threw — ignoring',
-        expect.any(Error),
-      )
+      expect(requestLine).toContain(`"X-Gizwits-User-token": "${REDACTED}"`)
+      expect(
+        lines.filter((line) => line.includes('top-secret-token')),
+      ).toStrictEqual([])
     })
   })
 })

@@ -28,8 +28,6 @@ export const mockRequest: ReturnType<
   typeof createMockHttpClient
 >['requestSpy'] = wire.requestSpy
 
-export const LOGIN_BACKOFF_MS = 900_000
-
 export const BINDINGS_PATH = '/bindings'
 export const DEVDATA_PREFIX = '/devdata/'
 export const LOGIN_PATH = '/login'
@@ -158,15 +156,6 @@ export const createAuthedApi = async (
   settingManager.set('token', 'user-token')
   return { api, settingManager }
 }
-
-// A store whose reads blow up — drives the fire-and-forget failure
-// path of the background session restore.
-export const createExplodingSettingManager = (): SettingManager => ({
-  get: vi.fn<SettingManager['get']>().mockImplementation(() => {
-    throw new Error('storage exploded')
-  }),
-  set: vi.fn<SettingManager['set']>(),
-})
 
 // One hook pair per suite — register inside each theme file's
 // `describe` as `beforeEach(wireSetup)` / `afterEach(wireTeardown)`:

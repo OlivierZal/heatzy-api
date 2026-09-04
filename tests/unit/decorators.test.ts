@@ -1,82 +1,16 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import type { SettingManager } from '../../src/api/index.ts'
 import type { Attributes, UndefinedTolerant } from '../../src/types/index.ts'
 import { Mode } from '../../src/constants.ts'
-import {
-  setting,
-  syncDevices,
-  updateDevice,
-} from '../../src/decorators/index.ts'
-import { createSettingStore, defined, mock } from '../helpers.ts'
+import { syncDevices, updateDevice } from '../../src/decorators/index.ts'
+import { defined, mock } from '../helpers.ts'
 
-class SettingHost {
-  public settingManager: SettingManager | undefined
-
-  @setting
-  public accessor token = ''
-
-  public constructor(settingManager?: SettingManager) {
-    this.settingManager = settingManager
-  }
-}
-
-describe(setting, () => {
-  it('reads through the setting manager when one is configured', () => {
-    const host = new SettingHost(
-      createSettingStore({ token: 'stored' }).settingManager,
-    )
-
-    expect(host.token).toBe('stored')
-  })
-
-  it('writes through the setting manager when one is configured', () => {
-    const { setSpy, settingManager } = createSettingStore()
-    const host = new SettingHost(settingManager)
-    host.token = 'fresh'
-
-    expect(setSpy).toHaveBeenCalledWith('token', 'fresh')
-    expect(host.token).toBe('fresh')
-  })
-
-  it('falls back to the in-memory default when the stored value is absent', () => {
-    const host = new SettingHost(createSettingStore().settingManager)
-
-    expect(host.token).toBe('')
-  })
-
-  it('falls back to the in-memory accessor without a setting manager', () => {
-    const host = new SettingHost()
-
-    expect(host.token).toBe('')
-
-    host.token = 'memory'
-
-    expect(host.token).toBe('memory')
-  })
-
-  it('unsets the key when clearing through a manager that delegates unset', () => {
-    const { setSpy, settingManager, unsetSpy } = createSettingStore(
-      { token: 'stored' },
-      { hasUnset: true },
-    )
-    const host = new SettingHost(settingManager)
-    host.token = ''
-
-    expect(unsetSpy).toHaveBeenCalledWith('token')
-    expect(setSpy).not.toHaveBeenCalled()
-    expect(host.token).toBe('')
-  })
-
-  it('stores the empty string when clearing without unset', () => {
-    const { setSpy, settingManager } = createSettingStore({ token: 'stored' })
-    const host = new SettingHost(settingManager)
-    host.token = ''
-
-    expect(setSpy).toHaveBeenCalledWith('token', '')
-    expect(host.token).toBe('')
-  })
-})
+// The `setting` decorator is @olivierzal/api-core's since the
+// SessionAPI adoption (re-exported for the stable public name); its
+// mechanism suite — delegation, in-memory fallback, the `''`→`unset`
+// cleared-sentinel rule — lives there. What is pinned HERE is this
+// SDK's use of it: the kernel's persisted-keys clauses drive the real
+// client's decorated `token` accessor against both persistence hosts.
 
 describe(syncDevices, () => {
   it('notifies sync after the decorated method resolves', async () => {

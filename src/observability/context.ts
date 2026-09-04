@@ -1,12 +1,13 @@
 // Thin vocabulary module over @olivierzal/api-core: the redaction
 // MECHANISM lives in the core (shared with melcloud-api); this file
 // owns only the Gizwits sensitive-key vocabulary and the bound engine
-// every redaction seat in this SDK shares.
+// every redaction seat in this SDK shares — the `HttpClient` subclass
+// seats it into every thrown snapshot, and `HeatzyAPI` hands it to the
+// core's `SessionAPI`, which seats it into the request/response log
+// lines its inherited dispatch emits.
 import { type Redaction, createRedaction } from '@olivierzal/api-core'
 
-export type { LoggableRequestConfig } from '@olivierzal/api-core'
-
-export { APICallLogData, REDACTED } from '@olivierzal/api-core'
+export { REDACTED } from '@olivierzal/api-core'
 
 // Every key that names a credential on the Gizwits wire beyond the
 // core's base vocabulary (authorization, cookie, set-cookie, password,

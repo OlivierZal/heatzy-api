@@ -87,14 +87,16 @@ Architecture, toolchain and process are aligned on the sibling
   11.0.0 fix, still correct). A REFUSED sign-in over a session that
   predates the attempt is NOT: a `true` hands the caller the
   credential Gizwits has just rejected. They are distinguishable right
-  there, with no heuristic: the `#acceptedSignIns` counter is bumped
-  the instant `#doAuthenticate` resolves and compared across the call
-  (16.0.0, the mechanism of melcloud-api 55.0.0). Do NOT restate this
+  there, with no heuristic: an accepted-sign-ins counter is bumped
+  the instant the `doAuthenticate` hook resolves and compared across
+  the call (16.0.0, the mechanism of melcloud-api 55.0.0; since 16.1.0
+  the counter and the comparison live in the core's `SessionAPI` — this
+  repo supplies only the hook). Do NOT restate this
   as "judge by the session": this repo INVENTED that shorthand in
   11.0.0, melcloud copied it in 54.0.0 and shipped the refused shape
   wrong. Here the wrong `true` never bit an internal path, because the
-  reactive `#reauthenticate` clears the refused token FIRST — right on
-  Gizwits, where the 400/9004 names the token itself, and the OPPOSITE
+  reactive `reauthenticate` hook clears the refused token FIRST — right
+  on Gizwits, where the 400/9004 names the token itself, and the OPPOSITE
   of melcloud's Classic, whose 401 can name an endpoint rather than
   the session — but `resumeSession` is PUBLIC, and a host calling it
   over a live token with refused stored credentials was told
@@ -103,23 +105,25 @@ Architecture, toolchain and process are aligned on the sibling
   clearing dialect half are all kernel-pinned.
 - **melcloud's 55.0.0 session fixes crossed the same day (16.0.0),
   decided per MECHANISM, never as a block.** The three verdicts:
-  1. `RegistrySyncError` CROSSED. The enforced post-auth cycle is
-     `#finishLogin` → `#syncCycle` on this dialect (no separate
-     `enforceRegistrySync` hook), so the wrap sits in `#finishLogin`'s
-     catch, cause preserved — and a refused credential structurally
-     CANNOT be wrapped, because `#doAuthenticate` throws before the
-     cycle is ever spent. Exported from `src/errors/` and the root
-     barrel like its siblings, ready to cross into api-core with them.
+  1. `RegistrySyncError` CROSSED. The wrap sits in the core's login
+     epilogue, cause preserved (since 16.1.0; before the adoption this
+     dialect inlined it, with no separate `enforceRegistrySync` hook —
+     now `enforceRegistrySync` IS the hook, delegating to the
+     propagating `#syncCycle`) — and a refused credential structurally
+     CANNOT be wrapped, because the `doAuthenticate` hook throws before
+     the cycle is ever spent. Exported from `src/errors/` and the root
+     barrel like its siblings; since 16.1.0 the exported name IS the
+     core's class, re-exported.
   2. The `resumeSession` single-flight CROSSED. com.heatzy boots with
      `shouldResumeSessionInBackground: true`, so the double-sign-in
      boot window (background `initialize()` vs the first request's
-     `#ensureSession` refresh) exists here identically. The deliberate
+     session refresh) exists here identically. The deliberate
      asymmetry crossed with it and is REACHED the same way: a caller
      joining after the accepted sign-in, while the enforced cycle
      still runs, reads the determined verdict — the one real caller in
-     that window is `#reauthenticate`, triggered by that very cycle's
-     400/401, and awaiting the shared promise would wait on its own
-     caller.
+     that window is the `reauthenticate` hook, triggered by that very
+     cycle's 400/401, and awaiting the shared promise would wait on its
+     own caller.
   3. The `#isCredentialRefused` record CROSSED — after VERIFICATION,
      not by copying. melcloud justified the flag by "Classic never
      wipes on a refusal"; this dialect DOES wipe, but only on the
@@ -131,8 +135,8 @@ Architecture, toolchain and process are aligned on the sibling
      difference of degree, not of kind. Two dialect adaptations, both
      deliberate: the record's guard excludes no throttle type (none
      exists here — see the Ledger), and the record is consulted only
-     in the sync-cycle epilogue (`#isSessionServable`), this dialect
-     having no `ensureAuthenticated`.
+     in the sync-cycle epilogue (the core's `isSessionServable`), this
+     dialect having no `ensureAuthenticated`.
 - V1 products speak a positional `raw: [1, 1, mode]` triplet on
   `/control` and only accept the four base modes; every other
   generation posts named `attrs`. The base facade owns the V1 dialect,
@@ -169,14 +173,31 @@ Architecture, toolchain and process are aligned on the sibling
   reports or Home telemetry, so the Result machinery would be dead
   code. Reintroduce it from melcloud-api only with a real caller.
 - **No rate-limit gate**: the Gizwits wire has never surfaced a 429;
-  adding the gate without wire evidence is over-engineering.
+  adding the gate without wire evidence is over-engineering. Since the
+  SessionAPI adoption (16.1.0) the verdict is spelled as an omission:
+  `HeatzyAPI` passes no `rateLimitHours`, so the core builds NO
+  rate-limit rung at all — inherited machinery that is never
+  constructed costs nothing and needs no local test.
 - **No `AuthenticationThrottledError`**: no observed login-throttle
   error code on Gizwits; the single 15-minute login backoff covers
   rejected sign-ins. Corollary (16.0.0): the refusal record's guard is
   bare `instanceof AuthenticationError` — melcloud's throttle
   exclusion has nothing to exclude here, every `AuthenticationError`
-  being definitive by construction.
-- **No `logLabel`**: a single client — nothing to disambiguate in logs.
+  being definitive by construction. Since the SessionAPI adoption
+  (16.1.0) both the guard and the throttle-widened backoff branch are
+  the core's own code: the branch is inherited but never taken, because
+  nothing on this wire ever constructs the throttle class — which also
+  stays deliberately un-re-exported. That un-export is why
+  `src/errors/authentication.ts` is a const + type PAIR over the core
+  class rather than a bare re-export: the core class's doc comment
+  hard-links its throttle subclass, typedoc cannot resolve a d.ts
+  comment link to a symbol outside this package's documentation, and
+  the pair keeps the runtime identity (same object, `instanceof`
+  unchanged both ways) while seating this dialect's own doc.
+- **No `logLabel`**: a single client — nothing to disambiguate in
+  logs. The core makes the label OPTIONAL and `HeatzyAPI` passes none,
+  so every seat receives the host logger unwrapped and every line
+  lands unprefixed in diagnostic reports, kernel-pinned.
 - **Single `.` export**: one dialect → no `/classic`-style subpaths.
 - **No `NoChangesError`**: an empty/no-op `setValues` resolves silently
   (V1 returns `{}`, V2+ skips the wire call) and still fires the sync
@@ -184,9 +205,14 @@ Architecture, toolchain and process are aligned on the sibling
   here the app-side `#sendUpdate` already guards on
   `Object.keys(updateData).length > 0` before calling, so no real caller
   hits the empty path — adding the error would be untested machinery.
-- **No per-call header merge in `#dispatch`**: no Gizwits endpoint sends
-  custom per-call headers, so `#dispatch` writes only the auth headers;
-  melcloud's `configHeaders` merge would be a dead, uncovered branch here.
+- **Per-call header merge: inherited, not re-judged.** Pre-16.1.0 this
+  entry read "no per-call header merge in `#dispatch`" — no Gizwits
+  endpoint sends custom per-call headers, and melcloud's
+  `configHeaders` merge would have been a dead, uncovered branch in a
+  local dispatch. The dispatch is the core's now and DOES carry the
+  general merge, covered by api-core's own suite; this SDK still never
+  sends per-call headers, so the merge arm simply never fires here.
+  The old verdict stands as a fact about the wire, not about the code.
 - **Divergence episode, NOT a verdict (2026-08-21 → 2026-08-25)**: the
   `HttpError` redaction shipped here at its round-1, headers-only scope
   (13.0.1) and stayed there for four days while melcloud-api's second
@@ -226,38 +252,54 @@ Architecture, toolchain and process are aligned on the sibling
 ## Mechanism boundary (@olivierzal/api-core)
 
 The API-client MECHANISMS live in `@olivierzal/api-core` (exact pin,
-production dependency): the HTTP client and `HttpError` (whole-snapshot
-redaction seated in the constructor), the redaction engine, the
-observability shells and `LifecycleEmitter`, the resilience primitives,
-`SyncManager`, the temporal entry point, the time units and the
-`APIError` base. Those modules used to be melcloud-api's byte-identical
-twins ("edit both or neither"); the divergence episode above expired
-that discipline, and the extraction replaced it. This repo keeps ONLY
-its protocol layer: the Gizwits sensitive-key VOCABULARY
-(`src/observability/context.ts` builds the one bound `redaction`
-engine; the `HttpClient` subclass and the `APICall*` shells receive
-it), the auth-failure statuses (`HeatzyAPI` passes `[401, 400]` to the
-core's `AuthRetryPolicy`), the wire types, the schemas, the facades,
-and thin re-export modules that keep internal import paths stable. A
+production dependency): `SessionAPI` — the session lifecycle, the
+login backoff, the logOut-epoch protocol, the single-flight refresh
+and resume, the accepted-sign-ins verdict counter, the refusal record,
+the request pipeline and the sync-cycle template — plus the HTTP
+client and `HttpError` (whole-snapshot redaction seated in the
+constructor), the redaction engine, the observability shells and
+`LifecycleEmitter`, the resilience primitives, `SyncManager`, the
+temporal entry point, the time units, the `setting` decorator and the
+error family (`APIError`, `AuthenticationError`, `RegistrySyncError` —
+re-exported here under unchanged public names so `instanceof` holds
+across the SDK and the core alike). Those modules used to be
+melcloud-api's byte-identical twins ("edit both or neither"); the
+divergence episode above expired that discipline, and the extraction
+replaced it. This repo keeps ONLY its protocol layer: the Gizwits
+sensitive-key VOCABULARY (`src/observability/context.ts` builds the
+one bound `redaction` engine; the `HttpClient` subclass seats it into
+every thrown snapshot, and `HeatzyAPI` hands it to the core through
+`SessionAPIOptions.redaction`, which seats it into the request/response
+log lines the inherited dispatch emits — the seam this adoption caught
+missing in the unreleased core and had fixed there BEFORE adopting,
+now pinned through the real client in `heatzy-api.test.ts`), the
+subclass options (`[401, 400]` as the auth-failure statuses; NO
+`logLabel`; NO `rateLimitHours`), the twelve dialect hooks in
+`src/api/heatzy.ts`, the wire types, the schemas, the facades, and
+thin re-export modules that keep internal import paths stable. A
 mechanism change happens in api-core and arrives here as a release +
 exact-pin bump PR; never re-implement one locally. The moved mechanism
 test suites live in api-core too — this repo's
-`observability.test.ts`/`http-client.test.ts` are thin
-vocabulary/wiring suites pinning what is OURS.
+`observability.test.ts`/`http-client.test.ts`/`heatzy-api-*.test.ts`
+are thin vocabulary/wiring suites pinning what is OURS.
 
-The next mechanism to cross that boundary is `src/api/heatzy.ts`'s
-session lifecycle and request pipeline, extracted as the core's
-`SessionAPI`. Its witness is `tests/contracts/session-lifecycle.test.ts`,
-the twin of melcloud-api's kernel of the same name: one clause table run
-against the REAL client, never a synthetic subclass (a suite whose hooks
-are `vi.fn`s proves the template calls its own hooks, not that
-`HeatzyAPI` still behaves the same after the move). The kernel must
-cross byte-identical — a clause reworded during the move proves nothing
-— which carries a PRECONDITION recorded in its own header:
-`src/api/heatzy.ts`, `src/api/types.ts`, `src/errors/`, `src/http/` and
-`src/resilience/` must SURVIVE as this repo's own paths, because every
-kernel import resolves through them. `heatzy-api-auth.test.ts` and
-friends stay where the mechanism goes; the kernel does not.
+That crossing is DONE (16.1.0): `HeatzyAPI` subclasses the core's
+`SessionAPI<SyncParams>`, its former private machinery deleted and its
+protocol knowledge re-scoped onto the core's protected hooks. Its
+witness is `tests/contracts/session-lifecycle.test.ts`, the twin of
+melcloud-api's kernel of the same name: one clause table run against
+the REAL client, never a synthetic subclass (a suite whose hooks are
+`vi.fn`s proves the template calls its own hooks, not that `HeatzyAPI`
+still behaves the same after the move). The kernel crossed
+byte-identical except the ONE dispose clause its own comment demanded
+be updated deliberately (the core carries melcloud's superset: the
+retry guard is released too, inert on a disposed instance) — and its
+header PRECONDITION held: `src/api/heatzy.ts`, `src/api/types.ts`,
+`src/errors/`, `src/http/` and `src/resilience/` survive as this
+repo's own paths, so every kernel import still resolves through them.
+`heatzy-api-auth.test.ts` and friends went where the mechanism went:
+what re-tested the core's lifecycle died here (api-core's suite owns
+it), and the files remain as thin wiring suites over the Gizwits half.
 
 Every clause is worded about the PER-DEVICE registry cycle (`/bindings`
 plus its `/devdata` fan-out), the account-denial pair added in 15.0.0
@@ -277,16 +319,18 @@ wrapped with its cause preserved; a refused credential never wrapped),
 the refusal-record episode (loss surfaced once per settling cycle over
 a standing token, recovery announced on the next accepted sign-in, a
 transport blip recording nothing), and the `resumeSession`
-single-flight rows. Four clauses hold divergences the extraction must handle
-deliberately rather than silently: `[Symbol.dispose]`
-releases the sync timer but NOT the retry guard (melcloud releases both —
-adopting its superset must update that clause in a commit that says so);
-no log label is passed anywhere, so every line arrives unprefixed and a
-default label in the extracted class would rewrite this SDK's diagnostic
-output; the auth-failure vocabulary is `[401, 400]`, each status
-pinned by its own row; and the reactive `#reauthenticate` clears the
-refused token FIRST, pinned as the dialect-specific half opposite
-melcloud's non-clearing Classic. The kernel also closes with three DECLARED
+single-flight rows. Four clauses held divergences the extraction had to
+handle deliberately rather than silently, and each was settled the way
+its clause demanded: `[Symbol.dispose]` used to release the sync timer
+but NOT the retry guard — the core carries melcloud's superset, and the
+16.1.0 adoption updated that ONE clause in a commit that says so (the
+only kernel byte that changed in the move; the flip is inert on a
+disposed instance); no log label is passed anywhere, so every line
+arrives unprefixed and the core's OPTIONAL `logLabel` stays unset here;
+the auth-failure vocabulary is `[401, 400]`, each status pinned by its
+own row; and the reactive `reauthenticate` hook clears the refused
+token FIRST, pinned as the dialect-specific half opposite melcloud's
+non-clearing Classic. The kernel also closes with three DECLARED
 ABSENCES — the login-throttle window, the rate-limit gate, and the
 mid-ladder probe — each naming the two expressions that make the claim
 checkable, so a quarantine can never hide a harness limitation the way
@@ -317,12 +361,13 @@ where even reads need auth).
 
 Same doctrine as melcloud-api — code adapts to the rules, never the
 reverse; no new disables; config-level `'off'` entries are triage
-verdicts, not suppressions; zero warnings. The only tolerated
-exceptions are protocol- or rule-pair-imposed and documented with a
-`-- reason`: the TC39 decorator `files`-scoped exceptions in
-`src/decorators/**`, the parse-boundary cast in `HttpClient.request`, the
-fire-and-forget `.catch()`, and the single-flight `.finally()` in
-`#ensureSession`. `src/temporal.ts` is the only sanctioned
+verdicts, not suppressions; zero warnings. Since the SessionAPI
+adoption (16.1.0) the repo carries ZERO inline disables: the
+single-flight `.finally()` left with `#ensureSession`, and the
+parse-boundary cast and fire-and-forget `.catch()` had already left
+with their mechanisms in the 1.0.0 extraction. The one standing
+config-level exception is the TC39 decorator `files`-scoped rule set
+for `src/decorators/**`. `src/temporal.ts` is the only sanctioned
 `temporal-polyfill` entry point.
 
 - All-type exports hoist the keyword (`export type { A, B }`); mixed
