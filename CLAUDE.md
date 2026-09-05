@@ -342,10 +342,14 @@ The shared tooling lives in `@olivierzal/configs` (exact pin): the
 eslint `library` preset (plugins are the package's dependencies — no
 plugin devDeps here), the prettier config (`"prettier"` key in
 package.json, no local file), the `tsconfig/library` base, `typedocBase`
-and the vitest `swcPlugin`. The overlays keep ONLY per-repo verdicts:
-the lint ignores (`scripts/`), the Gizwits `wireNamingEntries` splice,
-tsconfig `outDir`/`include`, and the typedoc identity (name, links,
-`intentionallyNotExported`). Do not re-declare family policy locally —
+and the vitest fragments — `swcPlugin`, and since configs 4.5.0 the
+`coverageDefaults` bar (`text` + `lcov` reporters, 100 % on all four
+axes) spread into `test.coverage`. The overlays keep ONLY per-repo
+verdicts: the lint ignores (`scripts/`), the Gizwits `wireNamingEntries`
+splice, tsconfig `outDir`/`include`, the coverage `include` glob (which
+files count is identity; how high the bar sits is not), and the typedoc
+identity (name, links, `intentionallyNotExported`). Do not re-declare
+family policy locally —
 a rule evaluation or version bump happens in configs, adoption is a
 reviewed pin bump. Never extend `tsconfig/library-build`: its
 `rootDir`/`include` resolve against the base file inside node_modules
