@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [16.1.1] - 2026-09-05
+## [16.2.0] - 2026-09-05
+
+### Changed
+
+- **The exact `@olivierzal/api-core` pin advances to 1.2.0.** The core's one change: `SessionAPI` now hands `SyncManager` the LABELLED logger — the seat a host running two labelled clients needs to tell whose auto-sync line a diagnostic report carries. This SDK passes NO `logLabel` (the Ledger verdict: a single client — nothing to disambiguate), so `this.logger` stays the host logger verbatim and every seat, `SyncManager` included, keeps receiving it unwrapped: the log output is byte-identical before and after the bump. The session-lifecycle kernel is the consumer witness — its no-label clause ("hands every seat the host logger verbatim, so no line carries a label"), which reaches the `SyncManager`'s own logger through a throwing host reporter, crossed green with ZERO diff; api-core's suite pins the no-op seat on its side, this kernel pins it through the real client.
 
 ### Removed
 
@@ -12,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - **The session-lifecycle kernel cites by symbol, never by line.** The kernel carried seventeen line-number citations (`heatzy.ts:341-345` and kin) that rotted when the adoption moved the cited members into the core — several pointed at members no longer in the file at all. They are replaced with the symbol names that survive a move, and the header now carries the same CITATION RULE melcloud-api's kernel adopted on 2026-08-30. The clause texts, the staged wires and every assertion are untouched — only citations changed, and the kernel stays green.
 
-Patch, not minor: nothing observable changes. Every deleted module was imported by nothing (verified family-wide), none was reachable from the package's single `.` export, and the test/tooling edits touch no shipped code — the public surface and every runtime behavior keep their 16.1.0 contract byte for byte.
+The sweep above shipped unreleased as 16.1.1 and rides along here; it stays behavior-neutral on its own terms — every deleted module was imported by nothing (verified family-wide), none was reachable from the package's single `.` export, and the test/tooling edits touch no shipped code. The minor digit belongs to the pin advance, matching the family's adoption precedent (16.1.0 for core 1.1.0): the dependency's public machinery moves under this SDK's inherited protected seam, even when — as here — no line this SDK emits changes.
 
 ## [16.1.0] - 2026-09-04
 
@@ -204,7 +208,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
-[16.1.1]: https://github.com/OlivierZal/heatzy-api/compare/v16.1.0...v16.1.1
+[16.2.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.1.0...v16.2.0
 [16.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.0.0...v16.1.0
 [16.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v15.0.0...v16.0.0
 [15.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v14.1.0...v15.0.0

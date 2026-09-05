@@ -1,6 +1,6 @@
 {
   "name": "@olivierzal/heatzy-api",
-  "version": "16.1.1",
+  "version": "16.2.0",
   "description": "Heatzy API for Node.js",
   "keywords": [
     "heatzy",
@@ -47,7 +47,7 @@
   },
   "prettier": "@olivierzal/configs/prettier",
   "dependencies": {
-    "@olivierzal/api-core": "1.1.0",
+    "@olivierzal/api-core": "1.2.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
