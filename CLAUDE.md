@@ -41,9 +41,9 @@ Architecture, toolchain and process are aligned on the sibling
   behavior of the previous Axios interceptor.
 - Wire-format types mirror the Gizwits API verbatim: snake_case and
   mixed keys (`dev_alias`, `derog_mode`, `cur_tempH`, `LOCK_C`) — do
-  not rename them to satisfy style rules. The eslint config carries a
-  scoped naming-convention exception for the `(cft|cur|eco)_temp[HL]`
-  register keys.
+  not rename them to satisfy style rules. The eslint overlay carries
+  one anchored wire-naming entry (snake or mixed case, plus `LOCK_C`),
+  scoped to `src/types/heatzy.ts` and `src/validation/schemas.ts`.
 - `/login` returns `expire_at` in **epoch seconds**; it is persisted as
   an ISO 8601 instant (`expiry` setting) so `isSessionExpired` reads it
   back absolutely, timezone-free.
@@ -190,13 +190,11 @@ Architecture, toolchain and process are aligned on the sibling
   (16.1.0) both the guard and the throttle-widened backoff branch are
   the core's own code: the branch is inherited but never taken, because
   nothing on this wire ever constructs the throttle class — which also
-  stays deliberately un-re-exported. That un-export is why
-  `src/errors/authentication.ts` is a const + type PAIR over the core
-  class rather than a bare re-export: the core class's doc comment
-  hard-links its throttle subclass, typedoc cannot resolve a d.ts
-  comment link to a symbol outside this package's documentation, and
-  the pair keeps the runtime identity (same object, `instanceof`
-  unchanged both ways) while seating this dialect's own doc.
+  stays deliberately un-re-exported. `src/errors/authentication.ts` is
+  a plain re-export of the core class: it was a const + type PAIR while
+  the core's doc hard-linked the throttle subclass (a link typedoc could
+  not resolve from this package); api-core 1.2.0 names that subclass in
+  code font precisely so the shim could return to a bare re-export.
 - **No `logLabel`**: a single client — nothing to disambiguate in
   logs. The core makes the label OPTIONAL and `HeatzyAPI` passes none,
   so every seat receives the host logger unwrapped and every line
@@ -354,11 +352,12 @@ files count is identity; how high the bar sits is not), and the typedoc
 identity (name, links, `intentionallyNotExported`). Do not re-declare
 family policy locally —
 a rule evaluation or version bump happens in configs, adoption is a
-reviewed pin bump. Never extend `tsconfig/library-build`: its
-`rootDir`/`include` resolve against the base file inside node_modules
-(same trap the configs README documents for `outDir`) — extend
-`tsconfig/library` and keep those keys local. The CI/audit/claude/zizmor
-workflows are stubs calling the family reusables in OlivierZal/configs,
+reviewed pin bump. `tsconfig.json` extends `tsconfig/library` and keeps
+the path-bearing keys (`outDir`, `include`) local; the build config
+extends `./tsconfig.json` so the base is named once (the `-build` alias
+configs ships holds no option of its own). The CI/claude*/dependabot/
+dependency-review/pr-title/zizmor workflows are stubs calling the family
+reusables in OlivierZal/configs,
 pinned `@<sha> # vX.Y.Z`; `publish.yml` and `docs.yml` stay local (no
 reusable exists), so the composite action stays too — and both installs
 pass `npm-token` (the configs dependency lives on GitHub Packages,
@@ -455,10 +454,10 @@ configs' `library` preset, and the polyfill itself is
   adapts, or the divergence is settled as a documented verdict — never
   merged over.
 - The SonarCloud project runs **CI-based analysis** (the `ci.yml` scan
-  step on the `lts/*` leg): **Automatic Analysis must stay DISABLED** in
+  step on the `22` leg): **Automatic Analysis must stay DISABLED** in
   the project's Administration settings. If it is on, the CI scanner
   aborts with `exit 3` ("running CI analysis while Automatic Analysis is
-  enabled") and fails the required `Test (Node lts/*)` leg — and
+  enabled") and fails the required `Test (Node 22)` leg — and
   autoscan miscategorized the `S2245` `Math.random` jitter as a
   _vulnerability_ (quality gate red) instead of the reviewable
   _hotspot_ the CI scanner raised, back when the retry backoff lived
@@ -472,7 +471,7 @@ configs' `library` preset, and the polyfill itself is
   docs source) — so the workflows declare no `merge_group` trigger.
 - The docs site deploys only on release or `gh workflow run docs.yml`.
 - CI: `Test (Node latest)` is `continue-on-error` by design — keep it
-  out of required status checks. Sonar coverage runs on the `lts/*` leg
+  out of required status checks. Sonar coverage runs on the `22` leg
   only.
 
 ## Releasing
