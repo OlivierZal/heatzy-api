@@ -9,6 +9,7 @@ const config = {
   externalSymbolLinkMappings: {
     '@olivierzal/api-core': {
       Redaction: 'https://olivierzal.github.io/api-core/',
+      SessionAPIConfig: 'https://olivierzal.github.io/api-core/',
     },
   },
   ...typedocBase({

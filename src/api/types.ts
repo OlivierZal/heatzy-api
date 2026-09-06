@@ -1,8 +1,7 @@
 import type {
   LifecycleEvents as CoreLifecycleEvents,
   SyncCallback as CoreSyncCallback,
-  Logger,
-  SettingManager,
+  SessionAPIConfig,
 } from '@olivierzal/api-core'
 
 import type { HttpClient } from '../http/index.ts'
@@ -36,9 +35,11 @@ export interface HeatzyAPIAdapter {
   readonly notifySync: SyncCallback
   /**
    * IANA timezone identifier the instance was configured with
-   * ({@link HeatzyAPIConfig.timezone}), or `undefined` when unset.
-   * Facades use it to anchor derogation end dates to the account
-   * timezone instead of the host runtime timezone.
+   * ({@link HeatzyAPIConfig.timezone}), or `undefined` when unset —
+   * the value {@link HeatzyAPI.timezone} exposes. No facade reads it:
+   * derogation end dates are anchored by the `Device` entities, which
+   * receive the timezone through the {@link DeviceRegistry} at
+   * construction.
    */
   readonly timezone: string | undefined
   /**
@@ -62,14 +63,18 @@ export interface HeatzyAPIAdapter {
 }
 
 /**
- * Configuration accepted by {@link HeatzyAPI.create}. Every property —
- * including the inherited {@link LoginCredentials} pair — may be
- * absent or explicitly `undefined`, interchangeably: the runtime
- * applies the same default either way (credentials can also arrive
- * later via `authenticate` or the {@link SettingManager}).
+ * Configuration accepted by {@link HeatzyAPI.create}: the core's
+ * session surface (`SessionAPIConfig` — `logger`, `settingManager`,
+ * and the members re-declared below to carry this dialect's own
+ * guidance) plus the Gizwits dialect's own. Every property — including
+ * the inherited {@link LoginCredentials} pair — may be absent or
+ * explicitly `undefined`, interchangeably: the runtime applies the
+ * same default either way (credentials can also arrive later via
+ * `authenticate` or the {@link SettingManager}).
  * @category Configuration
  */
-export interface HeatzyAPIConfig extends UndefinedTolerant<LoginCredentials> {
+export interface HeatzyAPIConfig
+  extends SessionAPIConfig<SyncParams>, UndefinedTolerant<LoginCredentials> {
   /**
    * Optional shutdown signal applied to every outgoing request.
    *
@@ -92,14 +97,6 @@ export interface HeatzyAPIConfig extends UndefinedTolerant<LoginCredentials> {
    * (`derogationEndString`). Defaults to the runtime locale.
    */
   readonly locale?: string | undefined
-  /**
-   * Custom logger. Defaults to `console`.
-   */
-  readonly logger?: Logger | undefined
-  /**
-   * External setting manager for persisting credentials and session data.
-   */
-  readonly settingManager?: SettingManager | undefined
   /**
    * Restore the persisted session in the background instead of awaiting
    * it inside `create()`. Session probing and full logins can take tens

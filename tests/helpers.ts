@@ -130,22 +130,6 @@ export const mockResponse = (
   status: number
 } => ({ data, headers, status })
 
-// The Response constructor rejects a non-null body on the "null body"
-// statuses defined in the Fetch spec. Listed explicitly so mocked
-// fetches can model those responses without hitting the guard.
-const HTTP_SWITCHING_PROTOCOLS = 101
-const HTTP_EARLY_HINTS = 103
-const HTTP_NO_CONTENT = 204
-const HTTP_RESET_CONTENT = 205
-const HTTP_NOT_MODIFIED = 304
-const NULL_BODY_STATUSES: ReadonlySet<number> = new Set([
-  HTTP_EARLY_HINTS,
-  HTTP_NO_CONTENT,
-  HTTP_NOT_MODIFIED,
-  HTTP_RESET_CONTENT,
-  HTTP_SWITCHING_PROTOCOLS,
-])
-
 const buildMockHeaders = (
   headers: Record<string, string | string[]>,
 ): Headers => {
@@ -172,7 +156,10 @@ const serializeBody = (body: unknown): string => {
 /**
  * Build a fetch-compatible Response mock. Used by tests that mock
  * the global `fetch()` and rely on the Response surface: `.status`, `.ok`, `.text()`, `.headers.get()`, and
- * `.headers.getSetCookie()`.
+ * `.headers.getSetCookie()`. The body is always serialised: this
+ * suite only stages the 400/500 rejections the subclass wiring is
+ * pinned on, never a Fetch-spec "null body" status (the core's own
+ * suite models those).
  * @param body - Response body; objects are JSON-serialised, strings pass
  *   through.
  * @param headers - Response headers; `set-cookie` may be an array.
@@ -192,10 +179,7 @@ export const mockFetchResponse = (
   ) {
     responseHeaders.set('content-type', 'application/json')
   }
-  return new Response(
-    NULL_BODY_STATUSES.has(status) ? null : serializeBody(body),
-    { headers: responseHeaders, status },
-  )
+  return new Response(serializeBody(body), { headers: responseHeaders, status })
 }
 
 const createHttpError = ({

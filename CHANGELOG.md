@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [16.2.1] - 2026-09-07
+
+### Changed
+
+- **`HeatzyAPIConfig` extends the core's `SessionAPIConfig<SyncParams>`** instead of re-declaring its five members, and `LoginCredentials` is the core's type re-exported — its Gizwits fact (the pair is also the verbatim `/login` body) travels on the re-export's own doc. Type-level only: every member keeps its name and shape, so nothing a consumer wrote changes meaning.
+- **`AuthenticationError` is a plain re-export again.** The const + type pair existed only because the core's doc hard-linked the throttle subclass this dialect does not re-export; api-core 1.2.0 names it in code font, so the pair's reason expired with the pin. Same class object, `instanceof` unchanged both ways.
+
+### Removed
+
+- **Residue with no reader, swept by the family audit**: the `test:update` script (the suite has no snapshots), the `MS_PER_MINUTE` forward of `src/time-units.ts`, the `isSensitive`/`redactValue`/`REDACTED` wrappers of `src/observability/context.ts` (the call loggers read the core's engine directly), the `data` option of `#requestData` no caller supplied, the unreachable null-body branch of the test `mockFetchResponse` (this suite stages 400/500 only), and `tests/unit/type-helpers.test.ts` (api-core's suite owns the ported clause). The documentation follows the tree: the lint-doctrine paragraph, CONTRIBUTING (`NODE_AUTH_TOKEN`, the `library` preset, the `prepublishOnly` chain, the coverage owner), the `HeatzyAPIAdapter.timezone` doc, the Sonar leg (`Test (Node 22)`), the wire-naming gotcha, the tsconfig and workflow sentences, and the session-lifecycle witness header, whose pre-move "portability precondition" is retired now that the move is behind it.
+
 ## [16.2.0] - 2026-09-05
 
 ### Changed
@@ -208,6 +219,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[16.2.1]: https://github.com/OlivierZal/heatzy-api/compare/v16.2.0...v16.2.1
 [16.2.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.1.0...v16.2.0
 [16.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.0.0...v16.1.0
 [16.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v15.0.0...v16.0.0

@@ -212,9 +212,11 @@ export class HeatzyAPI
 
   /**
    * IANA timezone supplied via {@link HeatzyAPIConfig.timezone}, or
-   * `undefined` when unset. Surfaced through {@link HeatzyAPIAdapter}
-   * so derogation end dates anchor to the account timezone rather
-   * than the host runtime timezone.
+   * `undefined` when unset. The value is seated into every `Device`
+   * through the {@link DeviceRegistry} at construction, which is what
+   * anchors derogation end dates to the account timezone rather than
+   * the host runtime timezone; this getter only reads the configured
+   * value back.
    * @returns The configured IANA timezone identifier, or `undefined`.
    */
   public get timezone(): string | undefined {
@@ -301,9 +303,11 @@ export class HeatzyAPI
    * @returns The live attributes.
    */
   public async getValues({ id }: { id: string }): Promise<Attributes> {
-    const { attr } = await this.#requestData('get', `/devdata/${id}/latest`, {
-      schema: DeviceDataSchema,
-    })
+    const { attr } = await this.#requestData(
+      'get',
+      `/devdata/${id}/latest`,
+      DeviceDataSchema,
+    )
     return attr
   }
 
@@ -333,9 +337,11 @@ export class HeatzyAPI
    * @returns Every device bound to the account that this SDK models.
    */
   public async list(): Promise<readonly DeviceBinding[]> {
-    const { devices } = await this.#requestData<Bindings>('get', '/bindings', {
-      schema: BindingsSchema,
-    })
+    const { devices } = await this.#requestData<Bindings>(
+      'get',
+      '/bindings',
+      BindingsSchema,
+    )
     const { keep, summarize } = createDroppedBindingCollector()
     const bindings = devices.flatMap((device) => keep(device) ?? [])
     const summary = summarize()
@@ -547,16 +553,16 @@ export class HeatzyAPI
   }
 
   // Strip the envelope and parse the body against the endpoint's
-  // schema; throw on transport failure — the contract every
-  // required-path endpoint (sync, mutations) wants. Responses nothing
-  // consumes (`/control`) go through the core's `request` directly.
+  // schema; throw on transport failure — the contract the two
+  // validated reads (`/bindings`, `/devdata`) want. The body-carrying
+  // calls go through the core directly: `/login` through `dispatch`,
+  // `/control` — whose response nothing consumes — through `request`.
   async #requestData<T>(
     method: string,
     url: string,
-    options: { readonly schema: z.ZodType<T>; readonly data?: unknown },
+    schema: z.ZodType<T>,
   ): Promise<T> {
-    const { schema, ...config } = options
-    const { data } = await this.request<T>(method, url, config)
+    const { data } = await this.request<T>(method, url)
     return parseOrThrow(schema, data, `${method.toUpperCase()} ${url}`)
   }
 }

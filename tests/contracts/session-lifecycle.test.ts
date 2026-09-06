@@ -54,26 +54,24 @@ import {
 // endpoint by endpoint — invaluable for branch coverage, useless as an
 // extraction witness: they prove each entry point does its own job, not
 // that the SESSION behaves the same once the template moves into
-// `@olivierzal/api-core` as `SessionAPI`. This kernel is that witness,
-// so it must cross the move byte-identical and stay green.
+// `@olivierzal/api-core` as `SessionAPI`. This kernel was that witness:
+// it crossed the 16.1.0 move byte-identical (a clause reworded during
+// the move would have proved nothing), and it is edited since whenever
+// a clause changes — 16.2.0 kept every clause and re-cited them by
+// symbol.
 //
 // It is the twin of melcloud-api's `tests/contracts/session-lifecycle.test.ts`:
-// the same clause table, worded for this dialect. The two SDKs are about
-// to share one extracted mechanism, and a clause that only one of them
-// holds is a clause the extraction can quietly break in the other.
+// the same clause table, worded for this dialect. The two SDKs share
+// one extracted mechanism, and a clause that only one of them holds is
+// a clause a core change can quietly break in the other.
 //
-// PORTABILITY PRECONDITION — the kernel STAYS while the mechanism
-// leaves, so it can only cross byte-identical while `src/api/heatzy.ts`,
-// `src/api/types.ts`, `src/errors/index.ts`, `src/http/index.ts` and
-// `src/resilience/index.ts` SURVIVE as this repo's own paths over
-// `@olivierzal/api-core` (the shape `src/http/`, `src/resilience/` and
-// `src/observability/` already took). Every import above resolves
-// through them; swapping one for a direct `@olivierzal/api-core` import
-// would force an edit here, and an edited witness proves nothing about
-// the move it was meant to witness. The one deliberate exception is the
-// core `HttpClient` imported above: it is the FOREIGN class the
-// transport-resolution clause needs, and naming it here is the point of
-// that clause.
+// Every import above resolves through this repo's own paths, and
+// `src/api/heatzy.ts` / `src/api/types.ts` survive on their own
+// verdicts (the Gizwits dialect behind the core's hooks; the local
+// adapter and configuration interfaces), not to keep this file stable.
+// The one FOREIGN import is the core `HttpClient` above: it is the
+// class the transport-resolution clause needs, and naming it here is
+// the point of that clause.
 //
 // Every clause is worded about THE REGISTRY CYCLE — and on this dialect
 // the cycle is PER-DEVICE, not bulk: `#fetch` reads the `/bindings`

@@ -1,8 +1,8 @@
 // Thin re-export of @olivierzal/api-core (the constants formerly
 // duplicated here as melcloud-api's near-twin; the core carries the
-// union of both repos' sets).
+// union of both repos' sets — only the two this repo reads are
+// forwarded).
 export {
-  MS_PER_MINUTE,
   MS_PER_SECOND,
   SESSION_REFRESH_AHEAD_MS,
 } from '@olivierzal/api-core/time-units'

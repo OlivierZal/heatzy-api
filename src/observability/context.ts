@@ -7,8 +7,6 @@
 // lines its inherited dispatch emits.
 import { type Redaction, createRedaction } from '@olivierzal/api-core'
 
-export { REDACTED } from '@olivierzal/api-core'
-
 // Every key that names a credential on the Gizwits wire beyond the
 // core's base vocabulary (authorization, cookie, set-cookie, password,
 // username, email, token): the header the issued user token rides on.
@@ -23,19 +21,3 @@ const EXTRA_SENSITIVE_KEYS = ['x-gizwits-user-token']
  * any route.
  */
 export const redaction: Redaction = createRedaction(EXTRA_SENSITIVE_KEYS)
-
-/**
- * Whether a header or payload key names a secret under the Gizwits
- * vocabulary.
- * @param key - Header or payload key, in any casing.
- * @returns `true` when the value behind the key must be redacted.
- */
-export const isSensitive = (key: string): boolean => redaction.isSensitive(key)
-
-/**
- * Deep-redacts a payload under the Gizwits vocabulary.
- * @param value - Any payload: object, array, string or primitive.
- * @returns The value with sensitive entries replaced by `******`.
- */
-export const redactValue = (value: unknown): unknown =>
-  redaction.redactValue(value)
