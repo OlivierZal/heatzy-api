@@ -3,29 +3,20 @@ import { describe, expect, it } from 'vitest'
 import {
   APIError,
   AttributeNotFoundError,
-  AuthenticationError,
   isAPIError,
   ValidationError,
 } from '../../src/errors/index.ts'
 
-describe.concurrent('apiError hierarchy', () => {
-  it('authenticationError is an instance of APIError and Error', () => {
-    const error = new AuthenticationError('bad creds')
+// Thin VOCABULARY suite: the error MECHANISMS — the `APIError` base,
+// `isAPIError`'s guard and narrowing, `AuthenticationError`'s name and
+// cause — live in @olivierzal/api-core with their own suites, and this
+// repo's `AuthenticationError` is the core's class re-bound (exercised
+// through the real client in `heatzy-api-auth.test.ts` and the
+// session-lifecycle kernel). What this file pins is the Gizwits
+// layer's own obligation: the two protocol errors it declares, and
+// that they sit inside the one family-wide `APIError` hierarchy.
 
-    expect(error).toBeInstanceOf(AuthenticationError)
-    expect(error).toBeInstanceOf(APIError)
-    expect(error).toBeInstanceOf(Error)
-    expect(error.message).toBe('bad creds')
-    expect(error.name).toBe('AuthenticationError')
-  })
-
-  it('preserves the original rejection as `cause`', () => {
-    const cause = new Error('upstream')
-    const error = new AuthenticationError('wrapped', { cause })
-
-    expect(error.cause).toBe(cause)
-  })
-
+describe.concurrent('the Gizwits protocol errors', () => {
   it('attributeNotFoundError derives its message from the attribute', () => {
     const error = new AttributeNotFoundError('derog_mode')
 
@@ -54,33 +45,11 @@ describe.concurrent('apiError hierarchy', () => {
     expect(error.context).toBe('login')
     expect(error.cause).toBe(cause)
   })
-})
 
-describe.concurrent(isAPIError, () => {
   it.each([
-    ['AuthenticationError', new AuthenticationError('x')],
     ['AttributeNotFoundError', new AttributeNotFoundError('mode')],
     ['ValidationError', new ValidationError('x', { context: 'login' })],
-  ])('returns true for %s', (_name, error: unknown) => {
+  ])('%s is recognised by the family guard', (_name, error: unknown) => {
     expect(isAPIError(error)).toBe(true)
-  })
-
-  it.each([
-    ['plain Error', new Error('boom')],
-    ['TypeError', new TypeError('bad')],
-    ['string', 'boom'],
-    ['null', null],
-    ['undefined', undefined],
-    ['plain object', { message: 'boom' }],
-  ])('returns false for %s', (_name, value) => {
-    expect(isAPIError(value)).toBe(false)
-  })
-
-  it('narrows the type so the subclass surface is accessible', () => {
-    const value: unknown = new AttributeNotFoundError('mode')
-    // Compile-time proof: `isAPIError` narrows `unknown` → `APIError`.
-    const narrowed = isAPIError(value) ? value : null
-
-    expect(narrowed?.name).toBe('AttributeNotFoundError')
   })
 })

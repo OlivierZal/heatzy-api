@@ -1,3 +1,4 @@
+import { REDACTED } from '@olivierzal/api-core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { SyncCallback } from '../../src/api/types.ts'
@@ -5,7 +6,6 @@ import type { DevicePostDataAny } from '../../src/types/index.ts'
 import { HeatzyAPI } from '../../src/api/heatzy.ts'
 import { Mode } from '../../src/constants.ts'
 import { ValidationError } from '../../src/errors/index.ts'
-import { REDACTED } from '../../src/observability/context.ts'
 import { buildBinding, buildLoginData, proAttributes } from '../fixtures.ts'
 import {
   createApi,

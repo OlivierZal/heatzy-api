@@ -20,4 +20,4 @@ None.
 - [ ] `npm run lint` passes
 - [ ] `npm run format` passes
 - [ ] `npm test` passes (coverage thresholds remain at 100%)
-- [ ] [`CHANGELOG.md`](../CHANGELOG.md) updated under `## [Unreleased]`
+- [ ] [`CHANGELOG.md`](../CHANGELOG.md) carries a versioned section for the change, when it is user-visible (there is no `[Unreleased]` heading)

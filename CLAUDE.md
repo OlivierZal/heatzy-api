@@ -157,9 +157,12 @@ Architecture, toolchain and process are aligned on the sibling
   header-only redaction still leaked the credential on every rejected
   sign-in. Redaction sits in the constructor rather than at the
   logging sites so no future call site can reintroduce the leak; the
-  sensitive-key vocabulary is shared with the call loggers
-  (`isSensitive`/`redactValue` in `src/observability/context.ts`),
-  never re-declared. The RESPONSE counts too, headers and body: an
+  sensitive-key vocabulary is bound ONCE, into the `redaction` engine
+  `src/observability/context.ts` builds, and that one engine is what
+  the core's call loggers (handed over through
+  `SessionAPIOptions.redaction`), the `HttpClient` subclass and
+  `HttpError` all share — never re-declared, and never wrapped: the
+  module exports the engine alone. The RESPONSE counts too, headers and body: an
   upstream echoes the credential it just rejected, which is why
   `response.data` is typed `unknown` — a failed body is a diagnostic
   payload, never a contract. What the retry policies read
@@ -369,10 +372,15 @@ verdicts, not suppressions; zero warnings. Since the SessionAPI
 adoption (16.1.0) the repo carries ZERO inline disables: the
 single-flight `.finally()` left with `#ensureSession`, and the
 parse-boundary cast and fire-and-forget `.catch()` had already left
-with their mechanisms in the 1.0.0 extraction. The one standing
-config-level exception is the TC39 decorator `files`-scoped rule set
-for `src/decorators/**`. `src/temporal.ts` is the only sanctioned
-`temporal-polyfill` entry point.
+with their mechanisms in the 1.0.0 extraction. The overlay
+(`eslint.config.ts`) carries NO config-level exception of its own —
+only the `scripts/` ignore and the Gizwits `wireNamingEntries` splice.
+The two `files`-scoped rule sets that apply here — the TC39 decorator
+set for `src/decorators/**` and the `temporal-polyfill` import
+exemption for `src/temporal.ts` — are family policy emitted by
+configs' `library` preset, and the polyfill itself is
+`@olivierzal/api-core`'s dependency: this repo declares none, and
+`src/temporal.ts` merely forwards the core's `temporal` entry point.
 
 - All-type exports hoist the keyword (`export type { A, B }`); mixed
   exports keep inline `type` specifiers, mirroring the
