@@ -1,7 +1,11 @@
 # CLAUDE.md
 
 Typed Node.js client for the Heatzy (Gizwits) API. ESM only,
-Node >= 22.20, published to GitHub Packages. `erasableSyntaxOnly` is on:
+Node >= 22.20 (`engines`, the device floor the code needs where it
+runs; `.nvmrc` names the INSTALL floor, 22.22.2 — the lowest Node the
+dev tree installs on, derived in `@olivierzal/configs` and re-derived
+there, never nudged here), published to GitHub Packages.
+`erasableSyntaxOnly` is on:
 no runtime enums, no parameter properties, no runtime namespaces.
 Architecture, toolchain and process are aligned on the sibling
 `melcloud-api` repo — when in doubt, mirror it.
@@ -29,7 +33,15 @@ Architecture, toolchain and process are aligned on the sibling
 - `npm run format` / `npm run format:fix` — prettier.
 - `npm run docs` — typedoc. The config is `typedoc.config.js` (JSDoc-typed
   with `@ts-check`: typedoc cannot load `.ts` configs and silently ignores
-  them); validation warnings fail the build.
+  them); validation warnings fail the build. `typedoc` and the two
+  plugins the shared preset names (`typedoc-plugin-mdn-links`,
+  `typedoc-plugin-coverage`) are THIS repo's devDependency pins —
+  declared here since the 10.0.0 rewrite, bumped by Dependabot: since
+  configs 5.0.0 none of the three appears in any field `npm install`
+  reads on the configs side — GitHub Packages strips
+  `peerDependenciesMeta` from the packument, so the optional peer 4.x
+  declared landed as a mandatory one in the three apps' locks — and the
+  preset only names the plugins for typedoc to load from this tree.
 
 ## Domain gotchas
 
@@ -376,16 +388,25 @@ files count is identity; how high the bar sits is not), and the typedoc
 identity (name, links, `intentionallyNotExported`). Do not re-declare
 family policy locally —
 a rule evaluation or version bump happens in configs, adoption is a
-reviewed pin bump. `tsconfig.json` extends `tsconfig/library` and keeps
-the path-bearing keys (`outDir`, `include`) local; the build config
-extends `./tsconfig.json` so the base is named once (the `-build` alias
-configs ships holds no option of its own). The CI/claude*/dependabot/
-dependency-review/pr-title/zizmor workflows are stubs calling the family
-reusables in OlivierZal/configs,
-pinned `@<sha> # vX.Y.Z`; `publish.yml` and `docs.yml` stay local (no
-reusable exists), so the composite action stays too — and both installs
-pass `npm-token` (the configs dependency lives on GitHub Packages,
-where even reads need auth).
+reviewed pin bump. `tsconfig.json` and `tsconfig.build.json` both
+extend `tsconfig/library` directly and keep the path-bearing keys local
+(`outDir`, `include`; the build config narrows `include` to `src` and
+sets `rootDir`) — configs 5.0.0 ships the two plain bases and nothing
+else, the content-free `-build` aliases it used to export having never
+been extended here. All eleven workflows are stubs calling the family
+reusables in OlivierZal/configs, pinned `@<sha> # vX.Y.Z` — since
+configs 5.0.0 `publish.yml` and `docs.yml` too (`reusable-publish.yml`,
+`reusable-docs.yml`): the caller keeps the `release` trigger and grants
+exactly what the called jobs declare (the `npm` and `github-pages`
+environments travel with them), and the composite
+`setup-node-and-install` action stays LOCAL because the called jobs run
+the CALLER's copy, handed the job `GITHUB_TOKEN` as `npm-token` by the
+reusable (the configs dependency lives on GitHub Packages, where even
+reads need auth). `docs.yml` also takes a `workflow_dispatch` boolean
+`dry-run`: the reusable builds and packs the site without deploying it
+— the one rehearsal a release-only path gets, so dispatch it once after
+every adoption that moves the configs ref and watch the build half
+succeed before a release reaches the deploy half.
 
 ## Lint doctrine
 
@@ -493,7 +514,9 @@ configs' `library` preset, and the polyfill itself is
   queue is impossible here — the feature is gated on ORGANISATION
   ownership and this repo is user-owned (verified 2026-08 against the
   docs source) — so the workflows declare no `merge_group` trigger.
-- The docs site deploys only on release or `gh workflow run docs.yml`.
+- The docs site deploys only on release or `gh workflow run docs.yml`
+  (`-f dry-run=true` builds and packs it without deploying — the
+  release-path rehearsal).
 - CI: `Test (Node latest)` is `continue-on-error` by design — keep it
   out of required status checks. Sonar coverage runs on the `22` leg
   only.
@@ -509,7 +532,8 @@ configs' `library` preset, and the polyfill itself is
   published release") — nothing to bump there on release, and nothing
   that can drift.
 
-- Publishing is release-triggered (`publish.yml`): a **published GitHub
+- Publishing is release-triggered (`publish.yml`, a stub over configs'
+  `reusable-publish.yml`): a **published GitHub
   Release** packs the tarball and publishes it to GitHub Packages. A
   release marked **prerelease** publishes under the `next` dist-tag; a
   normal one under `latest`. The version comes from `package.json` at
