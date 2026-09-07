@@ -35,12 +35,13 @@ Architecture, toolchain and process are aligned on the sibling
   with `@ts-check`: typedoc cannot load `.ts` configs and silently ignores
   them); validation warnings fail the build. `typedoc` and the two
   plugins the shared preset names (`typedoc-plugin-mdn-links`,
-  `typedoc-plugin-coverage`) are THIS repo's devDependency pins, moved
-  here by Dependabot: since configs 5.0.0 none of the three appears in
-  any field `npm install` reads on the configs side — GitHub Packages
-  strips `peerDependenciesMeta` from the packument, so the optional peer
-  4.x declared landed as a mandatory one in the three apps' locks — and
-  the preset only names the plugins for typedoc to load from this tree.
+  `typedoc-plugin-coverage`) are THIS repo's devDependency pins —
+  declared here since the 10.0.0 rewrite, bumped by Dependabot: since
+  configs 5.0.0 none of the three appears in any field `npm install`
+  reads on the configs side — GitHub Packages strips
+  `peerDependenciesMeta` from the packument, so the optional peer 4.x
+  declared landed as a mandatory one in the three apps' locks — and the
+  preset only names the plugins for typedoc to load from this tree.
 
 ## Domain gotchas
 
