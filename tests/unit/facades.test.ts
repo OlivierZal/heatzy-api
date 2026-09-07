@@ -1,3 +1,8 @@
+import {
+  defined,
+  mock,
+  mockTemporalNowZoned,
+} from '@olivierzal/api-core/testing'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { HeatzyAPIAdapter } from '../../src/api/index.ts'
@@ -30,12 +35,7 @@ import {
   v1Attributes,
   v2Attributes,
 } from '../fixtures.ts'
-import {
-  createMockAdapter,
-  defined,
-  mock,
-  mockTemporalNowZoned,
-} from '../helpers.ts'
+import { createMockAdapter } from '../helpers.ts'
 
 interface FacadeContext<T> {
   api: HeatzyAPIAdapter

@@ -36,6 +36,8 @@ The `prepublishOnly` script chains tests + typecheck + lint + format + docs — 
 
 Branches, functions, lines, and statements are all enforced at **100%** — the family's `coverageDefaults` from `@olivierzal/configs`, spread into the coverage block of [`vitest.config.ts`](vitest.config.ts). New code must come with the tests that keep these thresholds green; review will request changes otherwise.
 
+The vitest doubles the SDK suites share (`cast`, `defined`, `mock`, `createLogger`, `createSettingStore`, `createMockHttpClient`, `mockFetchResponse`, the `HttpError` factories, the `Temporal` clock spies) come from `@olivierzal/api-core/testing`; [`tests/helpers.ts`](tests/helpers.ts) holds only what is this dialect's own. Do not re-add a local copy of a core helper — a fix to one must reach every SDK, which is why they live in the core.
+
 ## Commits & pull requests
 
 - Commit messages: short, imperative, present tense (`Add HomeFacade error mapping`). No conventional-commits prefix is required.

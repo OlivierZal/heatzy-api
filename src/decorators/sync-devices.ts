@@ -1,38 +1,11 @@
-/**
- * Object that supports sync notification via `notifySync`. Both
- * {@link HeatzyAPI} (bare payload, routed through the lifecycle
- * emitter) and facades (enrich the payload with their `id` then
- * delegate to `api.notifySync`) implement this contract structurally.
- */
-interface HasNotifySync {
-  readonly notifySync: (params?: {
-    ids?: string[] | undefined
-  }) => Promise<void>
-}
-
-/**
- * Method decorator that invokes a sync notification **after** the
- * decorated method resolves. The host implements `notifySync`
- * structurally — facades enrich the payload with their `id` before
- * delegating, {@link HeatzyAPI} emits straight through the lifecycle
- * emitter.
- *
- * Intended for one-shot post-method notifications; this is **not**
- * a subscription. Exceptions thrown by the consumer's callback
- * propagate — the decorator does not swallow them, so a buggy sync
- * handler surfaces on the caller rather than dying silently.
- * @param target - The decorated method.
- * @param _context - TC39 decoration context; pins the decorator kind
- * at type level.
- * @returns The replacement method that triggers sync after execution.
- * @category Decorators
- */
-export const syncDevices = <TArgs extends readonly unknown[], TResult>(
-  target: (...args: TArgs) => Promise<TResult>,
-  _context: ClassMethodDecoratorContext,
-): ((...args: TArgs) => Promise<TResult>) =>
-  async function newTarget(this: HasNotifySync, ...args: TArgs) {
-    const data = await target.call(this, ...args)
-    await this.notifySync()
-    return data
-  }
+// Thin re-export of @olivierzal/api-core's `syncDevices` method
+// decorator FACTORY (formerly this repo's own bare decorator): the
+// post-method sync notification is one concern in both SDKs — await the
+// method, then call the host's `notifySync`, the core's own and generic
+// in the sync params — and the core carries melcloud-api's factory form,
+// forwarding its payload verbatim. This dialect applies it bare,
+// `@syncDevices()`, so the host's `notifySync` receives `undefined`:
+// `HeatzyAPI` emits that through the lifecycle emitter, a facade
+// enriches it with its own `id` before delegating. The shape change —
+// `@syncDevices` to `@syncDevices()` — is what made 17.0.0 a major.
+export { syncDevices } from '@olivierzal/api-core'

@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [17.0.0] - 2026-09-07
+
+### Breaking changes
+
+- **`syncDevices` is a decorator FACTORY: `@syncDevices()`, no longer `@syncDevices`.** The post-method sync notification was one concern drifted into two shapes — melcloud-api's factory forwarding a payload, this repo's bare decorator forwarding nothing — and `@olivierzal/api-core` 1.3.0 owns it in the factory form, generic over the consumer's sync params like `SessionAPI` itself. The exported name is now the core's function re-exported, so a consumer that decorates its own host with it applies `@syncDevices()`; the bare spelling is a type error. Inside this SDK the three application sites (`DeviceFacade.setValues`/`values`, `HeatzyAPI`'s registry cycle) carry the parentheses, and what the host's `notifySync` receives changes from no argument to an explicit `undefined` — invisible to every `onSyncComplete` observer typed `(params?: { ids? })`, and pinned as such in the sync suite. This shape change is what makes the release a major.
+
+- **`HeatzyAPIAdapter` names only what a facade reads.** The `fetch` and `timezone` members are dropped from the exported interface: no facade ever consumed either (the adapter's four real reads are `locale`, `notifySync`, `getValues`, `updateValues`), the `timezone` doc claimed a role the member never had (derogation end dates reach every `Device` through the `DeviceRegistry` at construction, never through the adapter), and a host had to mock both to satisfy a type that documents "the API surface facades depend on". `HeatzyAPI.fetch` and `HeatzyAPI.timezone` stay public on the client, unchanged. Migration: a consumer reading `adapter.fetch` or `adapter.timezone` off a value typed `HeatzyAPIAdapter` types it `HeatzyAPI` instead; a consumer building an adapter double drops the two members.
+
+### Changed
+
+- **The exact `@olivierzal/api-core` pin advances to 1.3.0, and three more twins cross into it.** `ValidationError` is the core's class re-exported (like `AuthenticationError` and `RegistrySyncError` before it) — the class names no validator, the `ZodError` riding its `cause` as `unknown`, so only `parseOrThrow`, the zod boundary that constructs it, stays here; `instanceof` holds across the SDK and the core alike, and the `RegistrySyncError` wrap of a failed enforced cycle keeps carrying it as `cause` unchanged. The sign-in normalization is the core's protected `SessionAPI.toAuthFailure(error, message)`, which reads the `[401, 400]` `authFailureStatuses` this subclass already hands `super()` — the vocabulary's ONE spelling, where the deleted module-level `toAuthFailure` spelled it a second time; `doAuthenticate` throws what it answers, or the original rejection verbatim, with the same `'Heatzy rejected the credentials'` message and cause as before. And the vitest doubles every SDK suite carried as a hand-maintained copy (`cast`, `defined`, `mock`, `createLogger`, `createSettingStore`, `createMockHttpClient`, `mockFetchResponse`, the `HttpError` factories, the native-`Temporal` clock spies) come from the core's new `@olivierzal/api-core/testing` subpath: `tests/helpers.ts` keeps only what is this dialect's own (`createMockAdapter`, `mockResponse`), the transport double is built from THIS SDK's `HttpClient` subclass (`createMockHttpClient(HttpClient, baseURL)` takes the class, so the spy sits on the transport that seats the Gizwits vocabulary), and `mockFetchResponse` regains the Fetch null-body statuses (204, 205, 304) the 16.2.1 sweep had dropped as unreachable here — they are the core's to model now. The subpath imports `vitest` and declares it nowhere, by the core's verdict: `vitest` stays this repo's devDependency, the root barrel never re-exports the subpath, and a production import of `@olivierzal/heatzy-api` loads no test framework.
+
+### Removed
+
+- **What the crossings replaced**: the local `ValidationError` class, the module-level `toAuthFailure` export of `src/api/heatzy.ts` (never on the package surface — `src/index.ts` did not re-export it), the bare `syncDevices` implementation, and the copied test helpers. The suites follow the mechanism: the `toAuthFailure` unit table becomes a wiring table through the real client — each of the two statuses pinned by its own row, an off-vocabulary `/login` rejection pinned to surface verbatim — the `syncDevices` mechanism clauses (target-then-notify order, the propagating hook) go where api-core's suite owns them, and the `ValidationError` class clause leaves `errors.test.ts`, which now pins the one protocol error this dialect still declares (`AttributeNotFoundError`).
+
 ## [16.2.1] - 2026-09-07
 
 ### Changed
@@ -219,6 +235,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[17.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.2.1...v17.0.0
 [16.2.1]: https://github.com/OlivierZal/heatzy-api/compare/v16.2.0...v16.2.1
 [16.2.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.1.0...v16.2.0
 [16.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.0.0...v16.1.0

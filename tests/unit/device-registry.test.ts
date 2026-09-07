@@ -1,10 +1,10 @@
+import { defined, mockTemporalNowZoned } from '@olivierzal/api-core/testing'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { DerogationMode, Mode } from '../../src/constants.ts'
 import { DeviceRegistry } from '../../src/entities/index.ts'
 import { Temporal } from '../../src/temporal.ts'
 import { buildBinding, proAttributes, v2Attributes } from '../fixtures.ts'
-import { defined, mockTemporalNowZoned } from '../helpers.ts'
 
 describe(DeviceRegistry, () => {
   it('registers a device reachable by id', () => {

@@ -1,3 +1,4 @@
+import { defined, mockTemporalNowZoned } from '@olivierzal/api-core/testing'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { DerogationMode, Mode, Product, Switch } from '../../src/constants.ts'
@@ -9,7 +10,6 @@ import {
   proAttributes,
   v2Attributes,
 } from '../fixtures.ts'
-import { defined, mockTemporalNowZoned } from '../helpers.ts'
 
 const NOW_ISO = '2026-07-21T10:00:00Z'
 const MINUTE_MS = 60_000
