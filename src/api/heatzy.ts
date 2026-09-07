@@ -12,8 +12,7 @@ import type {
 import { isModelledProduct } from '../constants.ts'
 import { setting, syncDevices } from '../decorators/index.ts'
 import { DeviceRegistry } from '../entities/index.ts'
-import { AuthenticationError } from '../errors/index.ts'
-import { HttpClient, HttpStatus, isHttpError } from '../http/index.ts'
+import { HttpClient, HttpStatus } from '../http/index.ts'
 import { redaction } from '../observability/context.ts'
 import { isSessionExpired } from '../resilience/index.ts'
 import { Temporal } from '../temporal.ts'
@@ -49,24 +48,6 @@ const buildTransport = (transport: TransportConfig | undefined): HttpClient =>
         headers: { [APPLICATION_ID_HEADER]: APPLICATION_ID },
         timeout: transport?.timeoutMs ?? DEFAULT_TIMEOUT_MS,
       })
-
-/**
- * Narrow a login rejection surfaced by the HTTP client into the shared
- * {@link AuthenticationError} domain type. Gizwits rejects credentials
- * with HTTP 400 (error codes in the body), so both 400 and 401 read as
- * an authentication failure on the `/login` path; any other rejection
- * yields `null` and the caller rethrows its original error.
- * @param error - The error to inspect.
- * @returns An {@link AuthenticationError} for a 400/401 `HttpError`; `null` otherwise.
- */
-export const toAuthFailure = (error: unknown): AuthenticationError | null =>
-  isHttpError(error) &&
-  (error.response.status === HttpStatus.BadRequest ||
-    error.response.status === HttpStatus.Unauthorized)
-    ? new AuthenticationError('Heatzy rejected the credentials', {
-        cause: error,
-      })
-    : null
 
 /**
  * One `/bindings` entry the listing boundary dropped. The two verdicts
@@ -238,7 +219,9 @@ export class HeatzyAPI
       // Gizwits reports an invalid or expired user token as HTTP 400
       // (error code 9004 in the body), never 401 — both statuses arm
       // the reactive re-auth, mirroring the field-proven Axios
-      // interceptor.
+      // interceptor. The vocabulary's ONE spelling: the core's
+      // `toAuthFailure` reads this same set on the sign-in path
+      // (`doAuthenticate` below), so it is never declared twice.
       authFailureStatuses: [HttpStatus.Unauthorized, HttpStatus.BadRequest],
       defaultSyncIntervalMinutes: DEFAULT_SYNC_INTERVAL_MINUTES,
       // The Gizwits-bound engine, so the core's request/response log
@@ -411,7 +394,10 @@ export class HeatzyAPI
   // any prior session; the core persists the credentials once this
   // resolves. On failure every store is left untouched: the login
   // rejection is narrowed to `AuthenticationError` where the wire
-  // means one, and rethrown verbatim otherwise.
+  // means one — the core's `toAuthFailure`, reading the `[401, 400]`
+  // vocabulary handed to `super()` — and rethrown verbatim otherwise.
+  // The two-step form rather than `?? error`: the family lint refuses
+  // a thrown `unknown` that is not the caught variable itself.
   protected override async doAuthenticate(
     credentials: LoginCredentials,
   ): Promise<void> {
@@ -419,9 +405,12 @@ export class HeatzyAPI
     try {
       data = await this.login({ postData: credentials })
     } catch (error) {
-      const failure = toAuthFailure(error)
-      if (failure !== null) {
-        throw failure
+      const authError = this.toAuthFailure(
+        error,
+        'Heatzy rejected the credentials',
+      )
+      if (authError !== null) {
+        throw authError
       }
       throw error
     }
@@ -507,7 +496,7 @@ export class HeatzyAPI
   // reschedule, re-apply a raced sign-out, or surface a lost session).
   // `fetch` downgrades its failure to a logged empty list, the
   // post-auth path propagates.
-  @syncDevices
+  @syncDevices()
   async #syncCycle(): Promise<readonly DeviceBinding[]> {
     return this.runSyncCycle(async () => this.#fetch())
   }

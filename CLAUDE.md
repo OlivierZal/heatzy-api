@@ -35,10 +35,13 @@ Architecture, toolchain and process are aligned on the sibling
 
 - **An expired or invalid Gizwits token is HTTP 400, not 401** (error
   code 9004 in the body). `AuthRetryPolicy` triggers on 400 _and_ 401,
-  and `toAuthFailure` maps both to `AuthenticationError` on the login
-  path. A genuinely malformed request therefore pays one guarded
-  re-login round-trip before its 400 propagates — the field-proven
-  behavior of the previous Axios interceptor.
+  and the core's protected `toAuthFailure` — reading that same
+  `[401, 400]` `authFailureStatuses` the subclass hands `super()`, the
+  vocabulary's ONE spelling since 17.0.0 — maps both to
+  `AuthenticationError` on the login path. A genuinely malformed
+  request therefore pays one guarded re-login round-trip before its 400
+  propagates — the field-proven behavior of the previous Axios
+  interceptor.
 - Wire-format types mirror the Gizwits API verbatim: snake_case and
   mixed keys (`dev_alias`, `derog_mode`, `cur_tempH`, `LOCK_C`) — do
   not rename them to satisfy style rules. The eslint overlay carries
@@ -260,10 +263,13 @@ the request pipeline and the sync-cycle template — plus the HTTP
 client and `HttpError` (whole-snapshot redaction seated in the
 constructor), the redaction engine, the observability shells and
 `LifecycleEmitter`, the resilience primitives, `SyncManager`, the
-temporal entry point, the time units, the `setting` decorator and the
-error family (`APIError`, `AuthenticationError`, `RegistrySyncError` —
-re-exported here under unchanged public names so `instanceof` holds
-across the SDK and the core alike). Those modules used to be
+temporal entry point, the time units, the `setting` and `syncDevices`
+decorators (the latter in factory form, `@syncDevices()`, since
+17.0.0) and the error family (`APIError`, `AuthenticationError`,
+`RegistrySyncError`, and since 17.0.0 `ValidationError` — re-exported
+here under unchanged public names so `instanceof` holds across the SDK
+and the core alike; `parseOrThrow`, the zod boundary that constructs
+`ValidationError`, stays here). Those modules used to be
 melcloud-api's byte-identical twins ("edit both or neither"); the
 divergence episode above expired that discipline, and the extraction
 replaced it. This repo keeps ONLY its protocol layer: the Gizwits
@@ -274,15 +280,33 @@ every thrown snapshot, and `HeatzyAPI` hands it to the core through
 log lines the inherited dispatch emits — the seam this adoption caught
 missing in the unreleased core and had fixed there BEFORE adopting,
 now pinned through the real client in `heatzy-api.test.ts`), the
-subclass options (`[401, 400]` as the auth-failure statuses; NO
-`logLabel`; NO `rateLimitHours`), the twelve dialect hooks in
-`src/api/heatzy.ts`, the wire types, the schemas, the facades, and
-thin re-export modules that keep internal import paths stable. A
+subclass options (`[401, 400]` as the auth-failure statuses — spelled
+ONCE, into `super()`: the reactive re-auth rung owns the set and the
+core's protected `toAuthFailure(error, message)` consults it on the
+sign-in path, so `doAuthenticate` constructs no `AuthenticationError`
+of its own; NO `logLabel`; NO `rateLimitHours`), the twelve dialect
+hooks in `src/api/heatzy.ts`, the wire types, the schemas, the facades,
+and thin re-export modules that keep internal import paths stable. A
 mechanism change happens in api-core and arrives here as a release +
 exact-pin bump PR; never re-implement one locally. The moved mechanism
 test suites live in api-core too — this repo's
 `observability.test.ts`/`http-client.test.ts`/`heatzy-api-*.test.ts`
-are thin vocabulary/wiring suites pinning what is OURS.
+are thin vocabulary/wiring suites pinning what is OURS. The test
+DOUBLES live there as well (api-core 1.3.0): the suites import `cast`,
+`defined`, `mock`, `createLogger`, `createSettingStore`,
+`createMockHttpClient`, `mockFetchResponse`, the `HttpError` factories
+and the native-`Temporal` clock spies from
+`@olivierzal/api-core/testing`, and `tests/helpers.ts` keeps only what
+is this dialect's own (`createMockAdapter`, `mockResponse`) — never a
+local copy of a core helper, the drift that subpath exists to end. The
+subpath imports `vitest` and declares it nowhere (a peer, optional or
+not, would put the test framework on the Homey that installs this SDK
+as a production dependency), so `vitest` MUST stay a devDependency
+here; the core's root barrel never re-exports the subpath, so shipped
+code cannot reach it. The transport double is built from THIS repo's
+`HttpClient` subclass — `createMockHttpClient(HttpClient, baseURL)`
+takes the class — so the spy sits on the transport that seats the
+Gizwits vocabulary, the one `buildTransport`'s `instanceof` accepts.
 
 That crossing is DONE (16.1.0): `HeatzyAPI` subclasses the core's
 `SessionAPI<SyncParams>`, its former private machinery deleted and its

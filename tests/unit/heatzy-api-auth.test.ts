@@ -1,4 +1,8 @@
 import {
+  createServerError,
+  createSettingStore,
+} from '@olivierzal/api-core/testing'
+import {
   afterEach,
   beforeEach,
   describe,
@@ -9,29 +13,27 @@ import {
 } from 'vitest'
 
 import type { HeatzyAPISettings } from '../../src/api/types.ts'
-import type { HttpResponse } from '../../src/http/index.ts'
-import { HeatzyAPI, toAuthFailure } from '../../src/api/heatzy.ts'
+import { HeatzyAPI } from '../../src/api/heatzy.ts'
 import {
   AuthenticationError,
   RegistrySyncError,
 } from '../../src/errors/index.ts'
+import { type HttpResponse, HttpStatus } from '../../src/http/index.ts'
 import { Temporal } from '../../src/temporal.ts'
 import { buildBinding } from '../fixtures.ts'
 import {
   createApi,
+  LOGIN_PATH,
   loginCalls,
   mockDriftedWire,
   mockRejectedWire,
   mockRequest,
   mockWire,
+  stageHeatzyWire,
   wireSetup,
   wireTeardown,
 } from '../heatzy-api-harness.ts'
-import {
-  createServerError,
-  createSettingStore,
-  mockResponse,
-} from '../helpers.ts'
+import { mockResponse } from '../helpers.ts'
 
 // Thin AUTH WIRING suite since the SessionAPI adoption: the session
 // lifecycle mechanism — the login backoff, the resume single-flight,
@@ -41,7 +43,8 @@ import {
 // this file pins is the Gizwits half the hooks supply: the verbatim
 // `/login` exchange and its `expire_at` epoch-seconds conversion, the
 // user-token header, the persisted-key vocabulary, the RegistrySyncError
-// cause this dialect's cycle produces, and `toAuthFailure`'s mapping.
+// cause this dialect's cycle produces, and the `[401, 400]` vocabulary
+// the core's `toAuthFailure` reads on the sign-in path.
 
 const SETTING_KEYS = [
   'expiry',
@@ -251,23 +254,61 @@ describe('in-memory persistence (no setting manager)', () => {
   })
 })
 
-describe(toAuthFailure, () => {
-  it.each([{ status: 400 }, { status: 401 }])(
-    'wraps an HTTP $status login rejection into AuthenticationError',
-    ({ status }) => {
-      const error = createServerError(status, '/login')
-      const failure = toAuthFailure(error)
+// The sign-in normalization is the core's protected `toAuthFailure`,
+// whose MECHANISM — the narrowing, the preserved cause, the `null` that
+// rethrows — is pinned in api-core's suite. What is OURS is the
+// vocabulary it reads: the `[401, 400]` `authFailureStatuses` `HeatzyAPI`
+// hands `super()`, the ONE spelling both the reactive re-auth rung and
+// this path consult. So each status is pinned by its own row through the
+// real client, and an off-vocabulary rejection is pinned to surface
+// verbatim — a `/login` POST goes through `dispatch`, below every
+// policy rung, so nothing retries or re-maps it.
+const stageRefusedLogin = (status: number): Error => {
+  const rejection = createServerError(status, LOGIN_PATH)
+  stageHeatzyWire(mockRequest, {
+    login: () => {
+      throw rejection
+    },
+    rest: () => mockResponse({}),
+  })
+  return rejection
+}
 
-      expect(failure).toBeInstanceOf(AuthenticationError)
-      expect(failure).toMatchObject({ cause: error })
+describe('the sign-in normalization', () => {
+  beforeEach(wireSetup)
+
+  afterEach(wireTeardown)
+
+  it.each([
+    { label: '401', status: HttpStatus.Unauthorized },
+    {
+      label: '400, the status Gizwits itself uses',
+      status: HttpStatus.BadRequest,
+    },
+  ])(
+    'rejects authenticate() with AuthenticationError on a $label, the rejection as cause',
+    async ({ status }) => {
+      const api = await createApi()
+      const rejection = stageRefusedLogin(status)
+
+      const signIn = api.authenticate({ password: 'bad', username: 'user' })
+
+      await expect(signIn).rejects.toBeInstanceOf(AuthenticationError)
+      await expect(signIn).rejects.toMatchObject({
+        cause: rejection,
+        message: 'Heatzy rejected the credentials',
+      })
+      expect(api.isAuthenticated()).toBe(false)
     },
   )
 
-  it('returns null for other HTTP errors', () => {
-    expect(toAuthFailure(createServerError(500, '/login'))).toBeNull()
-  })
+  it('propagates an off-vocabulary /login rejection verbatim', async () => {
+    const api = await createApi()
+    const rejection = stageRefusedLogin(HttpStatus.ServiceUnavailable)
 
-  it('returns null for non-HTTP errors', () => {
-    expect(toAuthFailure(new Error('network'))).toBeNull()
+    const signIn = api.authenticate({ password: 'pw', username: 'user' })
+
+    await expect(signIn).rejects.toBe(rejection)
+    expect(api.isAuthenticated()).toBe(false)
   })
 })

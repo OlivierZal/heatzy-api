@@ -1,3 +1,4 @@
+import { createLogger, createServerError } from '@olivierzal/api-core/testing'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { RequestErrorEvent, SyncCallback } from '../../src/api/types.ts'
@@ -12,7 +13,7 @@ import {
   wireSetup,
   wireTeardown,
 } from '../heatzy-api-harness.ts'
-import { createLogger, createServerError, mockResponse } from '../helpers.ts'
+import { mockResponse } from '../helpers.ts'
 
 // Thin SYNC WIRING suite since the SessionAPI adoption: the sync-cycle
 // template — timer arming and disposal, the best-effort downgrade, the
@@ -20,7 +21,7 @@ import { createLogger, createServerError, mockResponse } from '../helpers.ts'
 // by its own suite and, through the real client, by the
 // session-lifecycle kernel. What this file pins is the PER-DEVICE
 // cycle this dialect owns: the `/bindings` + `/devdata` fan-out, its
-// leg-by-leg degradation, the `@syncDevices` notification, and the
+// leg-by-leg degradation, the `@syncDevices()` notification, and the
 // abortSignal wiring from `HeatzyAPIConfig` into every request.
 
 // Long enough for the transient-retry rung to exhaust its four
@@ -134,7 +135,10 @@ describe(HeatzyAPI, () => {
       await api.fetch()
 
       expect(onSyncComplete).toHaveBeenCalledTimes(1)
-      expect(onSyncComplete).toHaveBeenCalledWith()
+      // The bare `@syncDevices()` forwards `undefined`: the core's
+      // factory forwards what it was built with, where this repo's
+      // former bare decorator called `notifySync()` with no argument.
+      expect(onSyncComplete).toHaveBeenCalledWith(undefined)
     })
   })
 

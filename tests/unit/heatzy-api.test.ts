@@ -1,4 +1,5 @@
 import { REDACTED } from '@olivierzal/api-core'
+import { createLogger, defined } from '@olivierzal/api-core/testing'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { SyncCallback } from '../../src/api/types.ts'
@@ -14,7 +15,7 @@ import {
   wireSetup,
   wireTeardown,
 } from '../heatzy-api-harness.ts'
-import { createLogger, defined, mockResponse } from '../helpers.ts'
+import { mockResponse } from '../helpers.ts'
 
 describe(HeatzyAPI, () => {
   beforeEach(wireSetup)

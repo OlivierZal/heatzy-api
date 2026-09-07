@@ -102,7 +102,7 @@ export class DeviceFacade {
    * @param attributes - Writable attributes to apply.
    * @returns The echoed attribute payload.
    */
-  @syncDevices
+  @syncDevices()
   @updateDevice
   public async setValues(attributes: PostAttributes): Promise<PostAttributes> {
     // Stripped at the single entry point: V1's `control` checks each key
@@ -116,7 +116,7 @@ export class DeviceFacade {
    * sync observers.
    * @returns The fresh attribute payload.
    */
-  @syncDevices
+  @syncDevices()
   @updateDevice
   public async values(): Promise<Attributes> {
     return this.api.getValues({ id: this.id })
@@ -124,7 +124,7 @@ export class DeviceFacade {
 
   /**
    * Notify the API's `onSyncComplete` observer, scoped to this device.
-   * Invoked by the `@syncDevices` decorator after each decorated
+   * Invoked by the `@syncDevices()` decorator after each decorated
    * mutation or read.
    */
   public async notifySync(): Promise<void> {

@@ -4,17 +4,19 @@ import {
   APIError,
   AttributeNotFoundError,
   isAPIError,
-  ValidationError,
 } from '../../src/errors/index.ts'
 
 // Thin VOCABULARY suite: the error MECHANISMS — the `APIError` base,
 // `isAPIError`'s guard and narrowing, `AuthenticationError`'s name and
-// cause — live in @olivierzal/api-core with their own suites, and this
-// repo's `AuthenticationError` is the core's class re-bound (exercised
-// through the real client in `heatzy-api-auth.test.ts` and the
-// session-lifecycle kernel). What this file pins is the Gizwits
-// layer's own obligation: the two protocol errors it declares, and
-// that they sit inside the one family-wide `APIError` hierarchy.
+// cause and, since api-core 1.3.0, `ValidationError`'s context and
+// cause — live in @olivierzal/api-core with their own suites; this
+// repo's `AuthenticationError` and `ValidationError` are the core's
+// classes re-bound (exercised through the real client in
+// `heatzy-api-auth.test.ts`, through `parseOrThrow` in
+// `validation.test.ts`, and in the session-lifecycle kernel). What this
+// file pins is the Gizwits layer's own obligation: the one protocol
+// error it still declares, and that it sits inside the one family-wide
+// `APIError` hierarchy.
 
 describe.concurrent('the Gizwits protocol errors', () => {
   it('attributeNotFoundError derives its message from the attribute', () => {
@@ -35,21 +37,9 @@ describe.concurrent('the Gizwits protocol errors', () => {
     expect(error.cause).toBe(cause)
   })
 
-  it('validationError carries context and cause', () => {
-    const cause = new Error('zod issue')
-    const error = new ValidationError('bad shape', { cause, context: 'login' })
+  it('attributeNotFoundError is recognised by the family guard', () => {
+    const error: unknown = new AttributeNotFoundError('mode')
 
-    expect(error).toBeInstanceOf(ValidationError)
-    expect(error).toBeInstanceOf(APIError)
-    expect(error.name).toBe('ValidationError')
-    expect(error.context).toBe('login')
-    expect(error.cause).toBe(cause)
-  })
-
-  it.each([
-    ['AttributeNotFoundError', new AttributeNotFoundError('mode')],
-    ['ValidationError', new ValidationError('x', { context: 'login' })],
-  ])('%s is recognised by the family guard', (_name, error: unknown) => {
     expect(isAPIError(error)).toBe(true)
   })
 })

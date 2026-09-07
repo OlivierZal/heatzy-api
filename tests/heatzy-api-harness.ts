@@ -1,29 +1,33 @@
-import { type MockInstance, vi } from 'vitest'
-
-import type { HeatzyAPIConfig, SettingManager } from '../src/api/types.ts'
-import type {
-  HttpClient,
-  HttpRequestConfig,
-  HttpResponse,
-} from '../src/http/index.ts'
-import type { Attributes, LoginData } from '../src/types/index.ts'
-import { HeatzyAPI } from '../src/api/heatzy.ts'
-import { Temporal } from '../src/temporal.ts'
-import { buildBinding, buildLoginData, proAttributes } from './fixtures.ts'
 import {
+  type MockHttpClient,
   createLogger,
   createMockHttpClient,
   createServerError,
   createSettingStore,
-  mockResponse,
   mockTemporalNowInstant,
-} from './helpers.ts'
+} from '@olivierzal/api-core/testing'
+import { type MockInstance, vi } from 'vitest'
 
-const wire = createMockHttpClient('https://euapi.gizwits.com/app')
+import type { HeatzyAPIConfig, SettingManager } from '../src/api/types.ts'
+import type { Attributes, LoginData } from '../src/types/index.ts'
+import { HeatzyAPI } from '../src/api/heatzy.ts'
+import {
+  type HttpRequestConfig,
+  type HttpResponse,
+  HttpClient,
+} from '../src/http/index.ts'
+import { Temporal } from '../src/temporal.ts'
+import { buildBinding, buildLoginData, proAttributes } from './fixtures.ts'
+import { mockResponse } from './helpers.ts'
 
-export const mockRequest: ReturnType<
-  typeof createMockHttpClient
->['requestSpy'] = wire.requestSpy
+// The transport under test is THIS SDK's `HttpClient` subclass — the
+// one seating the Gizwits redaction vocabulary, and the one
+// `buildTransport`'s `instanceof` accepts — handed to the core's helper
+// as the class it instantiates and spies on.
+const wire = createMockHttpClient(HttpClient, 'https://euapi.gizwits.com/app')
+
+export const mockRequest: MockHttpClient<HttpClient>['requestSpy'] =
+  wire.requestSpy
 
 export const BINDINGS_PATH = '/bindings'
 export const DEVDATA_PREFIX = '/devdata/'

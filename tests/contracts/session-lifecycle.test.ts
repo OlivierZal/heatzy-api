@@ -1,5 +1,10 @@
 import { HttpClient as CoreHttpClient } from '@olivierzal/api-core'
 import {
+  createLogger,
+  createServerError,
+  createSettingStore,
+} from '@olivierzal/api-core/testing'
+import {
   type MockInstance,
   afterEach,
   beforeEach,
@@ -41,12 +46,7 @@ import {
   wireSetup,
   wireTeardown,
 } from '../heatzy-api-harness.ts'
-import {
-  createLogger,
-  createServerError,
-  createSettingStore,
-  mockResponse,
-} from '../helpers.ts'
+import { mockResponse } from '../helpers.ts'
 
 // The session lifecycle and the request pipeline of `src/api/heatzy.ts`,
 // pinned against the REAL client rather than a synthetic subclass. The
@@ -65,13 +65,17 @@ import {
 // one extracted mechanism, and a clause that only one of them holds is
 // a clause a core change can quietly break in the other.
 //
-// Every import above resolves through this repo's own paths, and
-// `src/api/heatzy.ts` / `src/api/types.ts` survive on their own
-// verdicts (the Gizwits dialect behind the core's hooks; the local
-// adapter and configuration interfaces), not to keep this file stable.
-// The one FOREIGN import is the core `HttpClient` above: it is the
-// class the transport-resolution clause needs, and naming it here is
-// the point of that clause.
+// Every import of the SURFACE UNDER TEST above resolves through this
+// repo's own paths, and `src/api/heatzy.ts` / `src/api/types.ts`
+// survive on their own verdicts (the Gizwits dialect behind the core's
+// hooks; the local adapter and configuration interfaces), not to keep
+// this file stable. The FOREIGN imports are the core `HttpClient` above
+// — the class the transport-resolution clause needs, and naming it here
+// is the point of that clause — and the core's `./testing` doubles
+// (`createLogger`, `createServerError`, `createSettingStore`, since
+// 17.0.0), which stage the wire and never stand in for what a clause
+// pins; `mockResponse` stays this repo's own, the envelope being the
+// transport spy's shape, not the core's.
 //
 // Every clause is worded about THE REGISTRY CYCLE — and on this dialect
 // the cycle is PER-DEVICE, not bulk: `#fetch` reads the `/bindings`
@@ -394,8 +398,8 @@ const answerLogin = (): HttpResponse => {
     throw createServerError(UNAVAILABLE_STATUS, LOGIN_PATH)
   }
   // A refused Gizwits sign-in is an HTTP 400 carrying an error code in
-  // the body, not a 401 — `toAuthFailure` turns both into the shared
-  // `AuthenticationError`.
+  // the body, not a 401 — the core's `toAuthFailure`, reading this SDK's
+  // `[401, 400]`, turns both into the shared `AuthenticationError`.
   if (heatzyWire.login === 'refuse') {
     throw createServerError(HttpStatus.BadRequest, LOGIN_PATH)
   }
@@ -1491,13 +1495,17 @@ describeSessionLifecycleContract('HeatzyAPI', heatzyDriver)
 //    fallback window, the announced one, and the cap on an absurd one).
 //    No throttle type exists here to carry a window, and none can be
 //    constructed. Decide it by reading:
-//      - `toAuthFailure` — whose `new
-//        AuthenticationError(…)` is the ONLY one in `src/`
-//        (`grep -rn 'new AuthenticationError' src/` returns that single
-//        line). Its whole body is `status === BadRequest || status ===
-//        Unauthorized ? new AuthenticationError(…) : null`: one type,
-//        no window argument, no throttle branch — and `grep -rni
-//        throttl src/` returns nothing at all.
+//      - The sign-in normalization — `src/` constructs NO
+//        `AuthenticationError` of its own since 17.0.0 (`grep -rn 'new
+//        AuthenticationError' src/` returns nothing): `doAuthenticate`
+//        throws what the core's `toAuthFailure(error, message)` answers,
+//        and that helper's whole body is `isAuthFailure(error) ? new
+//        AuthenticationError(message, { cause }) : null` over the
+//        `[401, 400]` `authFailureStatuses` handed to `super()` — one
+//        type, no window argument, no throttle branch — and `grep -rni
+//        throttl src/` hits only the doc comment of
+//        `src/errors/authentication.ts`, which names the core subclass
+//        this repo deliberately does not re-export.
 //      - `#armLoginBackoff` — the ONLY writer of the
 //        gate: `Temporal.Now.instant().epochMilliseconds +
 //        LOGIN_BACKOFF_FAILURE_MS`, a bare constant sum. Nothing reads a

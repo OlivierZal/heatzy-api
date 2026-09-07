@@ -7,7 +7,6 @@ import type {
 import type { HttpClient } from '../http/index.ts'
 import type {
   Attributes,
-  DeviceBinding,
   DevicePostDataAny,
   LoginCredentials,
   UndefinedTolerant,
@@ -16,7 +15,12 @@ import type {
 /**
  * The API surface facades depend on — a structural slice of
  * {@link HeatzyAPI} that keeps the facade layer decoupled from the
- * client's lifecycle machinery (and trivially mockable in tests).
+ * client's lifecycle machinery (and trivially mockable in tests). It
+ * names exactly what a facade reads — the display locale, the sync
+ * notification and the two device endpoints — and nothing a facade
+ * does not: `HeatzyAPI.fetch` and `HeatzyAPI.timezone` stay public
+ * on the client alone, the timezone reaching every `Device` through
+ * the {@link DeviceRegistry} at construction.
  * @category Configuration
  */
 export interface HeatzyAPIAdapter {
@@ -33,19 +37,6 @@ export interface HeatzyAPIAdapter {
    * observer cannot break the caller.
    */
   readonly notifySync: SyncCallback
-  /**
-   * IANA timezone identifier the instance was configured with
-   * ({@link HeatzyAPIConfig.timezone}), or `undefined` when unset —
-   * the value {@link HeatzyAPI.timezone} exposes. No facade reads it:
-   * derogation end dates are anchored by the `Device` entities, which
-   * receive the timezone through the {@link DeviceRegistry} at
-   * construction.
-   */
-  readonly timezone: string | undefined
-  /**
-   * Fetch all bindings and sync the device registry.
-   */
-  readonly fetch: () => Promise<readonly DeviceBinding[]>
   /**
    * Read the live attribute payload of a single device.
    */
