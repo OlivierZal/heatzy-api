@@ -21,7 +21,7 @@ import { mockResponse } from '../helpers.ts'
 // by its own suite and, through the real client, by the
 // session-lifecycle kernel. What this file pins is the PER-DEVICE
 // cycle this dialect owns: the `/bindings` + `/devdata` fan-out, its
-// leg-by-leg degradation, the `@syncDevices` notification, and the
+// leg-by-leg degradation, the `@syncDevices()` notification, and the
 // abortSignal wiring from `HeatzyAPIConfig` into every request.
 
 // Long enough for the transient-retry rung to exhaust its four
