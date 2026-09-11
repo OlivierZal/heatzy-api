@@ -5,9 +5,11 @@ import { Device, syncDevice } from './device.ts'
  * Central in-memory registry of all bound Heatzy devices. Synced from
  * the `/bindings` + `/devdata` responses and queryable by id.
  *
- * Upsert + prune semantics: existing models are updated in place,
- * new ones created, stale entries removed — object identity is
- * preserved across syncs so facade references remain valid.
+ * Upsert + prune semantics: an existing model is updated in place, a
+ * new one created, a stale entry removed. Object identity therefore
+ * survives an UPSERT and not a PRUNE — an id that leaves the listing is
+ * deleted, and its next appearance is a different object. Facades bind
+ * by id for exactly that reason; they must never hold the entity.
  * @category Entities
  */
 export class DeviceRegistry {

@@ -48,6 +48,7 @@ export {
   APIError,
   AttributeNotFoundError,
   AuthenticationError,
+  EntityNotFoundError,
   isAPIError,
   RegistrySyncError,
   ValidationError,

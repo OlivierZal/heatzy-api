@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [18.0.0] - 2026-09-11
+
+### Breaking changes
+
+- **A facade binds to its device's ID, not to the entity, and its reads can now throw.** `DeviceFacade` captured the `Device` object in its constructor and every getter read through that reference — while `DeviceRegistry` destroys the identity on two paths it owns: `syncDevices` ends with `#prune`, which `delete`s every id absent from the listing, and `#upsertDevice` then rebuilds an absent entry with `new Device(...)` rather than reviving the old one; `HeatzyAPI.clearRegistry()` is a full prune (`syncDevices([], {})`), invoked by the core's `logOut()` and by a raced sign-out in the sync epilogue. So the ordinary fix for a stuck account — log out, sign back in — detached every facade a consumer held, and com.heatzy memoizes its facade for the life of the device: the class doc promised "object identity is preserved across syncs so facade references remain valid", which is true of the upsert branch and false of the prune branch in the same method. From this release the facade keeps only the device's identity (`id`, `product`) and resolves the entity per access through the new `HeatzyAPIAdapter.getDeviceById`, so it FOLLOWS a rebuild instead of reading a detached copy forever. Migration: a read or a write against a device the registry no longer holds throws `EntityNotFoundError` where it previously answered the state that device had when it was dropped — a consumer holding a cached facade catches it and re-resolves, or asks the non-throwing `DeviceFacade.exists` first. Nothing changes while the device is present, which is every other case.
+
+- **`HeatzyAPIAdapter` gains `getDeviceById`.** The interface names what a facade reads, and a facade now reads its entity through the adapter rather than holding it. `HeatzyAPI` implements it over its own registry. Migration: a consumer building an adapter double adds the member; nothing else on the interface moves.
+
+### Added
+
+- **`EntityNotFoundError`** (exported from the root barrel): thrown when a facade resolves its device by id and the registry holds nothing under it. Carries the unresolved `entityId`. Mirrors melcloud-api's class of the same name, which had no twin here — the fix crossed only that repo when it was made, which is the transversal gap this release closes.
+
+- **`DeviceFacade.exists`**: the non-throwing twin of the resolution above, for consumers that keep a cached facade and want to detect staleness without a `try`/`catch`.
+
 ## [17.0.0] - 2026-09-07
 
 ### Breaking changes
@@ -230,6 +244,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[18.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v17.0.0...v18.0.0
 [17.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.2.0...v17.0.0
 [16.2.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.1.0...v16.2.0
 [16.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.0.0...v16.1.0

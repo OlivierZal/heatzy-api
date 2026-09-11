@@ -22,6 +22,9 @@ const HTTP_OK = 200
 export const createMockAdapter = (
   overrides: Partial<HeatzyAPIAdapter> = {},
 ): HeatzyAPIAdapter => ({
+  getDeviceById: vi
+    .fn<HeatzyAPIAdapter['getDeviceById']>()
+    .mockReturnValue(undefined),
   getValues: vi
     .fn<HeatzyAPIAdapter['getValues']>()
     .mockResolvedValue(v1Attributes),

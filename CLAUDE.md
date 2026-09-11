@@ -68,6 +68,28 @@ Architecture, toolchain and process are aligned on the sibling
   product, with the PDF added to `references/`. `isModelledProduct` is
   the non-throwing form the listing boundary asks FIRST, so an
   unextended map costs that one radiator and never the account.
+- **A facade holds its device's ID, never the entity.** `DeviceRegistry`
+  destroys object identity on the two paths it owns: `syncDevices` ends
+  with `#prune`, which deletes every id absent from the listing, and
+  `#upsertDevice` rebuilds an absent entry with `new Device(...)` rather
+  than reviving the old one — and `clearRegistry()` is a full prune
+  (`syncDevices([], {})`), reached from the core's `logOut()` and from a
+  raced sign-out in the sync epilogue. Identity therefore survives an
+  UPSERT and not a PRUNE. Until 18.0.0 the facade captured the object in
+  its constructor, so the ordinary fix for a stuck account — log out,
+  sign back in — detached every facade a consumer held, permanently:
+  com.heatzy memoizes its facade for the life of the device and never
+  clears it, so the device froze while its writes still went out. The
+  facade now keeps `id` and `product` alone and resolves the entity per
+  access through `HeatzyAPIAdapter.getDeviceById`, so it FOLLOWS the
+  rebuild; a device the registry no longer holds throws
+  `EntityNotFoundError`, with the non-throwing `exists` beside it for
+  consumers that keep a cached reference. The registry's own class doc
+  used to promise the opposite ("object identity is preserved across
+  syncs so facade references remain valid") — true of the upsert branch,
+  false of the prune branch in the same method. melcloud-api fixed the
+  same shape on both its dialects and the fix never crossed here: the
+  transversal axis again.
 - **The registry cycle degrades per device, at the boundary.** The
   cycle (`/bindings` + one `/devdata` read per binding) is reached from
   the ENFORCED post-auth sync, which propagates — so anything that
