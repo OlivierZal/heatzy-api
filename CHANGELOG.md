@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - **`HeatzyAPIAdapter` gains `getDeviceById`.** The interface names what a facade reads, and a facade now reads its entity through the adapter rather than holding it. `HeatzyAPI` implements it over its own registry. Migration: a consumer building an adapter double adds the member; nothing else on the interface moves.
 
+### Changed
+
+- **The exact `@olivierzal/api-core` pin advances to 1.5.0: three session-lifecycle fixes, behaviour only.** No twin crosses and no surface moves, so the adoption is the pin, and it rides this major rather than costing a release of its own. Each of the three was reproduced before it was fixed.
+
+- **A boot inside the login-backoff window no longer goes dormant for the life of the process.** The gate refused an automatic resume WITHOUT a wire call, so no sync cycle ran, so `planNext()` — the only thing that arms the auto-sync timer — was never reached. The client emitted `onAuthenticationLost` it could never retract and left nothing in the log to explain the silence. Gizwits answers a 429 on a rate-limited `/login`, which is exactly what arms that window while saying nothing about the credential pair, and com.heatzy has no heartbeat of its own to break out. The refusal now schedules one retry at the deadline it already knows.
+
+- **`ensureSession` can no longer await itself.** The enforced post-auth registry sync a refresh triggers re-entered the gate and joined the promise that was waiting on it, hanging every request on the client with no log line and no timeout. The refresh now runs inside a per-instance async scope its own descendants are excluded by, while a genuinely concurrent caller still shares the single flight.
+
+- **A raced sign-in's epilogue can no longer destroy a newer session.** It was gated on the logOut epoch alone — which answers "did a sign-out land after me?" and was used to answer "is what I stored still current?". An account switch silently reverted to the previous pair, and with a sign-out in between, the stale flight deleted the session and both credentials a newer sign-in had just established, after that sign-in had reported success. The verdict is now gated on the most recent sign-in as well.
+
 ### Added
 
 - **`EntityNotFoundError`** (exported from the root barrel): thrown when a facade resolves its device by id and the registry holds nothing under it. Carries the unresolved `entityId`. Mirrors melcloud-api's class of the same name, which had no twin here — the fix crossed only that repo when it was made, which is the transversal gap this release closes.
