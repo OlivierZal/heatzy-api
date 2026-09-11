@@ -4,6 +4,7 @@ import type {
   SessionAPIConfig,
 } from '@olivierzal/api-core'
 
+import type { Device } from '../entities/index.ts'
 import type { HttpClient } from '../http/index.ts'
 import type {
   Attributes,
@@ -37,6 +38,15 @@ export interface HeatzyAPIAdapter {
    * observer cannot break the caller.
    */
   readonly notifySync: SyncCallback
+  /**
+   * Resolve a device against the LIVE registry by its Gizwits id.
+   *
+   * Facades bind by id rather than by entity reference: the registry
+   * prunes and rebuilds its entries on every sync and on a sign-out, so
+   * a facade holding the object would keep reading a detached copy
+   * forever once that happened.
+   */
+  readonly getDeviceById: (id: string) => Device | undefined
   /**
    * Read the live attribute payload of a single device.
    */

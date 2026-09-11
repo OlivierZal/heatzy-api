@@ -13,7 +13,7 @@ import {
   POST_DATA_UNIT,
 } from '../constants.ts'
 import { syncDevices, updateDevice } from '../decorators/index.ts'
-import { AttributeNotFoundError } from '../errors/index.ts'
+import { AttributeNotFoundError, EntityNotFoundError } from '../errors/index.ts'
 import { isKeyOf, omitUndefined } from '../utils.ts'
 
 const isModeV1 = isKeyOf(modeToModeV1)
@@ -42,6 +42,18 @@ export class DeviceFacade {
    */
   public get derogationEndDate(): Temporal.ZonedDateTime | null {
     return this.device.derogationEndDate
+  }
+
+  /**
+   * Whether the underlying device still exists in the registry.
+   * Non-throwing introspection: answers `false` instead of throwing
+   * {@link EntityNotFoundError} when the registry no longer holds the
+   * id. For consumers that keep a cached facade reference and want to
+   * detect staleness without a `try`/`catch`.
+   * @returns `true` when the device is still resolvable.
+   */
+  public get exists(): boolean {
+    return this.api.getDeviceById(this.id) !== undefined
   }
 
   /**
@@ -78,20 +90,31 @@ export class DeviceFacade {
 
   protected readonly api: HeatzyAPIAdapter
 
-  protected readonly device: Device
-
   protected get data(): Attributes {
     return this.device.data
   }
 
+  // Resolved on EVERY access, never held. The registry prunes and
+  // rebuilds its entries on each sync and on a sign-out, so a facade
+  // that captured the object would keep reading a detached copy for the
+  // rest of the process — writes would still be sent, and every read
+  // would answer the state the device had when it was dropped.
+  protected get device(): Device {
+    const device = this.api.getDeviceById(this.id)
+    if (device === undefined) {
+      throw new EntityNotFoundError(this.id)
+    }
+    return device
+  }
+
   /**
-   * Builds the facade over a registry entity.
+   * Builds the facade over a registry entity. Only the device's
+   * IDENTITY is captured — the entity itself is resolved per access.
    * @param api - API surface the facade calls through.
    * @param device - Registry entity to wrap.
    */
   public constructor(api: HeatzyAPIAdapter, device: Device) {
     this.api = api
-    this.device = device
     this.id = device.id
     this.product = device.product
   }

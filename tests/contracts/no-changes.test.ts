@@ -89,29 +89,56 @@ const describeNoChangesContract = (
   })
 }
 
+// The facade resolves its device per access, so every generation seats
+// its entity into the adapter's lookup — the registry a real client
+// would hold.
+const seat = <T>(
+  api: HeatzyAPIAdapter,
+  device: Device,
+  build: (device: Device) => T,
+): T => {
+  vi.mocked(api.getDeviceById).mockImplementation((id: string) =>
+    id === device.id ? device : undefined,
+  )
+  return build(device)
+}
+
 const GENERATIONS = [
   {
     name: 'V1 device',
     build: (api: HeatzyAPIAdapter): DeviceFacade =>
-      new DeviceFacade(api, new Device(buildBinding('v1'), v1Attributes)),
+      seat(
+        api,
+        new Device(buildBinding('v1'), v1Attributes),
+        (device) => new DeviceFacade(api, device),
+      ),
   },
   {
     name: 'V2 device',
     build: (api: HeatzyAPIAdapter): DeviceV2Facade =>
-      new DeviceV2Facade(api, new Device(buildBinding('v2'), v2Attributes)),
+      seat(
+        api,
+        new Device(buildBinding('v2'), v2Attributes),
+        (device) => new DeviceV2Facade(api, device),
+      ),
   },
   {
     name: 'Glow device',
     build: (api: HeatzyAPIAdapter): DeviceGlowFacade =>
-      new DeviceGlowFacade(
+      seat(
         api,
         new Device(buildBinding('glow'), glowAttributes),
+        (device) => new DeviceGlowFacade(api, device),
       ),
   },
   {
     name: 'Pro device',
     build: (api: HeatzyAPIAdapter): DeviceProFacade =>
-      new DeviceProFacade(api, new Device(buildBinding('pro'), proAttributes)),
+      seat(
+        api,
+        new Device(buildBinding('pro'), proAttributes),
+        (device) => new DeviceProFacade(api, device),
+      ),
   },
 ] as const
 

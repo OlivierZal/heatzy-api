@@ -11,7 +11,7 @@ import type {
 } from '../types/index.ts'
 import { isModelledProduct } from '../constants.ts'
 import { setting, syncDevices } from '../decorators/index.ts'
-import { DeviceRegistry } from '../entities/index.ts'
+import { type Device, DeviceRegistry } from '../entities/index.ts'
 import { HttpClient, HttpStatus } from '../http/index.ts'
 import { redaction } from '../observability/context.ts'
 import { isSessionExpired } from '../resilience/index.ts'
@@ -277,6 +277,18 @@ export class HeatzyAPI
    */
   public async fetch(): Promise<readonly DeviceBinding[]> {
     return this.runBestEffortSyncCycle(async () => this.#syncCycle())
+  }
+
+  /**
+   * Resolve a device against the live registry by its Gizwits id — the
+   * lookup facades bind through, so a registry rebuild cannot strand a
+   * cached facade over a detached entity.
+   * @param id - Gizwits device id (`did`).
+   * @returns The registry device, or `undefined` when none answers to
+   * that id.
+   */
+  public getDeviceById(id: string): Device | undefined {
+    return this.#registry.devices.getById(id)
   }
 
   /**

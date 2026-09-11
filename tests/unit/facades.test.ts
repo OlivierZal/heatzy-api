@@ -16,7 +16,10 @@ import {
   TemperatureCompensation,
 } from '../../src/constants.ts'
 import { Device } from '../../src/entities/index.ts'
-import { AttributeNotFoundError } from '../../src/errors/index.ts'
+import {
+  AttributeNotFoundError,
+  EntityNotFoundError,
+} from '../../src/errors/index.ts'
 import {
   DeviceFacade,
   DeviceGlowFacade,
@@ -58,6 +61,15 @@ const createFacadeContext = <T>({
 }): FacadeContext<T> => {
   const api = createMockAdapter(apiOverrides)
   const device = new Device(buildBinding(binding), attributes)
+  // The facade resolves its device per access, so the adapter has to
+  // answer for it — the registry a real client would hold. A test that
+  // supplies its own lookup keeps it, which is how a pruned registry is
+  // simulated.
+  if (apiOverrides.getDeviceById === undefined) {
+    vi.mocked(api.getDeviceById).mockImplementation((id: string) =>
+      id === device.id ? device : undefined,
+    )
+  }
   return { api, device, facade: build(api, device) }
 }
 
@@ -285,7 +297,10 @@ describe(DeviceV2Facade, () => {
         id: 'did-v2',
         product: Product.v2,
       })
-      const facade = new DeviceV2Facade(createMockAdapter(), device)
+      const facade = new DeviceV2Facade(
+        createMockAdapter({ getDeviceById: () => device }),
+        device,
+      )
 
       expect(facade.derogationEndString).toBeNull()
     })
@@ -459,6 +474,43 @@ describe(DeviceProFacade, () => {
       expect(facade.isPresence).toBe(isPresence)
     },
   )
+})
+
+// A facade binds to the device's ID, never to the entity. The registry
+// prunes and rebuilds its entries on every sync and on a sign-out, and
+// a consumer that memoizes its facade — both shipped apps do — would
+// otherwise keep reading a detached object for the life of the process.
+describe('registry rebinding', () => {
+  it('follows the entity the registry replaces under the same id', () => {
+    const { api, device, facade } = createV1Facade()
+    const rebuilt = new Device(buildBinding('v1'), {
+      ...v1Attributes,
+      mode: Mode.eco,
+    })
+    vi.mocked(api.getDeviceById).mockImplementation((id: string) =>
+      id === rebuilt.id ? rebuilt : undefined,
+    )
+
+    expect(device.id).toBe(rebuilt.id)
+    expect(facade.mode).toBe(Mode.eco)
+  })
+
+  it('answers exists while the device is in the registry, and after', () => {
+    const { api, facade } = createV1Facade()
+
+    expect(facade.exists).toBe(true)
+
+    vi.mocked(api.getDeviceById).mockReturnValue(undefined)
+
+    expect(facade.exists).toBe(false)
+  })
+
+  it('throws EntityNotFoundError when the registry has dropped it', () => {
+    const { api, facade } = createV1Facade()
+    vi.mocked(api.getDeviceById).mockReturnValue(undefined)
+
+    expect(() => facade.mode).toThrow(EntityNotFoundError)
+  })
 })
 
 describe(FacadeManager, () => {

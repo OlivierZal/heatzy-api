@@ -60,6 +60,19 @@ describe(HeatzyAPI, () => {
   })
 
   describe('endpoints and validation', () => {
+    // The lookup facades bind through: they hold the id, never the
+    // entity, so a registry rebuild cannot strand a cached facade.
+    it('resolves a synced device by id, and nothing for an unknown one', async () => {
+      const { api } = await createAuthedApi()
+      const binding = buildBinding('pro')
+      api.registry.syncDevices([binding], { [binding.did]: proAttributes })
+      const [device] = api.registry.getDevices()
+
+      expect(device).toBeDefined()
+      expect(api.getDeviceById(binding.did)).toBe(device)
+      expect(api.getDeviceById('did-absent')).toBeUndefined()
+    })
+
     it('lists bindings without touching the registry', async () => {
       const { api } = await createAuthedApi()
       const binding = buildBinding('v2')

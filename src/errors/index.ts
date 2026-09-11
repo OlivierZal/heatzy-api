@@ -1,5 +1,6 @@
 export { AttributeNotFoundError } from './attribute-not-found.ts'
 export { AuthenticationError } from './authentication.ts'
 export { APIError, isAPIError } from './base.ts'
+export { EntityNotFoundError } from './entity-not-found.ts'
 export { RegistrySyncError } from './registry-sync.ts'
 export { ValidationError } from './validation.ts'
