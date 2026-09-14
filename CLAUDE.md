@@ -451,9 +451,9 @@ environments travel with them), and the composite
 adoption — the called jobs reach configs' own copy through
 `$/`, GitHub's self-repository syntax (the repository that defines the
 workflow, at the running commit; GitHub.com only, runner 2.336.0 or
-newer) — handed the job `GITHUB_TOKEN` as `npm-token` by the
-reusable (the configs dependency lives on GitHub Packages, where even
-reads need auth). `docs.yml` also takes a `workflow_dispatch` boolean
+newer); the reusable hands each install the job `GITHUB_TOKEN` as
+`npm-token` (the configs dependency lives on GitHub Packages, where
+even reads need auth). `docs.yml` also takes a `workflow_dispatch` boolean
 `dry-run`: the reusable builds and packs the site without deploying it
 — the one rehearsal a release-only path gets, so dispatch it once after
 every adoption that moves the configs ref and watch the build half
