@@ -13,8 +13,6 @@ import { Device, syncDevice } from './device.ts'
  * @category Entities
  */
 export class DeviceRegistry {
-  readonly #devices = new Map<string, Device>()
-
   public readonly devices = {
     /**
      * Returns the device with the given id, or `undefined` when no such device is registered.
@@ -23,6 +21,8 @@ export class DeviceRegistry {
      */
     getById: (id: string): Device | undefined => this.#devices.get(id),
   }
+
+  readonly #devices = new Map<string, Device>()
 
   readonly #timezone: string | undefined
 
