@@ -1,6 +1,14 @@
 export { AttributeNotFoundError } from './attribute-not-found.ts'
-export { AuthenticationError } from './authentication.ts'
-export { APIError, isAPIError } from './base.ts'
 export { EntityNotFoundError } from './entity-not-found.ts'
-export { RegistrySyncError } from './registry-sync.ts'
-export { ValidationError } from './validation.ts'
+// The core's error family is forwarded under unchanged names so
+// `instanceof` holds across the SDK and the core alike; the two classes
+// declared here are the protocol's own, and they extend `APIError`
+// through the package specifier — never through this barrel, which
+// would form an eval-time cycle under `class extends`.
+export {
+  APIError,
+  AuthenticationError,
+  isAPIError,
+  RegistrySyncError,
+  ValidationError,
+} from '@olivierzal/api-core'

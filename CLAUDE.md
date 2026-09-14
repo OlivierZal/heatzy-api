@@ -227,11 +227,13 @@ Architecture, toolchain and process are aligned on the sibling
   (16.1.0) both the guard and the throttle-widened backoff branch are
   the core's own code: the branch is inherited but never taken, because
   nothing on this wire ever constructs the throttle class — which also
-  stays deliberately un-re-exported. `src/errors/authentication.ts` is
-  a plain re-export of the core class: it was a const + type PAIR while
-  the core's doc hard-linked the throttle subclass (a link typedoc could
-  not resolve from this package); api-core 1.2.0 names that subclass in
-  code font precisely so the shim could return to a bare re-export.
+  stays deliberately un-re-exported. `AuthenticationError` reaches this
+  SDK as a bare forward in `src/errors/index.ts` (the per-file shim was
+  folded into the barrel in 18.0.1): it had been a const + type PAIR
+  while the core's doc hard-linked the throttle subclass (a link typedoc
+  could not resolve from this package); api-core 1.2.0 names that
+  subclass in code font precisely so the forward could return to a bare
+  re-export.
 - **No `logLabel`**: a single client — nothing to disambiguate in
   logs. The core makes the label OPTIONAL and `HeatzyAPI` passes none,
   so every seat receives the host logger unwrapped and every line
@@ -319,10 +321,15 @@ ONCE, into `super()`: the reactive re-auth rung owns the set and the
 core's protected `toAuthFailure(error, message)` consults it on the
 sign-in path, so `doAuthenticate` constructs no `AuthenticationError`
 of its own; NO `logLabel`; NO `rateLimitHours`), the twelve dialect
-hooks in `src/api/heatzy.ts`, the wire types, the schemas, the facades,
-and thin re-export modules that keep internal import paths stable. A
-mechanism change happens in api-core and arrives here as a release +
-exact-pin bump PR; never re-implement one locally. The moved mechanism
+hooks in `src/api/heatzy.ts`, the wire types, the schemas and the
+facades; the directory barrels (`errors/`, `http/`, `resilience/`,
+`decorators/`, `types/`) forward the core's names directly — the
+one-line re-export shims that once sat between were folded in 18.0.1,
+and the two local `APIError` subclasses extend the core's class through
+the package specifier, never through the errors barrel (an eval-time
+cycle under `class extends`). A mechanism change happens in api-core
+and arrives here as a release + exact-pin bump PR; never re-implement
+one locally. The moved mechanism
 test suites live in api-core too — this repo's
 `observability.test.ts`/`http-client.test.ts`/`heatzy-api-*.test.ts`
 are thin vocabulary/wiring suites pinning what is OURS. The test
