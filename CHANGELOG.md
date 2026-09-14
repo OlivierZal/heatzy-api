@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [18.1.0] - 2026-09-14
+
+### Changed
+
+- **The registry refreshes every five seconds again, the cadence the app ran on for years.** June's `DEFAULT_SYNC_INTERVAL = 5` was in seconds; carrying the number onto api-core's `syncIntervalMinutes` made it five minutes without anyone deciding so, and Gizwits pushes nothing — a radiator changed from the physical device or the Heatzy app reaches Homey only by polling, so sixty times slower was a regression. With a 5-second cadence an overlap between a write and the refresh is the common case, which is why this rides api-core 1.7.0: the core parks the auto-sync tick around every mutation and for a 3-second settle window after it, so a refresh can no longer read the pre-write state back into the registry — and the tick is only ever delayed, never advanced.
+
+### Fixed
+
+- **A refused request says why again.** June's error path surfaced Gizwits' `detail_message ?? error_message` — the reason the wire gives for a refusal — and the extraction dropped it: every non-2xx read `Request failed with status code N`. The transport now seats a reader (`HttpClientConfig.describeFailure`, api-core 1.7.1) that puts the wire's reason in the `HttpError` message, falling back to the status line when the body carries none.
+- **The exact `@olivierzal/api-core` pin advances to 1.7.1** for both.
+
 ## [18.0.1] - 2026-09-14
 
 ### Changed
@@ -261,6 +272,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[18.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v18.0.1...v18.1.0
 [18.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v18.0.0...v18.0.1
 [18.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v17.0.0...v18.0.0
 [17.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.2.0...v17.0.0

@@ -80,6 +80,17 @@ export interface DeviceV1PostData {
 }
 
 /**
+ * The body of every non-2xx Gizwits response: the reason the wire gives
+ * for a refusal — a code, and two messages of which the detail wins.
+ * @category Types
+ */
+export interface ErrorData {
+  readonly detail_message: string | null
+  readonly error_code: number
+  readonly error_message: string | null
+}
+
+/**
  * `/login` response: the user token and its expiry (epoch seconds).
  * @category Types
  */

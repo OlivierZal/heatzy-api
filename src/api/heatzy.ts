@@ -37,7 +37,15 @@ const APPLICATION_ID = 'c70a66ff039d41b4a220e198b0fcc8b3'
 const USER_TOKEN_HEADER = 'X-Gizwits-User-token'
 const LOGIN_PATH = '/login'
 
-const DEFAULT_SYNC_INTERVAL_MINUTES = 5
+// Five seconds, the cadence the app ran on for years: Gizwits pushes
+// nothing, so a radiator changed from the physical device or the Heatzy
+// app reaches Homey only by polling. The core's knob is in minutes; the
+// core parks the tick around every write (1.7.0), which is what makes a
+// cadence this short safe against a refresh overlapping a write.
+const DEFAULT_SYNC_INTERVAL_SECONDS = 5
+const SECONDS_PER_MINUTE = 60
+const DEFAULT_SYNC_INTERVAL_MINUTES =
+  DEFAULT_SYNC_INTERVAL_SECONDS / SECONDS_PER_MINUTE
 const DEFAULT_TIMEOUT_MS = 30_000
 
 const buildTransport = (transport: TransportConfig | undefined): HttpClient =>

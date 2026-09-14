@@ -234,6 +234,21 @@ Architecture, toolchain and process are aligned on the sibling
   could not resolve from this package); api-core 1.2.0 names that
   subclass in code font precisely so the forward could return to a bare
   re-export.
+- **Cadence: five seconds**, as in June. `DEFAULT_SYNC_INTERVAL = 5`
+  was in SECONDS before the extraction; carrying the number onto the
+  core's `syncIntervalMinutes` silently made it five minutes, and a
+  radiator changed from the device or the Heatzy app then took up to
+  five minutes to reach Homey. 18.1.0 restored the cadence (`5 / 60`
+  minutes, spelled from two named constants). It is safe against a
+  refresh overlapping a write only because api-core 1.7.1 parks the
+  tick around every mutation and for a 3-second settle window after
+  it — never re-shorten a cadence on a core that does not.
+- **Failure reasons**: the transport seats `describeFailure`
+  (`src/http/failure.ts`, through `HttpClientConfig.describeFailure`)
+  so a thrown `HttpError` says what Gizwits said —
+  `detail_message ?? error_message`, June's own precedence — and falls
+  back to the status line when the body carries none. The reader sees
+  the parsed body before redaction and copies only those two fields.
 - **No `logLabel`**: a single client — nothing to disambiguate in
   logs. The core makes the label OPTIONAL and `HeatzyAPI` passes none,
   so every seat receives the host logger unwrapped and every line
@@ -305,7 +320,11 @@ decorators (the latter in factory form, `@syncDevices()`, since
 `RegistrySyncError`, and since 17.0.0 `ValidationError` — re-exported
 here under unchanged public names so `instanceof` holds across the SDK
 and the core alike; `parseOrThrow`, the zod boundary that constructs
-`ValidationError`, stays here). Those modules used to be
+`ValidationError`, stays here; `setting` stays on the root barrel too,
+though melcloud-api exports none and no consumer imports it — an
+asymmetry accepted 2026-09-14 rather than a major for a zero-consumer
+symbol: a consumer may decorate its own persisted accessor with the
+core's cleared-sentinel rule). Those modules used to be
 melcloud-api's byte-identical twins ("edit both or neither"); the
 divergence episode above expired that discipline, and the extraction
 replaced it. This repo keeps ONLY its protocol layer: the Gizwits

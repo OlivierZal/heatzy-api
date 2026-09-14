@@ -85,6 +85,69 @@ describe(HttpClient, () => {
     await expect(promise).rejects.toThrow(HttpError)
     await expect(promise).rejects.toSatisfy((error) => isHttpError(error))
   })
+
+  // June surfaced the wire's own reason; the extraction dropped it.
+  it('says what Gizwits said when a failed response carries a reason', async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse(
+        {
+          detail_message: null,
+          error_code: 9021,
+          error_message: 'token invalid',
+        },
+        {},
+        400,
+      ),
+    )
+    const client = new HttpClient({ baseURL: BASE_URL, timeout: 0 })
+
+    await expect(client.request({ url: '/bindings' })).rejects.toThrow(
+      'token invalid',
+    )
+  })
+
+  it('prefers the detail message and falls back to the status line', async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse(
+        {
+          detail_message: 'device offline',
+          error_code: 9042,
+          error_message: 'busy',
+        },
+        {},
+        400,
+      ),
+    )
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse(
+        { detail_message: null, error_code: 0, error_message: null },
+        {},
+        502,
+      ),
+    )
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse(
+        { detail_message: 0, error_code: 0, error_message: ['busy'] },
+        {},
+        503,
+      ),
+    )
+    mockFetch.mockResolvedValueOnce(mockFetchResponse({ ok: false }, {}, 500))
+    const client = new HttpClient({ baseURL: BASE_URL, timeout: 0 })
+
+    await expect(client.request({ url: '/bindings' })).rejects.toThrow(
+      'device offline',
+    )
+    await expect(client.request({ url: '/bindings' })).rejects.toThrow(
+      'Request failed with status code 502',
+    )
+    await expect(client.request({ url: '/bindings' })).rejects.toThrow(
+      'Request failed with status code 503',
+    )
+    await expect(client.request({ url: '/bindings' })).rejects.toThrow(
+      'Request failed with status code 500',
+    )
+  })
 })
 
 describe('httpError re-export', () => {
