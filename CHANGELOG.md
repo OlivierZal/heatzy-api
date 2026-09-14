@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **The exact `@olivierzal/api-core` pin advances to 1.6.0: two session-epilogue fixes, behaviour only.** A stored pair that Gizwits has definitively refused is now parked until the next accepted sign-in — it was replayed every 15-minute backoff window for the life of the process, the hammering the disarm-on-refusal verdict exists to prevent (this wire never throttles, so the throttle branch that keeps its retry stays inherited and untaken). And only a sign-in that began after the last sign-out claims the session: a stale flight answered after a sign-out no longer leaves a session standing behind it. No surface moves, so the adoption is the pin.
 - **The twelve one-line re-export modules of `@olivierzal/api-core` are gone; the directory barrels forward the core's names directly.** Each shim was imported by its own barrel and by nothing else. The two local `APIError` subclasses now extend the core's class through the package specifier — never through the errors barrel, which would form an eval-time cycle under `class extends`. The Gizwits credential doc rides the specifier in `src/types/index.ts`, where typedoc reads it as before. Public names, types and the single `.` subpath are unchanged; melcloud-api's twin fold is 57.2.1.
 
 ## [18.0.0] - 2026-09-11
