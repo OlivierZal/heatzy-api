@@ -447,8 +447,11 @@ configs 5.0.0 `publish.yml` and `docs.yml` too (`reusable-publish.yml`,
 `reusable-docs.yml`): the caller keeps the `release` trigger and grants
 exactly what the called jobs declare (the `npm` and `github-pages`
 environments travel with them), and the composite
-`setup-node-and-install` action stays LOCAL because the called jobs run
-the CALLER's copy, handed the job `GITHUB_TOKEN` as `npm-token` by the
+`setup-node-and-install` action is gone since the configs 6.1.0
+adoption — the called jobs reach configs' own copy through
+`$/`, GitHub's self-repository syntax (the repository that defines the
+workflow, at the running commit; GitHub.com only, runner 2.336.0 or
+newer) — handed the job `GITHUB_TOKEN` as `npm-token` by the
 reusable (the configs dependency lives on GitHub Packages, where even
 reads need auth). `docs.yml` also takes a `workflow_dispatch` boolean
 `dry-run`: the reusable builds and packs the site without deploying it
