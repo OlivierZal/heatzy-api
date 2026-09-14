@@ -1,2 +1,1 @@
-export { RetryGuard } from './retry-guard.ts'
-export { isSessionExpired } from './session-expiry.ts'
+export { isSessionExpired, RetryGuard } from '@olivierzal/api-core'

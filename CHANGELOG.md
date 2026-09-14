@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [18.0.1] - 2026-09-14
+
+### Changed
+
+- **The twelve one-line re-export modules of `@olivierzal/api-core` are gone; the directory barrels forward the core's names directly.** Each shim was imported by its own barrel and by nothing else. The two local `APIError` subclasses now extend the core's class through the package specifier — never through the errors barrel, which would form an eval-time cycle under `class extends`. The Gizwits credential doc rides the specifier in `src/types/index.ts`, where typedoc reads it as before. Public names, types and the single `.` subpath are unchanged; melcloud-api's twin fold is 57.2.1.
+
 ## [18.0.0] - 2026-09-11
 
 ### Breaking changes
@@ -254,6 +260,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[18.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v18.0.0...v18.0.1
 [18.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v17.0.0...v18.0.0
 [17.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.2.0...v17.0.0
 [16.2.0]: https://github.com/OlivierZal/heatzy-api/compare/v16.1.0...v16.2.0

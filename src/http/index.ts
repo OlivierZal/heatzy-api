@@ -8,6 +8,6 @@ export { HttpClient } from './client.ts'
 export {
   type HttpErrorRequestConfig,
   HttpError,
+  HttpStatus,
   isHttpError,
-} from './errors.ts'
-export { HttpStatus } from './status.ts'
+} from '@olivierzal/api-core'

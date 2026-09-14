@@ -1,4 +1,4 @@
-import { APIError } from './base.ts'
+import { APIError } from '@olivierzal/api-core'
 
 /**
  * Thrown when a facade resolves its underlying registry device by id and
