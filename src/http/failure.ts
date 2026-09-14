@@ -9,15 +9,17 @@ import type { ErrorData } from '../types/index.ts'
 const isReason = (value: unknown): value is string | null =>
   value === null || typeof value === 'string'
 
-// Presence AND type: a body that carries the two keys with something
-// other than a string or null is not the wire's shape, and the status
-// line stands in rather than a non-string message.
+// Presence AND type: a body that carries the three keys with something
+// other than a number and two strings-or-null is not the wire's shape,
+// and the status line stands in rather than a non-string message.
 const isErrorData = (data: unknown): data is ErrorData =>
   data !== null &&
   typeof data === 'object' &&
   'detail_message' in data &&
+  'error_code' in data &&
   'error_message' in data &&
   isReason(data.detail_message) &&
+  typeof data.error_code === 'number' &&
   isReason(data.error_message)
 
 /**

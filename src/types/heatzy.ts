@@ -81,11 +81,12 @@ export interface DeviceV1PostData {
 
 /**
  * The body of every non-2xx Gizwits response: the reason the wire gives
- * for a refusal, in two fields of which the detail wins.
+ * for a refusal — a code, and two messages of which the detail wins.
  * @category Types
  */
 export interface ErrorData {
   readonly detail_message: string | null
+  readonly error_code: number
   readonly error_message: string | null
 }
 
