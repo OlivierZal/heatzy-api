@@ -12,8 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- **A refused request says why again.** June's error path surfaced Gizwits' `detail_message ?? error_message` — the reason the wire gives for a refusal — and the extraction dropped it: every non-2xx read `Request failed with status code N`. The transport now seats a reader (`HttpClientConfig.describeFailure`, api-core 1.7.0) that puts the wire's reason in the `HttpError` message, falling back to the status line when the body carries none.
-- **The exact `@olivierzal/api-core` pin advances to 1.7.0** for both.
+- **A refused request says why again.** June's error path surfaced Gizwits' `detail_message ?? error_message` — the reason the wire gives for a refusal — and the extraction dropped it: every non-2xx read `Request failed with status code N`. The transport now seats a reader (`HttpClientConfig.describeFailure`, api-core 1.7.1) that puts the wire's reason in the `HttpError` message, falling back to the status line when the body carries none.
+- **The exact `@olivierzal/api-core` pin advances to 1.7.1** for both.
 
 ## [18.0.1] - 2026-09-14
 

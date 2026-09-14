@@ -125,6 +125,13 @@ describe(HttpClient, () => {
         502,
       ),
     )
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse(
+        { detail_message: 0, error_code: 0, error_message: ['busy'] },
+        {},
+        503,
+      ),
+    )
     mockFetch.mockResolvedValueOnce(mockFetchResponse({ ok: false }, {}, 500))
     const client = new HttpClient({ baseURL: BASE_URL, timeout: 0 })
 
@@ -133,6 +140,9 @@ describe(HttpClient, () => {
     )
     await expect(client.request({ url: '/bindings' })).rejects.toThrow(
       'Request failed with status code 502',
+    )
+    await expect(client.request({ url: '/bindings' })).rejects.toThrow(
+      'Request failed with status code 503',
     )
     await expect(client.request({ url: '/bindings' })).rejects.toThrow(
       'Request failed with status code 500',

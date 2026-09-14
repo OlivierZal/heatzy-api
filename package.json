@@ -46,7 +46,7 @@
   },
   "prettier": "@olivierzal/configs/prettier",
   "dependencies": {
-    "@olivierzal/api-core": "1.7.0",
+    "@olivierzal/api-core": "1.7.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {

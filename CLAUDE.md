@@ -240,7 +240,7 @@ Architecture, toolchain and process are aligned on the sibling
   radiator changed from the device or the Heatzy app then took up to
   five minutes to reach Homey. 18.1.0 restored the cadence (`5 / 60`
   minutes, spelled from two named constants). It is safe against a
-  refresh overlapping a write only because api-core 1.7.0 parks the
+  refresh overlapping a write only because api-core 1.7.1 parks the
   tick around every mutation and for a 3-second settle window after
   it — never re-shorten a cadence on a core that does not.
 - **Failure reasons**: the transport seats `describeFailure`
