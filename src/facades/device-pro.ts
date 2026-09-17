@@ -1,4 +1,9 @@
-import { DerogationMode, Mode, TEMPERATURE_SCALE } from '../constants.ts'
+import {
+  DerogationMode,
+  isMode,
+  Mode,
+  TEMPERATURE_SCALE,
+} from '../constants.ts'
 import { DeviceGlowFacade } from './device-glow.ts'
 
 /**
@@ -20,10 +25,12 @@ export class DeviceProFacade extends DeviceGlowFacade {
    * The mode the device is actually applying right now (wire
    * `cur_mode`), which can differ from the commanded `mode` during a
    * presence derogation.
-   * @returns The reported mode.
+   * @returns The reported mode, or `null` when the wire answers a value
+   * this SDK does not model (a code outside the six labels, `null`).
    */
-  public get currentMode(): Mode {
-    return this.getValue('cur_mode')
+  public get currentMode(): Mode | null {
+    const value: unknown = this.getValue('cur_mode')
+    return isMode(value) ? value : null
   }
 
   /**
@@ -49,7 +56,7 @@ export class DeviceProFacade extends DeviceGlowFacade {
    */
   public get isPresence(): boolean {
     return (
-      this.getValue('derog_mode') === DerogationMode.presence &&
+      this.derogationMode === DerogationMode.presence &&
       this.currentMode === Mode.comfort
     )
   }

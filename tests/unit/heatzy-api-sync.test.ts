@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { RequestErrorEvent, SyncCallback } from '../../src/api/types.ts'
 import { HeatzyAPI } from '../../src/api/heatzy.ts'
+import { ValidationError } from '../../src/errors/index.ts'
 import { buildBinding, buildLoginData, proAttributes } from '../fixtures.ts'
 import {
   createAuthedApi,
@@ -29,6 +30,24 @@ import { mockResponse } from '../helpers.ts'
 const TRANSIENT_RETRY_WINDOW_MS = 30_000
 
 const UNREADABLE_DEVICE_PATH = '/devdata/did-v2/latest'
+
+// Stages the registry cycle with a mode and a binding list read per
+// cycle, so a clause can change either between two fetches.
+const stageRegistry = (wire: {
+  bindings: () => readonly unknown[]
+  mode: () => unknown
+}): void => {
+  stageHeatzyWire(mockRequest, {
+    login: () => mockResponse(buildLoginData()),
+    rest: (config) =>
+      config.url === '/devdata/did-pro/latest'
+        ? mockResponse({ attr: { ...proAttributes, mode: wire.mode() } })
+        : heatzyRegistryResponse(config, {
+            attributes: proAttributes,
+            bindings: wire.bindings(),
+          }),
+  })
+}
 
 describe(HeatzyAPI, () => {
   beforeEach(wireSetup)
@@ -139,6 +158,256 @@ describe(HeatzyAPI, () => {
       // factory forwards what it was built with, where this repo's
       // former bare decorator called `notifySync()` with no argument.
       expect(onSyncComplete).toHaveBeenCalledWith(undefined)
+    })
+  })
+
+  // A device that stays unreadable fails the same way on every cycle.
+  // At the five-second cadence one line per failed read was 17,280 full
+  // error entries a day: the failure is reported when its streak starts,
+  // when its reason changes and every sixty identical cycles — so a
+  // diagnostic report's tail still carries it — and closed by one
+  // recovery line.
+  describe('failure streaks', () => {
+    const SKIP_LINE =
+      'Skipping device did-pro: its live attributes could not be read'
+    const DROPPED_LINE =
+      'Dropped 1 of 2 /bindings entries: device did-new (unknown product_key unshipped)'
+    const unshippedBinding = buildBinding('pro', {
+      did: 'did-new',
+      product_key: 'unshipped',
+    })
+
+    const fetchCycles = async (
+      api: HeatzyAPI,
+      cycles: number,
+    ): Promise<void> => {
+      if (cycles === 0) {
+        return
+      }
+      await api.fetch()
+      await fetchCycles(api, cycles - 1)
+    }
+
+    it('reports an unreadable device once per streak, not once per cycle', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      stageRegistry({
+        bindings: () => [buildBinding('pro')],
+        mode: () => 'cft3',
+      })
+
+      await fetchCycles(api, 3)
+
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(
+        SKIP_LINE,
+        expect.any(ValidationError),
+      )
+    })
+
+    it('reminds of the streak every sixty identical failures', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      stageRegistry({
+        bindings: () => [buildBinding('pro')],
+        mode: () => 'cft3',
+      })
+
+      await fetchCycles(api, 60)
+
+      expect(logger.error).toHaveBeenCalledTimes(2)
+      expect(logger.error).toHaveBeenLastCalledWith(
+        'Skipping device did-pro: still unreadable after 60 consecutive reads (ValidationError: attr.mode)',
+      )
+    })
+
+    // The message names the value received; the streak is keyed on
+    // WHERE the payload was refused, so a drifting value is one streak.
+    it('keeps one streak while the refused value changes', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      let mode = 'cft3'
+      stageRegistry({ bindings: () => [buildBinding('pro')], mode: () => mode })
+
+      await api.fetch()
+      mode = 'cft4'
+      await api.fetch()
+
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(
+        SKIP_LINE,
+        expect.any(ValidationError),
+      )
+    })
+
+    it('reports the failure in full again when its reason changes', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      let isRefusing = true
+      stageHeatzyWire(mockRequest, {
+        login: () => mockResponse(buildLoginData()),
+        rest: (config) => {
+          if (config.url !== '/devdata/did-pro/latest') {
+            return heatzyRegistryResponse(config, {
+              attributes: proAttributes,
+              bindings: [buildBinding('pro')],
+            })
+          }
+          if (isRefusing) {
+            return mockResponse({ attr: { ...proAttributes, mode: 'cft3' } })
+          }
+          throw createServerError(404, config.url)
+        },
+      })
+
+      await api.fetch()
+      isRefusing = false
+      await api.fetch()
+
+      expect(vi.mocked(logger.error).mock.calls).toStrictEqual([
+        [SKIP_LINE, expect.any(ValidationError)],
+        [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
+      ])
+    })
+
+    // The request pipeline logs every failed attempt; once the streak
+    // is open, those lines would repeat it on every cycle.
+    it('lets the streak alone report a device whose read keeps failing at the transport', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      stageHeatzyWire(mockRequest, {
+        login: () => mockResponse(buildLoginData()),
+        rest: (config) => {
+          if (config.url === '/devdata/did-pro/latest') {
+            throw createServerError(404, config.url)
+          }
+          return heatzyRegistryResponse(config, {
+            attributes: proAttributes,
+            bindings: [buildBinding('pro')],
+          })
+        },
+      })
+
+      await fetchCycles(api, 3)
+
+      expect(vi.mocked(logger.error).mock.calls).toStrictEqual([
+        [expect.stringContaining('"url": "/devdata/did-pro/latest"')],
+        [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
+      ])
+    })
+
+    it('closes the streak with one recovery line', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      let mode = 'cft3'
+      stageRegistry({ bindings: () => [buildBinding('pro')], mode: () => mode })
+
+      await fetchCycles(api, 2)
+      mode = 'cft'
+      await fetchCycles(api, 2)
+
+      expect(api.registry.devices.getById('did-pro')).toBeDefined()
+      expect(
+        vi
+          .mocked(logger.log)
+          .mock.calls.filter(([message]) =>
+            String(message).startsWith('Device did-pro:'),
+          ),
+      ).toStrictEqual([
+        [
+          'Device did-pro: its live attributes are readable again after 2 failed reads',
+        ],
+      ])
+    })
+
+    // A host transport can reject with a value that is not an Error;
+    // the leg receives it unwrapped (probed), and a streak still needs
+    // an identity for it.
+    it('keys a streak on a non-Error rejection by its string or its type', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      const readDevice = vi
+        .fn<() => Promise<ReturnType<typeof mockResponse>>>()
+        .mockRejectedValueOnce('offline')
+        .mockRejectedValueOnce('offline')
+        .mockRejectedValueOnce(7)
+        .mockRejectedValueOnce(8)
+      mockRequest.mockImplementation(async (config) =>
+        config.url === '/devdata/did-pro/latest'
+          ? readDevice()
+          : heatzyRegistryResponse(config, {
+              attributes: proAttributes,
+              bindings: [buildBinding('pro')],
+            }),
+      )
+
+      await fetchCycles(api, 4)
+
+      expect(vi.mocked(logger.error).mock.calls).toStrictEqual([
+        [SKIP_LINE, 'offline'],
+        [SKIP_LINE, 7],
+      ])
+    })
+
+    it('starts a new streak for a device that left the account and came back', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      let bindings: readonly unknown[] = [buildBinding('pro')]
+      stageRegistry({ bindings: () => bindings, mode: () => 'cft3' })
+
+      await api.fetch()
+      bindings = []
+      await api.fetch()
+      bindings = [buildBinding('pro')]
+      await api.fetch()
+
+      expect(logger.error).toHaveBeenCalledTimes(2)
+    })
+
+    it('starts a new streak after a sign-out', async () => {
+      const logger = createLogger()
+      const { api, settingManager } = await createAuthedApi({ logger })
+      stageRegistry({
+        bindings: () => [buildBinding('pro')],
+        mode: () => 'cft3',
+      })
+
+      await api.fetch()
+      api.logOut()
+      settingManager.set('token', 'user-token')
+      await api.fetch()
+
+      expect(logger.error).toHaveBeenCalledTimes(2)
+    })
+
+    it('reports a listing drop once per streak and closes it on recovery', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      let bindings: readonly unknown[] = [buildBinding('pro'), unshippedBinding]
+      stageRegistry({ bindings: () => bindings, mode: () => 'cft' })
+
+      await fetchCycles(api, 2)
+      bindings = [buildBinding('pro')]
+      await api.fetch()
+
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(DROPPED_LINE)
+      expect(logger.log).toHaveBeenCalledWith(
+        'Every /bindings entry is readable again after 2 listings with drops',
+      )
+    })
+
+    it('reminds of a listing drop every sixty identical listings', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      stageRegistry({
+        bindings: () => [buildBinding('pro'), unshippedBinding],
+        mode: () => 'cft',
+      })
+
+      await fetchCycles(api, 60)
+
+      expect(logger.error).toHaveBeenCalledTimes(2)
+      expect(logger.error).toHaveBeenLastCalledWith(
+        `${DROPPED_LINE} (unchanged over 60 listings)`,
+      )
     })
   })
 

@@ -101,20 +101,70 @@ Architecture, toolchain and process are aligned on the sibling
   leg (`Promise.allSettled`) feeding the registry the `undefined` it
   documents. `DeviceRegistry` runs no guard of its own — it builds a
   model per entry — so the boundary is what it relies on. Listing
-  drops are reported as ONE aggregated line per cycle naming every
-  dropped device with its verdict — never one line per entry, because
-  the listing carries every device of the account on every cycle and a
+  drops are reported as ONE aggregated line naming every dropped
+  device with its verdict — never one line per entry, because the
+  listing carries every device of the account on every cycle and a
   listing-wide regression must not storm the host logger exactly when
   the diagnostic report most needs to stay readable (16.0.0, the shape
   melcloud-api settled under the identical rationale in its 54.0.0).
   The two verdicts stay worded APART inside that line: a malformed
   entry means the schema is wrong, an unresolved `product_key` means
   the product map is stale, and an undifferentiated drop would leave
-  one indistinguishable symptom. The `/devdata` fan-out keeps its
-  per-device line — its failures each cost a wire call, so their
-  volume is bounded by the failed reads, never by the listing's size.
-  Only an envelope that is not a device list still fails the whole
-  cycle.
+  one indistinguishable symptom. Only an envelope that is not a device
+  list still fails the whole cycle.
+- **Failures are reported as STREAKS, not per cycle** (19.0.0). 16.0.0
+  kept one line per failed `/devdata` read because its volume was
+  "bounded by the failed reads" — a premise reasoned at a five-minute
+  cadence (288 cycles a day). 18.1.0 moved the cadence to five seconds
+  and left the line alone: one stuck device became 17,280 full error
+  entries a day, and a schema regression hits every device of a
+  generation, so the failed reads DID grow with the listing. A streak
+  (`FailureStreak` in `src/api/heatzy.ts`) is reported when it starts
+  (full line, error object and cause), when its reason changes, and
+  every 60 identical failures — the five minutes the 16.0.0 verdict
+  accepted, and enough for a diagnostic report's tail to still carry
+  it — then closed by one `log` line. The `/bindings` drop line
+  follows the same rule. A streak's identity is the error's name and
+  message, and for a zod refusal its failing PATHS
+  (`describeRefusedPaths`): the message names the values received, and
+  a drifting value must not reopen the streak on every read. The core's
+  per-attempt `logError` line would repeat an HTTP failure on every
+  cycle, so `HeatzyAPI` overrides it to hold back that line for a
+  `/devdata` read whose device already has an open streak — the cycle
+  that opens the streak still logs it, the shape of melcloud's Home
+  override for the `/context` 404. The state is in memory, stored BEFORE the
+  line is written (a throwing host logger never loses it), pruned for
+  a device that leaves the listing, and cleared on sign-out.
+- **A READ checks wire TYPES, not a vocabulary; `null` answers the
+  unmodelled** (19.0.0). The 10.0.0 rewrite put closed literals on
+  `com_temp` (0|50|100, copied from a 2024 enum that read the vendor
+  doc's example points as the whole set) and `cur_mode` (six Latin
+  labels). Gizwits declares `com_temp` a calibration register (0–100
+  on the Pro, 0–255 on the Glow family) and the Glow family's
+  `cur_mode` a number, and the V1 Pilote's `mode` enum in Chinese:
+  every Glow, Onyx, Shine, calibrated Pro and V1 failed its whole read
+  from com.heatzy 23.0.0 on, silently re-registered as "not found"
+  after any restart. melcloud-api's doctrine was right and this SDK
+  had not followed it: new wire vocabulary must never break a
+  consumer's sync. So `com_temp` is a number, `cur_mode` a label, a
+  number or `null`, `derog_mode` an integer (the wire allows 4 and 5,
+  no document defines them), and the facades read them through
+  `isMode` / `isDerogationMode`. `mode` stays the ONE closed literal:
+  it is the write vocabulary, the V1 labels are translated ahead of
+  it (`modeV1Labels`), and a label it cannot map is a real protocol
+  change worth a failed read. Test with FIELD payloads
+  (`tests/fixtures.ts` `field*`, verbatim from a real account), never
+  only with synthesized ones: the synthesized Glow fixture carried
+  `com_temp: 50` and no `cur_mode`, which is how the regression passed
+  a 100 % suite for two months.
+- **A refused payload names what was received, only where no
+  credential rides** (19.0.0). zod keeps no input in its issues, and
+  enabling its `reportInput` would print a container's whole subtree —
+  the login body (the token) or a `/bindings` list (each passcode).
+  `parseOrThrow` walks the raw payload itself and describes PRIMITIVE
+  values only, and only under `shouldReportReceived`, which the
+  `/devdata` read alone passes. The message names the paths; the issues
+  stay in the ZodError `cause`, printed once.
 - **`resumeSession()` judges by the SIGN-IN ROUND-TRIP, never by the
   session** — two different failures both leave a live session
   standing, and only the round-trip separates them. An ACCEPTED
@@ -184,7 +234,10 @@ Architecture, toolchain and process are aligned on the sibling
 - Derogation semantics live in the `Device` entity: boost ends after
   `derog_time` minutes, vacation after `derog_time` days, presence runs
   a countdown keyed off the _reported_ `cur_mode` (comfort 90 min,
-  comfort−1 60, comfort−2 30). `references/` holds the vendor PDFs.
+  comfort−1 60, comfort−2 30). Every other code opens NO window: off,
+  and the 4 and 5 the wire allows without any document defining them
+  (they used to fall through to vacation). A non-label `cur_mode`
+  clears the countdown. `references/` holds the vendor PDFs.
 - Secrets never travel inside a thrown error. `HttpError` redacts its
   whole snapshot at construction — request headers, BODY and query
   parameters, plus the response headers and body — because that object
@@ -235,10 +288,12 @@ Architecture, toolchain and process are aligned on the sibling
   subclass in code font precisely so the forward could return to a bare
   re-export.
 - **Cadence: five seconds**, as in June. `DEFAULT_SYNC_INTERVAL = 5`
-  was in SECONDS before the extraction; carrying the number onto the
-  core's `syncIntervalMinutes` silently made it five minutes, and a
-  radiator changed from the device or the Heatzy app then took up to
-  five minutes to reach Homey. 18.1.0 restored the cadence (`5 / 60`
+  was in SECONDS before the 10.0.0 rewrite, which renamed it
+  `DEFAULT_SYNC_INTERVAL_MINUTES = 5` and silently made it five
+  minutes (18.1.0's changelog blamed the api-core extraction; the
+  constant already reads minutes at `v10.0.0`), so from com.heatzy
+  23.0.0 to 23.3.5 a radiator changed from the device or the Heatzy app
+  took up to five minutes to reach Homey. 18.1.0 restored the cadence (`5 / 60`
   minutes, spelled from two named constants). It is safe against a
   refresh overlapping a write only because api-core 1.7.1 parks the
   tick around every mutation and for a 3-second settle window after

@@ -1,5 +1,5 @@
-import type { z } from 'zod'
 import { SessionAPI } from '@olivierzal/api-core'
+import { z } from 'zod'
 
 import type {
   Attributes,
@@ -12,7 +12,7 @@ import type {
 import { isModelledProduct } from '../constants.ts'
 import { setting, syncDevices } from '../decorators/index.ts'
 import { type Device, DeviceRegistry } from '../entities/index.ts'
-import { HttpClient, HttpStatus } from '../http/index.ts'
+import { HttpClient, HttpStatus, isHttpError } from '../http/index.ts'
 import { redaction } from '../observability/context.ts'
 import { isSessionExpired } from '../resilience/index.ts'
 import { Temporal } from '../temporal.ts'
@@ -21,6 +21,7 @@ import {
   BindingsSchema,
   DeviceBindingSchema,
   DeviceDataSchema,
+  describeRefusedPaths,
   LoginDataSchema,
   parseOrThrow,
 } from '../validation/index.ts'
@@ -47,6 +48,60 @@ const SECONDS_PER_MINUTE = 60
 const DEFAULT_SYNC_INTERVAL_MINUTES =
   DEFAULT_SYNC_INTERVAL_SECONDS / SECONDS_PER_MINUTE
 const DEFAULT_TIMEOUT_MS = 30_000
+
+// Consecutive identical failures between two reminders. At the default
+// cadence, sixty cycles are the five minutes at which 16.0.0 accepted
+// one line per failed read (288 a day): 18.1.0 moved the cadence to
+// five seconds without revisiting the line, which turned one stuck
+// device into 17,280 full error entries a day.
+const FAILURE_REMINDER_INTERVAL = 60
+
+/**
+ * One failure streak: the same thing failing the same way on every
+ * cycle is ONE event, reported when it starts, when its reason changes
+ * and every {@link FAILURE_REMINDER_INTERVAL} identical cycles — so a
+ * report's tail still carries it — and closed by one recovery line.
+ */
+interface FailureStreak {
+  /**
+   * Consecutive failures with the current `reason`.
+   */
+  readonly failures: number
+  /**
+   * The failure's identity: its error name and message — for a schema
+   * refusal, the refused paths instead of the message, which names
+   * values that may change from one read to the next.
+   */
+  readonly reason: string
+  /**
+   * Consecutive failures whatever their reason.
+   */
+  readonly total: number
+}
+
+const describeFailure = (error: unknown): string => {
+  if (error instanceof Error && error.cause instanceof z.ZodError) {
+    return `${error.name}: ${describeRefusedPaths(error.cause)}`
+  }
+  if (error instanceof Error) {
+    return `${error.name}: ${error.message}`
+  }
+  return typeof error === 'string' ? error : `a thrown ${typeof error}`
+}
+
+const advanceStreak = (
+  streak: FailureStreak | undefined,
+  reason: string,
+): FailureStreak => ({
+  failures: streak?.reason === reason ? streak.failures + 1 : 1,
+  reason,
+  total: (streak?.total ?? 0) + 1,
+})
+
+const deviceDataPath = (did: string): string => `/devdata/${did}/latest`
+
+const isReminderDue = ({ failures }: FailureStreak): boolean =>
+  failures % FAILURE_REMINDER_INTERVAL === 0
 
 const buildTransport = (transport: TransportConfig | undefined): HttpClient =>
   transport instanceof HttpClient
@@ -216,7 +271,13 @@ export class HeatzyAPI
   // account timezone); the core keeps the shutdown signal.
   readonly #config: Pick<HeatzyAPIConfig, 'locale' | 'timezone'>
 
+  // Reporting state only, in memory like the core's session-loss flag:
+  // after a restart the first failure is reported in full again.
+  #droppedBindings: FailureStreak | undefined
+
   readonly #registry: DeviceRegistry
+
+  readonly #unreadableDevices = new Map<string, FailureStreak>()
 
   @setting
   private accessor token = ''
@@ -306,11 +367,14 @@ export class HeatzyAPI
    * @returns The live attributes.
    */
   public async getValues({ id }: { id: string }): Promise<Attributes> {
-    const { attr } = await this.#requestData(
-      'get',
-      `/devdata/${id}/latest`,
-      DeviceDataSchema,
-    )
+    // The attribute payload carries no credential, so a refusal may
+    // name the values received — what the 23.3.4 report lacked.
+    const { attr } = await this.#requestData({
+      method: 'get',
+      schema: DeviceDataSchema,
+      shouldReportReceived: true,
+      url: deviceDataPath(id),
+    })
     return attr
   }
 
@@ -340,22 +404,14 @@ export class HeatzyAPI
    * @returns Every device bound to the account that this SDK models.
    */
   public async list(): Promise<readonly DeviceBinding[]> {
-    const { devices } = await this.#requestData<Bindings>(
-      'get',
-      '/bindings',
-      BindingsSchema,
-    )
+    const { devices } = await this.#requestData<Bindings>({
+      method: 'get',
+      schema: BindingsSchema,
+      url: '/bindings',
+    })
     const { keep, summarize } = createDroppedBindingCollector()
     const bindings = devices.flatMap((device) => keep(device) ?? [])
-    const summary = summarize()
-    if (summary !== null) {
-      // `error`, not `log`: a device the account owns has left the
-      // registry, and the consumer degrades it to a warning over
-      // frozen values without being told why. This line is the only
-      // trace of the drop, and it lands verbatim in the diagnostic
-      // report a user pastes into an issue.
-      this.logger.error(summary)
-    }
+    this.#reportDroppedBindings(summarize())
     return bindings
   }
 
@@ -375,7 +431,7 @@ export class HeatzyAPI
     const { data } = await this.dispatch<LoginData>('post', LOGIN_PATH, {
       data: postData,
     })
-    return parseOrThrow(LoginDataSchema, data, 'login')
+    return parseOrThrow(LoginDataSchema, data, { context: 'login' })
   }
 
   /**
@@ -407,6 +463,9 @@ export class HeatzyAPI
 
   protected override clearRegistry(): void {
     this.#registry.syncDevices([], {})
+    // A sign-out ends every streak: the next account starts clean.
+    this.#unreadableDevices.clear()
+    this.#droppedBindings = undefined
   }
 
   // One protocol sign-in round-trip. On success only the session
@@ -470,6 +529,23 @@ export class HeatzyAPI
 
   // The token needs refreshing when absent or within the forward
   // window of its expiry, so the renewal stays off the critical path.
+  // A device whose failure streak is open is reported by the streak —
+  // once, then every FAILURE_REMINDER_INTERVAL reads — so the
+  // pipeline's per-attempt line for its `/devdata` read would bring back
+  // the storm the streak ends. The failing cycle that opens a streak,
+  // and every other request, logs as before.
+  protected override logError(error: unknown): void {
+    if (
+      isHttpError(error) &&
+      this.#unreadableDevices
+        .keys()
+        .some((did) => error.config?.url === deviceDataPath(did))
+    ) {
+      return
+    }
+    super.logError(error)
+  }
+
   protected override needsSessionRefresh(): boolean {
     return (
       this.token === '' ||
@@ -521,6 +597,16 @@ export class HeatzyAPI
     return this.runSyncCycle(async () => this.#fetch())
   }
 
+  #closeDroppedBindings(streak: FailureStreak | undefined): void {
+    if (streak === undefined) {
+      return
+    }
+    this.#droppedBindings = undefined
+    this.logger.log(
+      `Every /bindings entry is readable again after ${String(streak.total)} listings with drops`,
+    )
+  }
+
   async #fetch(): Promise<readonly DeviceBinding[]> {
     const bindings = await this.list()
     this.#registry.syncDevices(bindings, await this.#readAttributes(bindings))
@@ -529,30 +615,27 @@ export class HeatzyAPI
 
   // The registry cycle's fan-out half, settled leg by leg: one device
   // the wire cannot answer for — a transient 5xx that outlived the
-  // retry rung, an attribute payload naming a mode this SDK predates —
-  // must not deny the whole account. A failed leg is logged with its
-  // device id and simply left out of the record, which is the
-  // `undefined` `DeviceRegistry.syncDevices` documents: an existing
-  // model keeps its last-known data, a new one waits for the next
-  // cycle. `Promise.allSettled` rather than a caught `Promise.all`
+  // retry rung, an attribute payload this SDK cannot read — must not
+  // deny the whole account. A failed leg is reported through its
+  // streak (`#recordUnreadable`) and simply left out of the record,
+  // which is the `undefined` `DeviceRegistry.syncDevices` documents: an
+  // existing model keeps its last-known data, a new one waits for the
+  // next cycle. `Promise.allSettled` rather than a caught `Promise.all`
   // because it also absorbs the ONE line that cannot be guarded — a
-  // host logger that throws while reporting the skip then costs that
-  // one device instead of the account.
+  // host logger that throws while reporting then costs that one device
+  // instead of the account.
   async #readAttributes(
     bindings: readonly DeviceBinding[],
   ): Promise<Record<string, Attributes>> {
+    const bound = new Set(bindings.map(({ did }) => did))
+    // A device that left the account and came back starts a new streak.
+    for (const did of this.#unreadableDevices.keys()) {
+      if (!bound.has(did)) {
+        this.#unreadableDevices.delete(did)
+      }
+    }
     const settled = await Promise.allSettled(
-      bindings.map(async ({ did }) => {
-        try {
-          return [did, await this.getValues({ id: did })] as const
-        } catch (error) {
-          this.logger.error(
-            `Skipping device ${did}: its live attributes could not be read`,
-            error,
-          )
-          throw error
-        }
-      }),
+      bindings.map(async ({ did }) => this.#readDevice(did)),
     )
     return Object.fromEntries(
       settled.flatMap((result) =>
@@ -561,17 +644,89 @@ export class HeatzyAPI
     )
   }
 
+  async #readDevice(did: string): Promise<readonly [string, Attributes]> {
+    const attributes = await this.#readOrRecord(did)
+    const streak = this.#unreadableDevices.get(did)
+    if (streak !== undefined) {
+      this.#unreadableDevices.delete(did)
+      this.logger.log(
+        `Device ${did}: its live attributes are readable again after ${String(streak.total)} failed reads`,
+      )
+    }
+    return [did, attributes]
+  }
+
+  async #readOrRecord(did: string): Promise<Attributes> {
+    try {
+      return await this.getValues({ id: did })
+    } catch (error) {
+      this.#recordUnreadable(did, error)
+      throw error
+    }
+  }
+
+  // The state is stored BEFORE the line is written, so a throwing host
+  // logger never loses the streak.
+  #recordUnreadable(did: string, error: unknown): void {
+    const streak = advanceStreak(
+      this.#unreadableDevices.get(did),
+      describeFailure(error),
+    )
+    this.#unreadableDevices.set(did, streak)
+    if (streak.failures === 1) {
+      this.logger.error(
+        `Skipping device ${did}: its live attributes could not be read`,
+        error,
+      )
+    } else if (isReminderDue(streak)) {
+      this.logger.error(
+        `Skipping device ${did}: still unreadable after ${String(streak.failures)} consecutive reads (${streak.reason})`,
+      )
+    }
+  }
+
+  // `error`, not `log`: a device the account owns has left the
+  // registry, and the consumer degrades it to a warning over frozen
+  // values without being told why. The line is the only trace of the
+  // drop and lands verbatim in the diagnostic report a user pastes into
+  // an issue — once per streak, reminded, and closed on recovery.
+  #reportDroppedBindings(summary: string | null): void {
+    const streak = this.#droppedBindings
+    if (summary === null) {
+      this.#closeDroppedBindings(streak)
+      return
+    }
+    const next = advanceStreak(streak, summary)
+    this.#droppedBindings = next
+    if (next.failures === 1) {
+      this.logger.error(summary)
+    } else if (isReminderDue(next)) {
+      this.logger.error(
+        `${summary} (unchanged over ${String(next.failures)} listings)`,
+      )
+    }
+  }
+
   // Strip the envelope and parse the body against the endpoint's
   // schema; throw on transport failure — the contract the two
   // validated reads (`/bindings`, `/devdata`) want. The body-carrying
   // calls go through the core directly: `/login` through `dispatch`,
   // `/control` — whose response nothing consumes — through `request`.
-  async #requestData<T>(
-    method: string,
-    url: string,
-    schema: z.ZodType<T>,
-  ): Promise<T> {
+  async #requestData<T>({
+    method,
+    schema,
+    shouldReportReceived,
+    url,
+  }: {
+    readonly method: string
+    readonly schema: z.ZodType<T>
+    readonly url: string
+    readonly shouldReportReceived?: boolean
+  }): Promise<T> {
     const { data } = await this.request<T>(method, url)
-    return parseOrThrow(schema, data, `${method.toUpperCase()} ${url}`)
+    return parseOrThrow(schema, data, {
+      context: `${method.toUpperCase()} ${url}`,
+      shouldReportReceived,
+    })
   }
 }

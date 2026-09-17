@@ -21,12 +21,14 @@ const PRESENCE_END_MINUTES = {
 
 const isPresenceCountdownMode = isKeyOf(PRESENCE_END_MINUTES)
 
+// The wire's own read types: a transition can carry a `cur_mode` or a
+// `derog_mode` this SDK does not model, and must survive it.
 interface DerogationTransition {
-  readonly currentMode?: Mode | undefined
-  readonly derogationMode?: DerogationMode | undefined
+  readonly currentMode?: Attributes['cur_mode']
+  readonly derogationMode?: Attributes['derog_mode']
   readonly derogationTime?: number | undefined
-  readonly newCurrentMode?: Mode | undefined
-  readonly newDerogationMode?: DerogationMode | undefined
+  readonly newCurrentMode?: Attributes['cur_mode']
+  readonly newDerogationMode?: Attributes['derog_mode']
   readonly newDerogationTime?: number | undefined
 }
 
@@ -40,16 +42,22 @@ const hasDerogationChanged = ({
   (newDerogationTime !== undefined && newDerogationTime !== derogationTime)
 
 // The running window a derogation opens: boost counts minutes, vacation
-// days; off has no window (`null`). Presence is handled separately (its
-// window keys off the reported mode, not `derog_time`).
+// days. Every other code has no window (`null`): off, and a code the
+// wire allows but no vendor document defines (4 and 5), which used to
+// fall through to vacation and invent an end weeks away. Presence is
+// handled separately (its window keys off the reported mode, not
+// `derog_time`).
 const derogationDuration = (
-  mode: DerogationMode,
+  mode: number,
   time: number,
 ): Temporal.DurationLike | null => {
-  if (mode === DerogationMode.off) {
-    return null
+  if (mode === DerogationMode.boost) {
+    return { minutes: time }
   }
-  return mode === DerogationMode.boost ? { minutes: time } : { days: time }
+  if (mode === DerogationMode.vacation) {
+    return { days: time }
+  }
+  return null
 }
 
 /**
@@ -193,15 +201,23 @@ export class Device {
 
   // The presence countdown keys off the *reported* mode: comfort
   // starts a 90-minute window, comfort−1 60, comfort−2 30; any other
-  // mode clears it.
+  // value clears it — another label, a Glow-family number, `null`.
+  // Entering presence without a new reported mode closes the window of
+  // the derogation it replaces: a boost end would otherwise read as the
+  // presence end.
   #handlePresenceEnd({
     currentMode,
+    derogationMode,
     newCurrentMode,
   }: DerogationTransition): void {
     if (newCurrentMode !== undefined && newCurrentMode !== currentMode) {
-      this.#derogationEnd = isPresenceCountdownMode(newCurrentMode)
-        ? this.#now().add({ minutes: PRESENCE_END_MINUTES[newCurrentMode] })
-        : null
+      this.#derogationEnd =
+        typeof newCurrentMode === 'string' &&
+        isPresenceCountdownMode(newCurrentMode)
+          ? this.#now().add({ minutes: PRESENCE_END_MINUTES[newCurrentMode] })
+          : null
+    } else if (derogationMode !== DerogationMode.presence) {
+      this.#derogationEnd = null
     }
   }
 

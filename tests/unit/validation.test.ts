@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
+import { Mode, Switch } from '../../src/constants.ts'
 import { ValidationError } from '../../src/errors/index.ts'
 import {
   BindingsSchema,
@@ -12,11 +13,16 @@ import {
 import {
   buildBinding,
   buildLoginData,
+  fieldGlowAttributes,
+  fieldOnyxAttributes,
+  fieldV1Payload,
   glowAttributes,
   proAttributes,
   v1Attributes,
   v2Attributes,
 } from '../fixtures.ts'
+
+const DEVDATA_CONTEXT = 'GET /devdata/did-pro/latest'
 
 // Drops the key entirely — unlike spreading `{ key: undefined }`, which
 // leaves a present-but-undefined property that JSON payloads never carry.
@@ -38,18 +44,104 @@ const captureValidationError = (act: () => unknown): ValidationError => {
 describe(parseOrThrow, () => {
   it('returns the parsed data on success', () => {
     expect(
-      parseOrThrow(LoginDataSchema, buildLoginData(1_753_100_000), 'login'),
+      parseOrThrow(LoginDataSchema, buildLoginData(1_753_100_000), {
+        context: 'login',
+      }),
     ).toStrictEqual({ expire_at: 1_753_100_000, token: 'user-token' })
   })
 
   it('throws a ValidationError carrying the context and the ZodError cause', () => {
     const error = captureValidationError(() =>
-      parseOrThrow(LoginDataSchema, { token: 'user-token' }, 'login'),
+      parseOrThrow(
+        LoginDataSchema,
+        { token: 'user-token' },
+        { context: 'login' },
+      ),
     )
 
     expect(error.context).toBe('login')
     expect(error.cause).toBeInstanceOf(z.ZodError)
     expect(error.message).toMatch(/invalid api response shape \(login\)/iv)
+  })
+
+  // The message names WHERE; the issues — what was expected — stay in
+  // the ZodError cause, so a logged error prints them once, not twice.
+  it('names each failing path, leaving the issues to the cause', () => {
+    const error = captureValidationError(() =>
+      parseOrThrow(
+        LoginDataSchema,
+        { expire_at: 'soon' },
+        { context: 'login' },
+      ),
+    )
+
+    expect(error.message).toBe(
+      'Invalid API response shape (login): expire_at, token',
+    )
+  })
+
+  it('names a path once when several checks fail on it', () => {
+    const error = captureValidationError(() =>
+      parseOrThrow(
+        z.object({ hour: z.number().max(23).int() }),
+        { hour: 30.5 },
+        { context: 'probe' },
+      ),
+    )
+
+    expect(error.message).toBe('Invalid API response shape (probe): hour')
+  })
+
+  it('names the root when the body itself is refused', () => {
+    const error = captureValidationError(() =>
+      parseOrThrow(LoginDataSchema, 'refused', { context: 'login' }),
+    )
+
+    expect(error.message).toBe('Invalid API response shape (login): (root)')
+  })
+
+  // Opt-out by default: the login body holds the token and `/bindings`
+  // each device's passcode, so no received value is ever described
+  // unless the caller parses a payload that carries no credential.
+  it('describes no received value without the opt-in', () => {
+    const error = captureValidationError(() =>
+      parseOrThrow(
+        LoginDataSchema,
+        { expire_at: 60, token: 12_345 },
+        { context: 'login' },
+      ),
+    )
+
+    expect(error.message).toBe('Invalid API response shape (login): token')
+  })
+
+  it.each([
+    {
+      data: { attr: { mode: 'warm' } },
+      expected: 'attr.mode (received "warm")',
+      label: 'a primitive received value',
+    },
+    {
+      data: { attr: {} },
+      expected: 'attr.mode (missing)',
+      label: 'a missing field',
+    },
+    {
+      data: { attr: ['cft'] },
+      expected: 'attr',
+      label: 'nothing of a container it refused',
+    },
+  ])('describes $label when the caller opts in', ({ data, expected }) => {
+    const error = captureValidationError(() =>
+      parseOrThrow(DeviceDataSchema, data, {
+        context: DEVDATA_CONTEXT,
+        shouldReportReceived: true,
+      }),
+    )
+
+    expect(error.message).toBe(
+      `Invalid API response shape (${DEVDATA_CONTEXT}): ${expected}`,
+    )
   })
 })
 
@@ -136,11 +228,87 @@ describe('deviceDataSchema', () => {
     )
   })
 
-  it('rejects an out-of-vocabulary com_temp offset', () => {
-    expect(() =>
-      DeviceDataSchema.parse({ attr: { ...glowAttributes, com_temp: 42 } }),
-    ).toThrow(/com_temp/v)
+  // The field payloads 10.0.0's closed literals refused as a whole: a
+  // read checks the wire's TYPE, the facades read an unmodelled value
+  // as `null`.
+  it.each([
+    { attributes: fieldGlowAttributes, label: 'Glow_Simple' },
+    { attributes: fieldOnyxAttributes, label: 'Onyx' },
+  ])('accepts the $label payload a real account answered', ({ attributes }) => {
+    expect(DeviceDataSchema.parse({ attr: attributes })).toStrictEqual({
+      attr: attributes,
+    })
   })
+
+  it.each([0, 5, 45, 255])(
+    'accepts a com_temp calibration of %i',
+    (calibration) => {
+      expect(
+        DeviceDataSchema.parse({
+          attr: { ...proAttributes, com_temp: calibration },
+        }).attr.com_temp,
+      ).toBe(calibration)
+    },
+  )
+
+  it.each([Mode.comfortMinus1, 'auto', 1, null])(
+    'accepts a cur_mode of %s as the wire sent it',
+    (currentMode) => {
+      expect(
+        DeviceDataSchema.parse({
+          attr: { ...proAttributes, cur_mode: currentMode },
+        }).attr.cur_mode,
+      ).toBe(currentMode)
+    },
+  )
+
+  it('accepts a derog_mode code no vendor document defines', () => {
+    expect(
+      DeviceDataSchema.parse({ attr: { ...proAttributes, derog_mode: 4 } }).attr
+        .derog_mode,
+    ).toBe(4)
+  })
+
+  it.each([
+    { field: 'com_temp', received: '5' },
+    { field: 'cur_mode', received: true },
+    { field: 'derog_mode', received: 1.5 },
+  ])('still rejects a $field of the wrong wire type', ({ field, received }) => {
+    expect(() =>
+      DeviceDataSchema.parse({ attr: { ...proAttributes, [field]: received } }),
+    ).toThrow(new RegExp(field, 'v'))
+  })
+
+  it.each([
+    { label: '停止', mode: Mode.stop },
+    { label: '经济', mode: Mode.eco },
+    { label: '舒适', mode: Mode.comfort },
+    { label: '解冻', mode: Mode.frostProtection },
+  ])('reads the V1 label $label as $mode', ({ label, mode }) => {
+    expect(DeviceDataSchema.parse({ attr: { mode: label } }).attr.mode).toBe(
+      mode,
+    )
+  })
+
+  it('reads the V1 payload a real account answered', () => {
+    expect(DeviceDataSchema.parse({ attr: fieldV1Payload })).toStrictEqual({
+      attr: { mode: Mode.comfort },
+    })
+  })
+
+  it.each([
+    { expected: Switch.on, field: 'on_off', isOn: true },
+    { expected: Switch.off, field: 'window_switch', isOn: false },
+  ])(
+    'normalises a boolean $field to its numeric switch',
+    ({ expected, field, isOn }) => {
+      const { attr } = DeviceDataSchema.parse({
+        attr: { ...proAttributes, [field]: isOn },
+      })
+
+      expect(attr).toMatchObject({ [field]: expected })
+    },
+  )
 })
 
 describe('loginDataSchema', () => {

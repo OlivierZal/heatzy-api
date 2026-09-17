@@ -3,7 +3,6 @@ import type {
   Mode,
   POST_DATA_UNIT,
   Switch,
-  TemperatureCompensation,
 } from '../constants.ts'
 
 /**
@@ -11,17 +10,24 @@ import type {
  * the writable set with the read-only measures; field names mirror the
  * Gizwits wire verbatim (`cur_tempH`, `cft_temp`…) — do not rename
  * them to satisfy style rules.
+ *
+ * The read types are as WIDE as the wire: a value this SDK predates is
+ * read, never refused, and the facades answer `null` for it. Writes
+ * stay strict in {@link PostAttributes}.
  * @category Types
  */
-export interface Attributes extends PostAttributes {
+export interface Attributes extends Omit<PostAttributes, 'derog_mode'> {
   readonly mode: Mode
   // Pro
   readonly cur_humi?: number | undefined
-  readonly cur_mode?: Mode | undefined
+  // A Latin label on the Pro, a number on the Glow family
+  readonly cur_mode?: number | string | null | undefined
   readonly cur_temp?: number | undefined
   // Glow
   readonly cur_tempH?: number | undefined
   readonly cur_tempL?: number | undefined
+  // Not V1; the wire declares codes up to 5, documents 0–3
+  readonly derog_mode?: number | undefined
 }
 
 /**
@@ -111,8 +117,8 @@ export interface PostAttributes {
   // Glow
   readonly cft_tempH?: number | undefined
   readonly cft_tempL?: number | undefined
-  // Not V1, V2, V4
-  readonly com_temp?: TemperatureCompensation | undefined
+  // Not V1, V2, V4: a calibration register (see TemperatureCompensation)
+  readonly com_temp?: number | undefined
   // Not V1
   readonly derog_mode?: DerogationMode | undefined
   readonly derog_time?: number | undefined

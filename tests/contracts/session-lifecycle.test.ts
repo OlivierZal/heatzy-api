@@ -703,7 +703,7 @@ const describeSessionLifecycleContract = (
     // malformed sibling took the atomic array down with it, and an
     // unresolved `product_key` threw out of the `Device` constructor
     // mid-sync. Both are now dropped at the boundary, and dropped
-    // LOUDLY — as ONE aggregated line per cycle (a listing-wide
+    // LOUDLY — as ONE aggregated line per streak (a listing-wide
     // regression must not storm the host logger exactly when the
     // diagnostic report most needs to stay readable), with the two
     // verdicts worded apart inside it because they call for opposite

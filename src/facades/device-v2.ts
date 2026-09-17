@@ -1,5 +1,5 @@
 import type { PostAttributes } from '../types/index.ts'
-import { DerogationMode } from '../constants.ts'
+import { DerogationMode, isDerogationMode } from '../constants.ts'
 import { DeviceFacade } from './device.ts'
 
 /**
@@ -11,15 +11,20 @@ export class DeviceV2Facade extends DeviceFacade {
   /**
    * The running derogation's end, formatted for display in the
    * configured locale — time-of-day for boost and presence, day +
-   * month + time for vacation. `null` when no derogation is running —
-   * or when it was already running at first sight: the wire carries no
-   * start timestamp, so the end is only derived when a change is
-   * observed (see {@link Device.derogationEndDate}).
+   * month + time for vacation. `null` when no derogation is running,
+   * when its code is one this SDK does not model, or when it was
+   * already running at first sight: the wire carries no start
+   * timestamp, so the end is only derived when a change is observed
+   * (see {@link Device.derogationEndDate}).
    * @returns The formatted end label, or `null`.
    */
   public get derogationEndString(): string | null {
     const { derogationEndDate, derogationMode } = this
-    if (derogationEndDate === null || derogationMode === DerogationMode.off) {
+    if (
+      derogationEndDate === null ||
+      derogationMode === null ||
+      derogationMode === DerogationMode.off
+    ) {
       return null
     }
     return derogationMode === DerogationMode.vacation
@@ -39,10 +44,13 @@ export class DeviceV2Facade extends DeviceFacade {
 
   /**
    * The running derogation mode.
-   * @returns The wire `derog_mode` value.
+   * @returns The wire `derog_mode` value, or `null` for a code the wire
+   * allows but this SDK does not model (4 and 5 on the Pro and the Glow
+   * family).
    */
-  public get derogationMode(): DerogationMode {
-    return this.getValue('derog_mode')
+  public get derogationMode(): DerogationMode | null {
+    const value = this.getValue('derog_mode')
+    return isDerogationMode(value) ? value : null
   }
 
   /**

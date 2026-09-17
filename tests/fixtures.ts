@@ -86,6 +86,48 @@ export const proAttributes: Attributes = {
 }
 
 /**
+ * A Glow_Simple's `/devdata` attributes as a real account answered
+ * them, verbatim (cyr-ius/heatzypy `tests/fixtures/devices_rest.json`,
+ * 2024-05-08): `cur_mode` is a number and `com_temp` a calibration of
+ * 5, the payload 10.0.0's closed literals refused as a whole.
+ */
+export const fieldGlowAttributes: Attributes = {
+  cft_tempH: 0,
+  cft_tempL: 130,
+  com_temp: 5,
+  cur_mode: 1,
+  cur_tempH: 0,
+  cur_tempL: 117,
+  derog_mode: DerogationMode.off,
+  derog_time: 0,
+  eco_tempH: 0,
+  eco_tempL: 110,
+  LOCK_C: Switch.off,
+  mode: Mode.eco,
+  on_off: Switch.on,
+  timer_switch: Switch.off,
+}
+
+/**
+ * An Onyx's field attributes from the same fixture, running a vacation
+ * derogation.
+ */
+export const fieldOnyxAttributes: Attributes = {
+  ...fieldGlowAttributes,
+  cft_tempL: 190,
+  cur_tempL: 199,
+  derog_mode: DerogationMode.vacation,
+  eco_tempL: 180,
+}
+
+/**
+ * The V1 Pilote's field payload from the same fixture: its Gizwits
+ * datapoint declares the mode enum in Chinese, and `/devdata` answers
+ * the declared label.
+ */
+export const fieldV1Payload = { mode: '舒适' } as const
+
+/**
  * `/login` payload with a one-hour-away expiry (epoch seconds).
  */
 export const buildLoginData = (
