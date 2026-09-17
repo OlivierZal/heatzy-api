@@ -33,6 +33,7 @@ import {
 import { Temporal } from '../../src/temporal.ts'
 import {
   buildBinding,
+  fieldGlowAttributes,
   glowAttributes,
   proAttributes,
   v1Attributes,
@@ -224,6 +225,14 @@ describe(DeviceV2Facade, () => {
     expect(facade.isTimer).toBe(false)
   })
 
+  // The wire declares `derog_mode` up to 5 while every vendor document
+  // stops at 3: an unmodelled code reads `null`, never a wrong mode.
+  it('reads null for a derogation code this SDK does not model', () => {
+    const { facade } = createV2Facade({ ...v2Attributes, derog_mode: 4 })
+
+    expect(facade.derogationMode).toBeNull()
+  })
+
   it('reads the lock and timer switches when on', () => {
     const { facade } = createV2Facade({
       ...v2Attributes,
@@ -288,22 +297,28 @@ describe(DeviceV2Facade, () => {
       expect(facade.derogationEndString).toBeNull()
     })
 
-    it('reads null when the derogation mode is off despite a pending end date', () => {
-      const device = mock<Device>({
-        data: v2Attributes,
-        derogationEndDate: Temporal.Now.zonedDateTimeISO('UTC').add({
-          minutes: 30,
-        }),
-        id: 'did-v2',
-        product: Product.v2,
-      })
-      const facade = new DeviceV2Facade(
-        createMockAdapter({ getDeviceById: () => device }),
-        device,
-      )
+    it.each([
+      { derogationMode: DerogationMode.off, label: 'off' },
+      { derogationMode: 4, label: 'a code this SDK does not model' },
+    ])(
+      'reads null when the derogation mode is $label despite a pending end date',
+      ({ derogationMode }) => {
+        const device = mock<Device>({
+          data: { ...v2Attributes, derog_mode: derogationMode },
+          derogationEndDate: Temporal.Now.zonedDateTimeISO('UTC').add({
+            minutes: 30,
+          }),
+          id: 'did-v2',
+          product: Product.v2,
+        })
+        const facade = new DeviceV2Facade(
+          createMockAdapter({ getDeviceById: () => device }),
+          device,
+        )
 
-      expect(facade.derogationEndString).toBeNull()
-    })
+        expect(facade.derogationEndString).toBeNull()
+      },
+    )
 
     it('renders a time-only label for a boost end in the configured locale', () => {
       const { device, facade } = createV2Facade(v2Attributes, {
@@ -376,6 +391,14 @@ describe(DeviceGlowFacade, () => {
     expect(facade.mode).toBe(Mode.comfort)
   })
 
+  // A calibration register, not the three anchors: the field Glow
+  // payload reads 5.
+  it('reads the temperature compensation register as the wire sent it', () => {
+    const { facade } = createGlowFacade(fieldGlowAttributes)
+
+    expect(facade.temperatureCompensation).toBe(5)
+  })
+
   it('reads isLocked from LOCK_C', () => {
     const { facade } = createGlowFacade({
       ...glowAttributes,
@@ -427,6 +450,21 @@ describe(DeviceProFacade, () => {
     expect(facade.isDetectingOpenWindow).toBe(false)
     expect(facade.isLocked).toBe(false)
     expect(facade.isOn).toBe(true)
+  })
+
+  it.each([
+    { currentMode: 1, label: 'a Glow-family number' },
+    { currentMode: 'auto', label: 'a label this SDK predates' },
+    { currentMode: null, label: 'null' },
+  ])('reads a null current mode for $label', ({ currentMode }) => {
+    const { facade } = createProFacade({
+      ...proAttributes,
+      cur_mode: currentMode,
+      derog_mode: DerogationMode.presence,
+    })
+
+    expect(facade.currentMode).toBeNull()
+    expect(facade.isPresence).toBe(false)
   })
 
   it('reads isOn from the commanded mode', () => {

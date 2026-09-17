@@ -136,6 +136,27 @@ describe(Device, () => {
       )
     })
 
+    // The wire allows derogation codes 4 and 5 that no vendor document
+    // defines; they used to fall through to vacation and invent an end
+    // weeks away.
+    it('clears the end when the derogation turns to a code this SDK does not model', () => {
+      const device = new Device(buildBinding('v2'), v2Attributes)
+      device.update({ derog_mode: DerogationMode.boost, derog_time: 60 })
+      device.update({ derog_mode: 4 })
+
+      expect(device.derogationEndDate).toBeNull()
+    })
+
+    it('derives no end from a derogation code this SDK does not model', () => {
+      const device = new Device(buildBinding('v2'), {
+        ...v2Attributes,
+        derog_mode: 5,
+      })
+      device.update({ derog_time: 3 })
+
+      expect(device.derogationEndDate).toBeNull()
+    })
+
     it('clears the end when the derogation turns off', () => {
       const device = new Device(buildBinding('v2'), v2Attributes)
       device.update({ derog_mode: DerogationMode.boost, derog_time: 45 })
@@ -165,6 +186,19 @@ describe(Device, () => {
       { reported: Mode.frostProtection },
       { reported: Mode.stop },
     ])(
+      'clears the presence countdown when cur_mode becomes $reported',
+      ({ reported }) => {
+        const device = createPresenceDevice()
+        device.update({ cur_mode: Mode.comfort })
+        device.update({ cur_mode: reported })
+
+        expect(device.derogationEndDate).toBeNull()
+      },
+    )
+
+    // A Glow-family number, a label this SDK predates, or `null` is not
+    // a presence countdown mode, and must clear rather than throw.
+    it.each([{ reported: 1 }, { reported: 'auto' }, { reported: null }])(
       'clears the presence countdown when cur_mode becomes $reported',
       ({ reported }) => {
         const device = createPresenceDevice()

@@ -9,10 +9,13 @@ import { type Redaction, createRedaction } from '@olivierzal/api-core'
 
 // Every key that names a credential on the Gizwits wire beyond the
 // core's base vocabulary (authorization, cookie, set-cookie, password,
-// username, email, token): the header the issued user token rides on.
+// username, email, token): the header the issued user token rides on,
+// and the device `passcode` every `/bindings` entry carries (vendor 2020
+// contract) — the core logs each `/bindings` response body, and a
+// device's binding secret has no business in a diagnostic report.
 // Extend this ONE vocabulary when a new wire field names a credential;
 // never re-declare it elsewhere.
-const EXTRA_SENSITIVE_KEYS = ['x-gizwits-user-token']
+const EXTRA_SENSITIVE_KEYS = ['passcode', 'x-gizwits-user-token']
 
 /**
  * The redaction engine bound to the Gizwits vocabulary — the ONE

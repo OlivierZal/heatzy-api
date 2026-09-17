@@ -15,6 +15,21 @@ export const DerogationMode = {
 export type DerogationMode =
   (typeof DerogationMode)[keyof typeof DerogationMode]
 
+const DEROGATION_MODES: ReadonlySet<unknown> = new Set(
+  Object.values(DerogationMode),
+)
+
+/**
+ * Whether a wire `derog_mode` is one this SDK models. The wire declares
+ * the register up to 5 on the Pro and the Glow family while every vendor
+ * document stops at 3: an unmodelled code is read, never refused, and
+ * the facades answer `null` for it.
+ * @param value - A wire `derog_mode` value.
+ * @returns `true` for a {@link DerogationMode}.
+ */
+export const isDerogationMode = (value: unknown): value is DerogationMode =>
+  DEROGATION_MODES.has(value)
+
 /**
  * Heating modes. `cft1`/`cft2` do not exist on V1 and V2 products.
  * @category Constants
@@ -28,6 +43,31 @@ export const Mode = {
   stop: 'stop',
 } as const
 export type Mode = (typeof Mode)[keyof typeof Mode]
+
+const MODES: ReadonlySet<unknown> = new Set(Object.values(Mode))
+
+/**
+ * Whether a wire value is a heating {@link Mode} label. `cur_mode` is a
+ * Latin label on the Pro but a number on the Glow family, so the
+ * facades read it through this guard and answer `null` otherwise.
+ * @param value - A wire mode value.
+ * @returns `true` for a {@link Mode}.
+ */
+export const isMode = (value: unknown): value is Mode => MODES.has(value)
+
+/**
+ * The V1 Pilote's `mode` labels. Its Gizwits datapoint declares the
+ * enum in Chinese, and `/devdata` answers the declared label, so a V1
+ * reads `舒适` where every later generation reads `cft`. The order
+ * matches the positional `raw` code {@link modeToModeV1} writes.
+ * @category Constants
+ */
+export const modeV1Labels: ReadonlyMap<string, Mode> = new Map([
+  ['停止', Mode.stop],
+  ['经济', Mode.eco],
+  ['舒适', Mode.comfort],
+  ['解冻', Mode.frostProtection],
+])
 
 /**
  * Glow setpoint bounds in °C per mode — the wire's accepted ranges,
@@ -55,7 +95,11 @@ export const Switch = { off: 0, on: 1 } as const
 export type Switch = (typeof Switch)[keyof typeof Switch]
 
 /**
- * `com_temp` values: an offset encoded around 50 (= no change).
+ * Named anchors of the `com_temp` sensor calibration on the Pro: a
+ * 0–100 register in tenths of a degree centred on 50 (no change), so
+ * 0 is −5 °C and 100 is +5 °C. They are anchors, not the vocabulary:
+ * any value in between is a valid calibration, and the Glow family
+ * declares the register over 0–255. Read `com_temp` as a number.
  * @category Constants
  */
 export const TemperatureCompensation = {

@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [19.0.0] - 2026-09-17
+
+### Breaking changes
+
+- **The read getters answer `null` for a value this SDK does not model.** `DeviceProFacade.currentMode` returns `Mode | null`, `DeviceV2Facade.derogationMode` returns `DerogationMode | null`, and `DeviceGlowFacade.temperatureCompensation` returns `number`. `Attributes` widens `cur_mode` to `number | string | null`, `com_temp` to `number` and `derog_mode` to `number`; `PostAttributes.com_temp` widens to `number`, the calibration register the vendor documents as writable over 0–100. Migration: a consumer that maps `currentMode` or `derogationMode` onto a capability handles `null` (com.heatzy clears the capability); nothing else changes for a device whose values are in the known vocabulary.
+
+### Fixed
+
+- **A Glow, Onyx or Shine, a calibrated Pilote Pro and a first-generation Pilote are readable again — a regression since 10.0.0.** The 10.0.0 rewrite put closed literals on the `/devdata` attributes: `com_temp` only in {0, 50, 100}, `cur_mode` only among the six Latin labels. Neither matches the wire. Gizwits declares `com_temp` as a calibration register (0–100 in tenths of a degree on the Pro, 0–255 on the Glow family), and the Glow family reports `cur_mode` as a number: a real Glow_Simple payload reads `com_temp` 5 and `cur_mode` 1, and failed its whole read. The V1 Pilote's datapoint declares its mode enum in Chinese (`舒适`, `经济`, `解冻`, `停止`), which `/devdata` answers verbatim, and the required `mode` literal refused it — com.heatzy had translated those labels until November 2024, and this SDK never did. Until 15.0.0 one such device failed the whole account's sync; since then it was only that device, but after any restart it was never registered at all. A read now checks the wire's TYPE, not a vocabulary: `com_temp` is a number, `cur_mode` a label, a number or `null`, `derog_mode` an integer, and the switches accept the `bool` Gizwits declares for `on_off` and `window_switch`. The V1 labels are translated to their Latin mode, and `mode` stays the one closed set, since it is the write vocabulary.
+- **An unmodelled derogation code no longer invents an end date.** The wire declares `derog_mode` up to 5 on the Pro and the Glow family while every vendor document stops at 3. Any code other than off and boost fell through to vacation, so boost followed by a 4 announced an end sixty days away. Only boost and vacation open a window now; `derogationEndString` reads `null` for an unmodelled code, and a non-label `cur_mode` clears the presence countdown instead of reaching it.
+- **A refused `/devdata` read names what the wire sent.** The field report that led here showed only the expected values: zod keeps no input in its issues, and the diagnostic tail was cut off. The `ValidationError` message now names each failing path, plus the primitive value received for the device-data read only — never for `/login`, which carries the token, nor `/bindings`, which carries each device's passcode. The issues themselves stay in the ZodError `cause`, so a logged error prints them once instead of twice.
+- **One stuck device no longer writes 17,280 error lines a day.** 16.0.0 accepted one line per failed `/devdata` read when the cadence was five minutes; 18.1.0 moved it to five seconds without revisiting the line. A failure is now reported when its streak starts, when its reason changes, and every sixty identical cycles (the five minutes at which one line per read was accepted), then closed by one `log` line when the device reads again. The aggregated `/bindings` drop line follows the same streak rule.
+- **The device `passcode` every `/bindings` entry carries is redacted** from the request and response log lines.
+
+### Corrected record
+
+- 18.1.0 attributed the five-minute cadence to the api-core extraction. It came from the 10.0.0 rewrite: `DEFAULT_SYNC_INTERVAL_MINUTES = 5` already stands in `v10.0.0:src/api/heatzy.ts`, where June's constant was in seconds. Every com.heatzy release from 23.0.0 to 23.3.5 polled every five minutes.
+
 ## [18.1.0] - 2026-09-14
 
 ### Changed
@@ -272,6 +290,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[19.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v18.1.0...v19.0.0
 [18.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v18.0.1...v18.1.0
 [18.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v18.0.0...v18.0.1
 [18.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v17.0.0...v18.0.0

@@ -17,6 +17,12 @@ describe.concurrent('the Gizwits vocabulary', () => {
     expect(redaction.isSensitive('X-Gizwits-User-Token')).toBe(true)
   })
 
+  // Every `/bindings` entry carries the device's binding passcode, and
+  // the core logs each `/bindings` response body.
+  it('marks the device passcode sensitive', () => {
+    expect(redaction.isSensitive('passcode')).toBe(true)
+  })
+
   it.each(['authorization', 'cookie', 'password', 'token', 'username'])(
     'keeps the core base key %s sensitive',
     (key) => {

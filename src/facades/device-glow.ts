@@ -1,9 +1,4 @@
-import {
-  type TemperatureCompensation,
-  GLOW_SETPOINT_RANGES,
-  Mode,
-  TEMPERATURE_SCALE,
-} from '../constants.ts'
+import { GLOW_SETPOINT_RANGES, Mode, TEMPERATURE_SCALE } from '../constants.ts'
 import { clampToRange } from '../utils.ts'
 import { DeviceV2Facade } from './device-v2.ts'
 
@@ -48,11 +43,14 @@ export class DeviceGlowFacade extends DeviceV2Facade {
   }
 
   /**
-   * The temperature compensation offset (wire-encoded around 50 = no
-   * change).
+   * The sensor calibration register. On the Pro it reads 0–100 in
+   * tenths of a degree centred on 50 (no change); the Glow family
+   * declares it over 0–255 with no documented scale, so the raw value
+   * is answered as is (`TemperatureCompensation` names the Pro's
+   * anchors).
    * @returns The wire `com_temp` value.
    */
-  public get temperatureCompensation(): TemperatureCompensation {
+  public get temperatureCompensation(): number {
     return this.getValue('com_temp')
   }
 
