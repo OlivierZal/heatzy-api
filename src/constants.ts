@@ -58,8 +58,7 @@ export const isMode = (value: unknown): value is Mode => MODES.has(value)
 /**
  * The V1 Pilote's `mode` labels. Its Gizwits datapoint declares the
  * enum in Chinese, and `/devdata` answers the declared label, so a V1
- * reads `舒适` where every later generation reads `cft`. The order
- * matches the positional `raw` code {@link modeToModeV1} writes.
+ * reads `舒适` where every later generation reads `cft`.
  * @category Constants
  */
 export const modeV1Labels: ReadonlyMap<string, Mode> = new Map([

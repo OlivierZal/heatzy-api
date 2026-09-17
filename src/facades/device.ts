@@ -16,6 +16,11 @@ import { syncDevices, updateDevice } from '../decorators/index.ts'
 import { AttributeNotFoundError, EntityNotFoundError } from '../errors/index.ts'
 import { isKeyOf, omitUndefined } from '../utils.ts'
 
+// `null` is a value here: a read the wire answers with `null` (a
+// Glow-family `cur_mode`) is returned, only an absent key throws.
+const isDefined = <T>(value: T): value is Exclude<T, undefined> =>
+  value !== undefined
+
 const isModeV1 = isKeyOf(modeToModeV1)
 
 /**
@@ -179,9 +184,9 @@ export class DeviceFacade {
 
   protected getValue<T extends keyof Attributes>(
     key: T,
-  ): NonNullable<Attributes[T]> {
+  ): Exclude<Attributes[T], undefined> {
     const value = this.data[key]
-    if (value === undefined) {
+    if (!isDefined(value)) {
       throw new AttributeNotFoundError(key)
     }
     return value

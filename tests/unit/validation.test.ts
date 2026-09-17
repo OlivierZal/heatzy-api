@@ -80,6 +80,18 @@ describe(parseOrThrow, () => {
     )
   })
 
+  it('names a path once when several checks fail on it', () => {
+    const error = captureValidationError(() =>
+      parseOrThrow(
+        z.object({ hour: z.number().max(23).int() }),
+        { hour: 30.5 },
+        { context: 'probe' },
+      ),
+    )
+
+    expect(error.message).toBe('Invalid API response shape (probe): hour')
+  })
+
   it('names the root when the body itself is refused', () => {
     const error = captureValidationError(() =>
       parseOrThrow(LoginDataSchema, 'refused', { context: 'login' }),

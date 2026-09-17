@@ -1,5 +1,5 @@
-import type { z } from 'zod'
 import { SessionAPI } from '@olivierzal/api-core'
+import { z } from 'zod'
 
 import type {
   Attributes,
@@ -12,7 +12,7 @@ import type {
 import { isModelledProduct } from '../constants.ts'
 import { setting, syncDevices } from '../decorators/index.ts'
 import { type Device, DeviceRegistry } from '../entities/index.ts'
-import { HttpClient, HttpStatus } from '../http/index.ts'
+import { HttpClient, HttpStatus, isHttpError } from '../http/index.ts'
 import { redaction } from '../observability/context.ts'
 import { isSessionExpired } from '../resilience/index.ts'
 import { Temporal } from '../temporal.ts'
@@ -21,6 +21,7 @@ import {
   BindingsSchema,
   DeviceBindingSchema,
   DeviceDataSchema,
+  describeRefusedPaths,
   LoginDataSchema,
   parseOrThrow,
 } from '../validation/index.ts'
@@ -67,7 +68,9 @@ interface FailureStreak {
    */
   readonly failures: number
   /**
-   * The failure's identity: its error name and message.
+   * The failure's identity: its error name and message — for a schema
+   * refusal, the refused paths instead of the message, which names
+   * values that may change from one read to the next.
    */
   readonly reason: string
   /**
@@ -77,6 +80,9 @@ interface FailureStreak {
 }
 
 const describeFailure = (error: unknown): string => {
+  if (error instanceof Error && error.cause instanceof z.ZodError) {
+    return `${error.name}: ${describeRefusedPaths(error.cause)}`
+  }
   if (error instanceof Error) {
     return `${error.name}: ${error.message}`
   }
@@ -91,6 +97,8 @@ const advanceStreak = (
   reason,
   total: (streak?.total ?? 0) + 1,
 })
+
+const deviceDataPath = (did: string): string => `/devdata/${did}/latest`
 
 const isReminderDue = ({ failures }: FailureStreak): boolean =>
   failures % FAILURE_REMINDER_INTERVAL === 0
@@ -365,7 +373,7 @@ export class HeatzyAPI
       method: 'get',
       schema: DeviceDataSchema,
       shouldReportReceived: true,
-      url: `/devdata/${id}/latest`,
+      url: deviceDataPath(id),
     })
     return attr
   }
@@ -521,6 +529,23 @@ export class HeatzyAPI
 
   // The token needs refreshing when absent or within the forward
   // window of its expiry, so the renewal stays off the critical path.
+  // A device whose failure streak is open is reported by the streak —
+  // once, then every FAILURE_REMINDER_INTERVAL reads — so the
+  // pipeline's per-attempt line for its `/devdata` read would bring back
+  // the storm the streak ends. The failing cycle that opens a streak,
+  // and every other request, logs as before.
+  protected override logError(error: unknown): void {
+    if (
+      isHttpError(error) &&
+      this.#unreadableDevices
+        .keys()
+        .some((did) => error.config?.url === deviceDataPath(did))
+    ) {
+      return
+    }
+    super.logError(error)
+  }
+
   protected override needsSessionRefresh(): boolean {
     return (
       this.token === '' ||

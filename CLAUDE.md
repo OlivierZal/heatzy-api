@@ -124,7 +124,15 @@ Architecture, toolchain and process are aligned on the sibling
   every 60 identical failures — the five minutes the 16.0.0 verdict
   accepted, and enough for a diagnostic report's tail to still carry
   it — then closed by one `log` line. The `/bindings` drop line
-  follows the same rule. The state is in memory, stored BEFORE the
+  follows the same rule. A streak's identity is the error's name and
+  message, and for a zod refusal its failing PATHS
+  (`describeRefusedPaths`): the message names the values received, and
+  a drifting value must not reopen the streak on every read. The core's
+  per-attempt `logError` line would repeat an HTTP failure on every
+  cycle, so `HeatzyAPI` overrides it to hold back that line for a
+  `/devdata` read whose device already has an open streak — the cycle
+  that opens the streak still logs it, the shape of melcloud's Home
+  override for the `/context` 404. The state is in memory, stored BEFORE the
   line is written (a throwing host logger never loses it), pruned for
   a device that leaves the listing, and cleared on sign-out.
 - **A READ checks wire TYPES, not a vocabulary; `null` answers the

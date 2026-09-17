@@ -202,8 +202,12 @@ export class Device {
   // The presence countdown keys off the *reported* mode: comfort
   // starts a 90-minute window, comfort−1 60, comfort−2 30; any other
   // value clears it — another label, a Glow-family number, `null`.
+  // Entering presence without a new reported mode closes the window of
+  // the derogation it replaces: a boost end would otherwise read as the
+  // presence end.
   #handlePresenceEnd({
     currentMode,
+    derogationMode,
     newCurrentMode,
   }: DerogationTransition): void {
     if (newCurrentMode !== undefined && newCurrentMode !== currentMode) {
@@ -212,6 +216,8 @@ export class Device {
         isPresenceCountdownMode(newCurrentMode)
           ? this.#now().add({ minutes: PRESENCE_END_MINUTES[newCurrentMode] })
           : null
+    } else if (derogationMode !== DerogationMode.presence) {
+      this.#derogationEnd = null
     }
   }
 

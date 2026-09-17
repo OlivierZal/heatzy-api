@@ -128,20 +128,27 @@ const describeReceived = (
     : ` (received ${JSON.stringify(value)})`
 }
 
-const describeIssuePath = (
-  data: unknown,
-  path: readonly PropertyKey[],
-  shouldReportReceived: boolean,
-): string => {
+const labelIssuePath = (path: readonly PropertyKey[]): string => {
   const label = path.map(String).join('.')
-  return `${label === '' ? '(root)' : label}${
-    shouldReportReceived ? describeReceived(data, path) : ''
-  }`
+  return label === '' ? '(root)' : label
 }
+
+const joinOnce = (labels: readonly string[]): string =>
+  [...new Set(labels)].join(', ')
+
+/**
+ * Name the paths a zod refusal failed at, each once and without the
+ * values received there: the identity of a refusal whose received
+ * values may change from one read to the next.
+ * @param error - The zod refusal.
+ * @returns The failing paths, comma-separated.
+ */
+export const describeRefusedPaths = (error: z.ZodError): string =>
+  joinOnce(error.issues.map(({ path }) => labelIssuePath(path)))
 
 /**
  * Parse `data` against `schema`; throw {@link ValidationError} on
- * mismatch. The message names each failing path — and, when the caller
+ * mismatch. The message names each failing path once — and, when the caller
  * opts in, the primitive value received there — while the full issue
  * list stays in the ZodError `cause`, so a logged error prints it once.
  * @param schema - Zod schema to validate against.
@@ -168,9 +175,14 @@ export const parseOrThrow = <T>(
 ): T => {
   const result = schema.safeParse(data)
   if (!result.success) {
-    const paths = result.error.issues
-      .map(({ path }) => describeIssuePath(data, path, shouldReportReceived))
-      .join(', ')
+    const paths = joinOnce(
+      result.error.issues.map(
+        ({ path }) =>
+          `${labelIssuePath(path)}${
+            shouldReportReceived ? describeReceived(data, path) : ''
+          }`,
+      ),
+    )
     throw new ValidationError(
       `Invalid API response shape (${context}): ${paths}`,
       { cause: result.error, context },

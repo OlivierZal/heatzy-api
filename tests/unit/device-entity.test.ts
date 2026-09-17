@@ -209,6 +209,29 @@ describe(Device, () => {
       },
     )
 
+    // The reported mode did not move, so presence has no countdown yet;
+    // the boost end it replaces must not read as the presence end.
+    it('closes the window of the derogation presence replaces', () => {
+      const device = new Device(buildBinding('pro'), proAttributes)
+      device.update({ derog_mode: DerogationMode.boost, derog_time: 600 })
+      device.update({ derog_mode: DerogationMode.presence })
+
+      expect(device.derogationEndDate).toBeNull()
+    })
+
+    it('starts the countdown when presence lands with a new reported mode', () => {
+      const device = new Device(buildBinding('pro'), proAttributes)
+      device.update({ derog_mode: DerogationMode.boost, derog_time: 600 })
+      device.update({
+        cur_mode: Mode.comfortMinus1,
+        derog_mode: DerogationMode.presence,
+      })
+
+      expect(defined(device.derogationEndDate).epochMilliseconds).toBe(
+        Date.now() + 60 * MINUTE_MS,
+      )
+    })
+
     it('keeps the presence countdown when the reported mode does not change', () => {
       const device = createPresenceDevice()
       device.update({ cur_mode: Mode.comfort })

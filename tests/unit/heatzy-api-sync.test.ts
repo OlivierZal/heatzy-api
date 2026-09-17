@@ -216,11 +216,13 @@ describe(HeatzyAPI, () => {
 
       expect(logger.error).toHaveBeenCalledTimes(2)
       expect(logger.error).toHaveBeenLastCalledWith(
-        'Skipping device did-pro: still unreadable after 60 consecutive reads (ValidationError: Invalid API response shape (GET /devdata/did-pro/latest): attr.mode (received "cft3"))',
+        'Skipping device did-pro: still unreadable after 60 consecutive reads (ValidationError: attr.mode)',
       )
     })
 
-    it('reports the failure in full again when its reason changes', async () => {
+    // The message names the value received; the streak is keyed on
+    // WHERE the payload was refused, so a drifting value is one streak.
+    it('keeps one streak while the refused value changes', async () => {
       const logger = createLogger()
       const { api } = await createAuthedApi({ logger })
       let mode = 'cft3'
@@ -230,11 +232,66 @@ describe(HeatzyAPI, () => {
       mode = 'cft4'
       await api.fetch()
 
-      expect(logger.error).toHaveBeenCalledTimes(2)
-      expect(logger.error).toHaveBeenLastCalledWith(
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(
         SKIP_LINE,
         expect.any(ValidationError),
       )
+    })
+
+    it('reports the failure in full again when its reason changes', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      let isRefusing = true
+      stageHeatzyWire(mockRequest, {
+        login: () => mockResponse(buildLoginData()),
+        rest: (config) => {
+          if (config.url !== '/devdata/did-pro/latest') {
+            return heatzyRegistryResponse(config, {
+              attributes: proAttributes,
+              bindings: [buildBinding('pro')],
+            })
+          }
+          if (isRefusing) {
+            return mockResponse({ attr: { ...proAttributes, mode: 'cft3' } })
+          }
+          throw createServerError(404, config.url)
+        },
+      })
+
+      await api.fetch()
+      isRefusing = false
+      await api.fetch()
+
+      expect(vi.mocked(logger.error).mock.calls).toStrictEqual([
+        [SKIP_LINE, expect.any(ValidationError)],
+        [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
+      ])
+    })
+
+    // The request pipeline logs every failed attempt; once the streak
+    // is open, those lines would repeat it on every cycle.
+    it('lets the streak alone report a device whose read keeps failing at the transport', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      stageHeatzyWire(mockRequest, {
+        login: () => mockResponse(buildLoginData()),
+        rest: (config) => {
+          if (config.url === '/devdata/did-pro/latest') {
+            throw createServerError(404, config.url)
+          }
+          return heatzyRegistryResponse(config, {
+            attributes: proAttributes,
+            bindings: [buildBinding('pro')],
+          })
+        },
+      })
+
+      await fetchCycles(api, 3)
+
+      expect(vi.mocked(logger.error).mock.calls).toStrictEqual([
+        [expect.stringContaining('"url": "/devdata/did-pro/latest"')],
+        [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
+      ])
     })
 
     it('closes the streak with one recovery line', async () => {
