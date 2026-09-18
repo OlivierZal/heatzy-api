@@ -87,11 +87,14 @@ const describeFailure = (error: unknown): string => {
     return `${error.name}: ${error.message}`
   }
   // A PRIMITIVE names itself, so two distinct thrown values stay two
-  // streaks; anything else names its type only (api-core's twin rule).
+  // streaks; an object names its type alone, since its default
+  // stringification says nothing and walking it could print a
+  // credential. api-core's twin rule, spelled the same way.
   return typeof error === 'string' ||
     typeof error === 'number' ||
     typeof error === 'bigint' ||
-    typeof error === 'boolean'
+    typeof error === 'boolean' ||
+    typeof error === 'symbol'
     ? String(error)
     : `a thrown ${typeof error}`
 }

@@ -345,9 +345,9 @@ describe(HeatzyAPI, () => {
 
       await fetchCycles(api, 8)
 
-      // Every primitive names itself, so eight rejections are seven
-      // streaks; the two objects share one, their type being all their
-      // identity can honestly be.
+      // Every primitive names itself, so eight rejections are six
+      // streaks: the repeated `offline` shares one, and so do the two
+      // objects, their type being all their identity can honestly be.
       expect(vi.mocked(logger.error).mock.calls).toStrictEqual([
         [SKIP_LINE, 'offline'],
         [SKIP_LINE, 7],
