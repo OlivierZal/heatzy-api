@@ -281,7 +281,21 @@ Architecture, toolchain and process are aligned on the sibling
   `applyValues`/`control` seam must carry presence for the Pro's own
   write to reach the wire — so a consumer that bypasses a facade, or
   subclasses one, still can. What com.heatzy's driver held by convention
-  is now the compiler's on the surface every consumer uses. Do NOT reach for a runtime range check instead:
+  is now the compiler's on the surface every consumer uses. The
+  technique is THIS wire's and does not cross to melcloud-api: here the
+  schema itself varies per generation — different KEYS (`cft_temp`
+  against `cft_tempH`/`cft_tempL`, `lock_switch` against `LOCK_C`) and
+  different VALUE encodings (`cur_mode` a label on the Pro, a number on
+  the Glow family) — over a product identity that is STATIC, resolved
+  once from `product_key` at construction and already shaped as a facade
+  hierarchy. MELCloud's Classic ATW is the opposite: ONE uniform payload
+  for every unit, every Zone 2 field present on all of them, and a FLAG
+  inside it (`HasZone2`) saying whether they mean anything. A flag read
+  at runtime cannot become a type without a per-unit generic, which is
+  why melcloud expresses that capability as a nullable read (`zone2`)
+  and keeps its write guards at runtime. Before crossing a capability
+  fix between the twins, ask which of the two shapes carries the
+  capability. Do NOT reach for a runtime range check instead:
   the declarations answer `uint8 0..5` on the Glow family and the Pro
   alike, so encoding them would AUTHORISE presence on a Glow — a
   declared range is a register's width, the vendor's sheet is the
