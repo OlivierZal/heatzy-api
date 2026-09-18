@@ -150,9 +150,16 @@ Architecture, toolchain and process are aligned on the sibling
   number or `null`, `derog_mode` an integer (the wire allows 4 and 5,
   no document defines them), and the facades read them through
   `isMode` / `isDerogationMode`. `mode` stays the ONE closed literal:
-  it is the write vocabulary, the V1 labels are translated ahead of
-  it (`modeV1Labels`), and a label it cannot map is a real protocol
-  change worth a failed read. Test with FIELD payloads
+  it is the write vocabulary, every spelling the vendor PUBLISHES for a
+  reported mode is translated ahead of it (`modeLabels`: the V1 Chinese
+  labels, and the `off` the 2020 API document lists for index 3 where
+  the 2018 one spells `stop` — one state, two vendor spellings, and not
+  a power switch: `on_off` is its own register), and a label it cannot
+  map is a real protocol change worth a failed read. A SWITCH is read
+  in any of its three declared forms (`0`/`1`, `bool`, or the `off`/`on`
+  labels of an enum-declared datapoint — a Pilote Pro answered its
+  documented-`Bool` `temp_set_step` with the string `off`, report
+  f6f78df8) and written as `0`/`1`. Test with FIELD payloads
   (`tests/fixtures.ts` `field*`, verbatim from a real account), never
   only with synthesized ones: the synthesized Glow fixture carried
   `com_temp: 50` and no `cur_mode`, which is how the regression passed

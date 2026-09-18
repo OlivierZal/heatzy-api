@@ -321,7 +321,7 @@ describe(HeatzyAPI, () => {
     // A host transport can reject with a value that is not an Error;
     // the leg receives it unwrapped (probed), and a streak still needs
     // an identity for it.
-    it('keys a streak on a non-Error rejection by its string or its type', async () => {
+    it('keys a streak on a non-Error rejection by its own value', async () => {
       const logger = createLogger()
       const { api } = await createAuthedApi({ logger })
       const readDevice = vi
@@ -330,6 +330,10 @@ describe(HeatzyAPI, () => {
         .mockRejectedValueOnce('offline')
         .mockRejectedValueOnce(7)
         .mockRejectedValueOnce(8)
+        .mockRejectedValueOnce(true)
+        .mockRejectedValueOnce(9n)
+        .mockRejectedValueOnce({ code: 1 })
+        .mockRejectedValueOnce({ code: 2 })
       mockRequest.mockImplementation(async (config) =>
         config.url === '/devdata/did-pro/latest'
           ? readDevice()
@@ -339,11 +343,18 @@ describe(HeatzyAPI, () => {
             }),
       )
 
-      await fetchCycles(api, 4)
+      await fetchCycles(api, 8)
 
+      // Every primitive names itself, so eight rejections are seven
+      // streaks; the two objects share one, their type being all their
+      // identity can honestly be.
       expect(vi.mocked(logger.error).mock.calls).toStrictEqual([
         [SKIP_LINE, 'offline'],
         [SKIP_LINE, 7],
+        [SKIP_LINE, 8],
+        [SKIP_LINE, true],
+        [SKIP_LINE, 9n],
+        [SKIP_LINE, { code: 1 }],
       ])
     })
 

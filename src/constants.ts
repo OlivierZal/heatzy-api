@@ -56,12 +56,20 @@ const MODES: ReadonlySet<unknown> = new Set(Object.values(Mode))
 export const isMode = (value: unknown): value is Mode => MODES.has(value)
 
 /**
- * The V1 Pilote's `mode` labels. Its Gizwits datapoint declares the
- * enum in Chinese, and `/devdata` answers the declared label, so a V1
- * reads `舒适` where every later generation reads `cft`.
+ * Every spelling Heatzy publishes for a mode it can REPORT, mapped to
+ * the one this SDK writes. `/devdata` answers a datapoint's declared
+ * LABEL, and the labels differ per product and per document: the V1
+ * Pilote declares its enum in Chinese, so it reads `舒适` where every
+ * later generation reads `cft`; and the vendor's 2020 API document
+ * lists index 3 as `off` — in the same list that gives `cft`, `eco`
+ * and `fro` — where its 2018 document spells the same index `stop`
+ * and glosses the V1 triplet `[1, 1, 3]` as "OFF mode". One state,
+ * two vendor spellings. Translating on READ costs nothing and never
+ * widens what this SDK WRITES.
  * @category Constants
  */
-export const modeV1Labels: ReadonlyMap<string, Mode> = new Map([
+export const modeLabels: ReadonlyMap<string, Mode> = new Map([
+  ['off', Mode.stop],
   ['停止', Mode.stop],
   ['经济', Mode.eco],
   ['舒适', Mode.comfort],

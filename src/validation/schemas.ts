@@ -7,7 +7,7 @@ import type {
   DeviceData,
   LoginData,
 } from '../types/index.ts'
-import { Mode, modeV1Labels, Switch } from '../constants.ts'
+import { Mode, modeLabels, Switch } from '../constants.ts'
 import { ValidationError } from '../errors/index.ts'
 
 // Runtime schemas for API boundaries where silent shape drift would hide
@@ -26,15 +26,25 @@ import { ValidationError } from '../errors/index.ts'
 // A V1 answers its Chinese label; every later generation, the Latin one.
 const ModeSchema = z.preprocess(
   (value) =>
-    typeof value === 'string' ? (modeV1Labels.get(value) ?? value) : value,
+    typeof value === 'string' ? (modeLabels.get(value) ?? value) : value,
   z.literal(Object.values(Mode)),
 )
 
 // Gizwits declares `on_off` and `window_switch` as `bool` datapoints:
 // every REST sample on record answers 0/1, a boolean is normalised.
+// Gizwits answers a datapoint's declared form, and a switch is declared
+// three ways across the products: the 0/1 this SDK writes, the `bool`
+// the vendor documents for `on_off` and `window_switch`, and the
+// on/off LABELS of an enum-declared one — witnessed in the field on a
+// Pilote Pro, whose `temp_set_step` (documented `Bool (0-1)`) answered
+// the string `off` (report f6f78df8, 2026-09-16). Every form reads
+// back as the one `Switch` value; writes stay 0/1.
 const SwitchSchema = z.union([
   z.literal(Object.values(Switch)),
   z.boolean().transform((isOn) => (isOn ? Switch.on : Switch.off)),
+  z
+    .literal(['off', 'on'])
+    .transform((label) => (label === 'on' ? Switch.on : Switch.off)),
 ])
 
 // Optional fields stay permissive per generation: a V1 payload carries

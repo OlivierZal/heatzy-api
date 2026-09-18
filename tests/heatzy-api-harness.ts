@@ -84,10 +84,8 @@ export const heatzyRegistryResponse = (
   if (url === BINDINGS_PATH) {
     return mockResponse({ devices: bindings })
   }
-  if (url?.startsWith(DEVDATA_PREFIX) === true) {
-    return mockResponse({ attr: attributes })
-  }
-  return mockResponse({})
+  const isDeviceRead = url?.startsWith(DEVDATA_PREFIX) === true
+  return mockResponse(isDeviceRead ? { attr: attributes } : {})
 }
 
 // Routes the three Heatzy endpoints to canned success responses so
