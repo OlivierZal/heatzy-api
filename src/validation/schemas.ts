@@ -23,22 +23,31 @@ import { ValidationError } from '../errors/index.ts'
 // Only `mode` stays a closed set: it is the write vocabulary, and a
 // label this SDK cannot map is a real protocol change.
 
-// A V1 answers its Chinese label; every later generation, the Latin one.
+// A V1 answers its Chinese label; every later generation, the Latin
+// one. Measured against the products' own datapoint declarations
+// (Gizwits `/app/datapoint`, fetched 2026-09-18 for the twelve modelled
+// `product_key`s): `mode` is an enum of `cft, eco, fro, stop` on the
+// Glow family, the same plus `cft1, cft2` on every Pilote and the Pro,
+// and the four Chinese labels on the V1. NO product declares `off` —
+// the vendor's 2020 API document does, for the same index its 2018 one
+// spells `stop`, so the alias is insurance against a published
+// spelling, not against a declaration.
 const ModeSchema = z.preprocess(
   (value) =>
     typeof value === 'string' ? (modeLabels.get(value) ?? value) : value,
   z.literal(Object.values(Mode)),
 )
 
-// Gizwits declares `on_off` and `window_switch` as `bool` datapoints:
-// every REST sample on record answers 0/1, a boolean is normalised.
-// Gizwits answers a datapoint's declared form, and a switch is declared
-// three ways across the products: the 0/1 this SDK writes, the `bool`
-// the vendor documents for `on_off` and `window_switch`, and the
-// on/off LABELS of an enum-declared one — witnessed in the field on a
-// Pilote Pro, whose `temp_set_step` (documented `Bool (0-1)`) answered
-// the string `off` (report f6f78df8, 2026-09-16). Every form reads
-// back as the one `Switch` value; writes stay 0/1.
+// Gizwits answers a datapoint's DECLARED form, and the declarations
+// differ per switch (measured 2026-09-18 over the twelve products):
+// `on_off` and `window_switch` are `bool`, `lock_switch`, `timer_switch`
+// and `LOCK_C` are `uint8 0..1`, and an enum-declared switch answers
+// its LABELS — witnessed in the field on a Pilote Pro, whose
+// `temp_set_step` (declared `enum [off, on]`, documented `Bool (0-1)`)
+// answered the string `off` (report f6f78df8, 2026-09-16). No switch
+// this SDK models is enum-declared today; accepting the labels costs
+// one branch and spares the whole device read if one ever is. Every
+// form reads back as the one `Switch` value; writes stay 0/1.
 const SwitchSchema = z.union([
   z.literal(Object.values(Switch)),
   z.boolean().transform((isOn) => (isOn ? Switch.on : Switch.off)),
@@ -57,6 +66,7 @@ const AttributesSchema: z.ZodType<Attributes> = z.looseObject({
   com_temp: z.number().optional(),
   cur_humi: z.number().optional(),
   cur_mode: z.union([z.string(), z.number(), z.null()]).optional(),
+  cur_signal: z.union([z.string(), z.number(), z.null()]).optional(),
   cur_temp: z.number().optional(),
   cur_tempH: z.number().optional(),
   cur_tempL: z.number().optional(),

@@ -34,6 +34,19 @@ export class DeviceProFacade extends DeviceGlowFacade {
   }
 
   /**
+   * The pilot-wire order the module is sending to the radiator right
+   * now (wire `cur_signal`, Pro only). The Pro regulates on its own
+   * sensor, so under one commanded `mode` it alternates between
+   * comfort and eco — this says which of them is on the wire.
+   * @returns The order being sent, or `null` when the wire answers a
+   * value this SDK does not model, or none at all.
+   */
+  public get currentSignal(): Mode | null {
+    const value: unknown = this.data.cur_signal
+    return isMode(value) ? value : null
+  }
+
+  /**
    * Whether the device has detected an open window and paused heating.
    * @returns `true` while open-window detection is triggered.
    */

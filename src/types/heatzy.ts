@@ -22,6 +22,9 @@ export interface Attributes extends Omit<PostAttributes, 'derog_mode'> {
   readonly cur_humi?: number | undefined
   // A Latin label on the Pro, a number on the Glow family
   readonly cur_mode?: number | string | null | undefined
+  // The pilot-wire order the Pro is sending right now: its own
+  // regulation switches between comfort and eco under one `mode`
+  readonly cur_signal?: number | string | null | undefined
   readonly cur_temp?: number | undefined
   // Glow
   readonly cur_tempH?: number | undefined

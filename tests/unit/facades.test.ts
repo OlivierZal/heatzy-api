@@ -467,6 +467,24 @@ describe(DeviceProFacade, () => {
     expect(facade.isPresence).toBe(false)
   })
 
+  // The Pro regulates on its own sensor, so the order it puts on the
+  // pilot wire (`cur_signal`, its own read-only datapoint) can differ
+  // from the commanded mode.
+  it('reads the pilot-wire order the module is sending', () => {
+    const { facade } = createProFacade({ ...proAttributes, cur_signal: 'eco' })
+
+    expect(facade.currentSignal).toBe(Mode.eco)
+  })
+
+  it.each([
+    { label: 'a value this SDK does not model', signal: 3 },
+    { label: 'no signal at all', signal: undefined },
+  ])('reads a null pilot-wire order for $label', ({ signal }) => {
+    const { facade } = createProFacade({ ...proAttributes, cur_signal: signal })
+
+    expect(facade.currentSignal).toBeNull()
+  })
+
   it('reads isOn from the commanded mode', () => {
     const { facade } = createProFacade({ ...proAttributes, mode: Mode.stop })
 
