@@ -275,8 +275,13 @@ Architecture, toolchain and process are aligned on the sibling
   family included, documents `Enum (0-2)`. The public write surface
   (`PostAttributes`) therefore carries `CommonDerogationMode`, and
   `DeviceProFacade.setValues` alone widens to `ControlAttributes`, the
-  transport's shape. What was a convention held in com.heatzy's driver
-  is now the compiler's. Do NOT reach for a runtime range check instead:
+  transport's shape. The guarantee is exactly FACADE-wide: the transport
+  stays at the wire's vocabulary on purpose — `HeatzyAPI.updateValues`,
+  the adapter, the exported `DevicePostData` and the protected
+  `applyValues`/`control` seam must carry presence for the Pro's own
+  write to reach the wire — so a consumer that bypasses a facade, or
+  subclasses one, still can. What com.heatzy's driver held by convention
+  is now the compiler's on the surface every consumer uses. Do NOT reach for a runtime range check instead:
   the declarations answer `uint8 0..5` on the Glow family and the Pro
   alike, so encoding them would AUTHORISE presence on a Glow — a
   declared range is a register's width, the vendor's sheet is the

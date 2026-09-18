@@ -40,9 +40,10 @@ const DEROGATION_MODES: ReadonlySet<unknown> = new Set(
 
 /**
  * Whether a wire `derog_mode` is one this SDK models. The wire declares
- * the register up to 5 on the Pro and the Glow family while every vendor
- * document stops at 3: an unmodelled code is read, never refused, and
- * the facades answer `null` for it.
+ * the register up to 5 on the Pro and the Glow family while the vendor
+ * documents four derogations on the Pro and three everywhere else: an
+ * unmodelled code is read, never refused, and the facades answer `null`
+ * for it.
  * @param value - A wire `derog_mode` value.
  * @returns `true` for a {@link DerogationMode}.
  */

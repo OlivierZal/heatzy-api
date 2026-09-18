@@ -148,12 +148,6 @@ export class DeviceFacade {
   /**
    * Send a control payload, merge the echo into the in-memory model,
    * and notify sync observers.
-   * @param attributes - Writable attributes to apply.
-   * @returns The echoed attribute payload.
-   */
-  /**
-   * Send a control payload, merge the echo into the in-memory model,
-   * and notify sync observers.
    * @param attributes - Writable attributes EVERY product accepts.
    * `DeviceProFacade` widens this to its own presence derogation.
    * @returns The echoed attribute payload.
@@ -173,9 +167,6 @@ export class DeviceFacade {
     this.device.update(data)
   }
 
-  // V1 products only accept the positional `raw` triplet, and only for
-  // the four base modes. Anything else is silently ignored — mirroring
-  // the wire's capabilities, not an SDK limitation.
   /**
    * The ONE decorated write seam: every facade's `setValues` lands
    * here, and it takes the transport's shape so the Pro can pass its
@@ -197,6 +188,9 @@ export class DeviceFacade {
     return this.control(omitUndefined(attributes))
   }
 
+  // V1 products only accept the positional `raw` triplet, and only for
+  // the four base modes. Anything else is silently ignored — mirroring
+  // the wire's capabilities, not an SDK limitation.
   protected async control({
     mode,
   }: ControlAttributes): Promise<ControlAttributes> {
