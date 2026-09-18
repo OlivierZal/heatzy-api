@@ -1,6 +1,7 @@
 export type {
   Attributes,
   Bindings,
+  ControlAttributes,
   DeviceBinding,
   DeviceData,
   DevicePostData,
@@ -29,6 +30,7 @@ export {
   HeatzyAPI,
 } from './api/index.ts'
 export {
+  type CommonDerogationMode,
   DerogationMode,
   getProduct,
   isModelledProduct,

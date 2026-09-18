@@ -3,6 +3,7 @@ import type { Device, PreviousMode } from '../entities/index.ts'
 import type { Temporal } from '../temporal.ts'
 import type {
   Attributes,
+  ControlAttributes,
   PostAttributes,
   UndefinedTolerant,
 } from '../types/index.ts'
@@ -125,21 +126,6 @@ export class DeviceFacade {
   }
 
   /**
-   * Send a control payload, merge the echo into the in-memory model,
-   * and notify sync observers.
-   * @param attributes - Writable attributes to apply.
-   * @returns The echoed attribute payload.
-   */
-  @syncDevices()
-  @updateDevice
-  public async setValues(attributes: PostAttributes): Promise<PostAttributes> {
-    // Stripped at the single entry point: V1's `control` checks each key
-    // against `undefined` itself, but V2+ counts keys to decide whether
-    // anything reaches the wire — and `{ mode: undefined }` has one.
-    return this.control(omitUndefined(attributes))
-  }
-
-  /**
    * Refresh a live attribute read into the in-memory model and notify
    * sync observers.
    * @returns The fresh attribute payload.
@@ -160,6 +146,19 @@ export class DeviceFacade {
   }
 
   /**
+   * Send a control payload, merge the echo into the in-memory model,
+   * and notify sync observers.
+   * @param attributes - Writable attributes EVERY product accepts.
+   * `DeviceProFacade` widens this to its own presence derogation.
+   * @returns The echoed attribute payload.
+   */
+  public async setValues(
+    attributes: PostAttributes,
+  ): Promise<ControlAttributes> {
+    return this.applyValues(attributes)
+  }
+
+  /**
    * Merge a partial attribute payload into the registry entity.
    * Invoked by the `@updateDevice` decorator.
    * @param data - Partial attribute payload to merge.
@@ -168,10 +167,33 @@ export class DeviceFacade {
     this.device.update(data)
   }
 
+  /**
+   * The ONE decorated write seam: every facade's `setValues` lands
+   * here, and it takes the transport's shape so the Pro can pass its
+   * own presence derogation through the same echo merge and sync
+   * notification. Narrowing happens in the PUBLIC signatures above, not
+   * here — a second decorated path would mean a second place to forget
+   * the merge.
+   * @param attributes - Attributes to write.
+   * @returns The echoed attribute payload.
+   */
+  @syncDevices()
+  @updateDevice
+  protected async applyValues(
+    attributes: ControlAttributes,
+  ): Promise<ControlAttributes> {
+    // Stripped at the single entry point: V1's `control` checks each key
+    // against `undefined` itself, but V2+ counts keys to decide whether
+    // anything reaches the wire — and `{ mode: undefined }` has one.
+    return this.control(omitUndefined(attributes))
+  }
+
   // V1 products only accept the positional `raw` triplet, and only for
   // the four base modes. Anything else is silently ignored — mirroring
   // the wire's capabilities, not an SDK limitation.
-  protected async control({ mode }: PostAttributes): Promise<PostAttributes> {
+  protected async control({
+    mode,
+  }: ControlAttributes): Promise<ControlAttributes> {
     if (mode !== undefined && isModeV1(mode)) {
       await this.api.updateValues({
         id: this.id,

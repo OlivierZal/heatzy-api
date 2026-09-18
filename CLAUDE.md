@@ -267,6 +267,27 @@ Architecture, toolchain and process are aligned on the sibling
 - Glow splits temperatures across two registers (`tempH` hundreds bit,
   `tempL` remainder in tenths of °C); Pro uses single `*_temp` registers
   in tenths. `getTargetTemperature` (utils) builds the right payload.
+- **A product's CAPABILITY lives in the type, on the facade that owns
+  it** (20.0.0). `derog_mode` was typed `DerogationMode` for every
+  product, so `glow.setValues({ derog_mode: presence })` compiled — and
+  the presence detection is documented on the Pilote Pro ALONE (`Enum
+(0-3)`, its sensor driving it), where every other generation, the Glow
+  family included, documents `Enum (0-2)`. The public write surface
+  (`PostAttributes`) therefore carries `CommonDerogationMode`, and
+  `DeviceProFacade.setValues` alone widens to `ControlAttributes`, the
+  transport's shape. The guarantee is exactly FACADE-wide: the transport
+  stays at the wire's vocabulary on purpose — `HeatzyAPI.updateValues`,
+  the adapter, the exported `DevicePostData` and the protected
+  `applyValues`/`control` seam must carry presence for the Pro's own
+  write to reach the wire — so a consumer that bypasses a facade, or
+  subclasses one, still can. What com.heatzy's driver held by convention
+  is now the compiler's on the surface every consumer uses. Do NOT reach for a runtime range check instead:
+  the declarations answer `uint8 0..5` on the Glow family and the Pro
+  alike, so encoding them would AUTHORISE presence on a Glow — a
+  declared range is a register's width, the vendor's sheet is the
+  capability. One decorated write seam remains
+  (`DeviceFacade.applyValues`, protected): the public signatures narrow,
+  the echo merge and the sync notification exist once.
 - Derogation semantics live in the `Device` entity: boost ends after
   `derog_time` minutes, vacation after `derog_time` days, presence runs
   a countdown keyed off the _reported_ `cur_mode` (comfort 90 min,
