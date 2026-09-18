@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [19.1.0] - 2026-09-18
+
+### Fixed
+
+- **A switch answered in words is read, not refused.** Gizwits answers a datapoint's declared FORM, and a switch is declared three ways across the products: the `0`/`1` this SDK writes, the `bool` the vendor documents for `on_off` and `window_switch`, and the `off`/`on` LABELS of an enum-declared one. The third was witnessed in the field: a Pilote Pro answered its `temp_set_step` — which the vendor documents as `Bool (0-1)` — with the string `off` (diagnostic report f6f78df8, 2026-09-16). That attribute is not modelled here, so it cost nothing — and the declarations confirm why it answered a string where its neighbours answered `0`: `temp_set_step` is declared `enum [off, on]` while `on_off` and `window_switch` are `bool` and `lock_switch`, `timer_switch` and `LOCK_C` are `uint8 0..1` (measured 2026-09-18 over the twelve products). No switch this SDK models is enum-declared today; one that ever is would have failed the whole device read, which is the regression 19.0.0 was cut for. All three forms now read back as the one `Switch` value, and writes stay `0`/`1`.
+- **The vendor's own second spelling of the stop mode is accepted.** Heatzy's 2020 API document lists index 3 as `off`, in the same list that gives `cft`, `eco` and `fro`; its 2018 document spells that index `stop` and glosses the V1 triplet `[1, 1, 3]` as "OFF mode"; the 2024/2025 datapoint sheets call it `3 : arrêt`. One state — heating stopped, not the device powered off, which is the separate `on_off` register — under two vendor spellings. A `mode` of `off` therefore reads as `Mode.stop` instead of failing the read. No product DECLARES it either — the twelve modelled `product_key`s declare `mode` as `enum [cft, eco, fro, stop]` (Glow family), the same plus `cft1, cft2` (every Pilote and the Pro) or the four Chinese labels (V1), measured against Gizwits' own `/app/datapoint` on 2026-09-18. This is the vendor's published vocabulary, accepted on READ only. `modeV1Labels` is renamed `modeLabels` for it (module-level, never on the package's public surface).
+
+### Added
+
+- **`DeviceProFacade.currentSignal`: the pilot-wire order the module is sending right now.** The Pro regulates on its own sensor, so under one commanded `mode` it alternates between comfort and eco; its read-only `cur_signal` datapoint says which one is on the wire (`enum [cft, eco, fro, stop, cft1, cft2]`, declared by the Pro alone). It reads `null` for a value this SDK does not model and for a product that carries none.
+
+### Changed
+
+- **The exact `@olivierzal/api-core` pin advances to 1.8.0: a repeated failure is ONE event in the log.** 19.0.0 streaked this SDK's own per-device line; the two lines UNDER it — the request pipeline's per-attempt error and the registry cycle's `Failed to fetch devices:` — had no such rule, and a whole-cycle failure wrote two lines per cycle, 34,560 a day at the 5-second cadence. The core now reports a failing call or cycle when the streak opens, when its reason changes and at most every five minutes, then closes it with one line counting the episode. Behaviour only; nothing here re-implements it.
+- **A failure streak's identity drops the values received.** `describeFailure` keyed a streak on the error's full message, and a `/devdata` refusal names the value it read — so a wrong-typed reading that drifts between reads reopened the streak on every cycle. A schema refusal is keyed on its failing PATHS now, and a thrown primitive on its own value rather than its type.
+- **The exact `@olivierzal/configs` pin advances to 6.4.1** (unicorn 75, jsdoc 64.5, `prefer-ternary` bounded to single-line expressions).
+
 ## [19.0.0] - 2026-09-17
 
 ### Breaking changes
@@ -290,6 +307,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[19.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v19.0.0...v19.1.0
 [19.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v18.1.0...v19.0.0
 [18.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v18.0.1...v18.1.0
 [18.0.1]: https://github.com/OlivierZal/heatzy-api/compare/v18.0.0...v18.0.1

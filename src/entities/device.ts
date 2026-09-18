@@ -54,10 +54,7 @@ const derogationDuration = (
   if (mode === DerogationMode.boost) {
     return { minutes: time }
   }
-  if (mode === DerogationMode.vacation) {
-    return { days: time }
-  }
-  return null
+  return mode === DerogationMode.vacation ? { days: time } : null
 }
 
 /**

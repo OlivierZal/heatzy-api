@@ -86,7 +86,17 @@ const describeFailure = (error: unknown): string => {
   if (error instanceof Error) {
     return `${error.name}: ${error.message}`
   }
-  return typeof error === 'string' ? error : `a thrown ${typeof error}`
+  // A PRIMITIVE names itself, so two distinct thrown values stay two
+  // streaks; an object names its type alone, since its default
+  // stringification says nothing and walking it could print a
+  // credential. api-core's twin rule, spelled the same way.
+  return typeof error === 'string' ||
+    typeof error === 'number' ||
+    typeof error === 'bigint' ||
+    typeof error === 'boolean' ||
+    typeof error === 'symbol'
+    ? String(error)
+    : `a thrown ${typeof error}`
 }
 
 const advanceStreak = (

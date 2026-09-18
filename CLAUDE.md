@@ -150,13 +150,49 @@ Architecture, toolchain and process are aligned on the sibling
   number or `null`, `derog_mode` an integer (the wire allows 4 and 5,
   no document defines them), and the facades read them through
   `isMode` / `isDerogationMode`. `mode` stays the ONE closed literal:
-  it is the write vocabulary, the V1 labels are translated ahead of
-  it (`modeV1Labels`), and a label it cannot map is a real protocol
-  change worth a failed read. Test with FIELD payloads
+  it is the write vocabulary, every spelling the vendor PUBLISHES for a
+  reported mode is translated ahead of it (`modeLabels`: the V1 Chinese
+  labels, and the `off` the 2020 API document lists for index 3 where
+  the 2018 one spells `stop` — one state, two vendor spellings, and not
+  a power switch: `on_off` is its own register), and a label it cannot
+  map is a real protocol change worth a failed read. A SWITCH is read
+  in any of its three declared forms (`0`/`1`, `bool`, or the `off`/`on`
+  labels of an enum-declared datapoint — a Pilote Pro answered its
+  documented-`Bool` `temp_set_step` with the string `off`, report
+  f6f78df8) and written as `0`/`1`. Test with FIELD payloads
   (`tests/fixtures.ts` `field*`, verbatim from a real account), never
   only with synthesized ones: the synthesized Glow fixture carried
   `com_temp: 50` and no `cur_mode`, which is how the regression passed
   a 100 % suite for two months.
+- **The products' own DECLARATIONS are public, and they settle every
+  vocabulary question** (2026-09-18). `GET https://euapi.gizwits.com/app/datapoint?product_key=<key>`
+  with the header `X-Gizwits-Application-Id: c70a66ff039d41b4a220e198b0fcc8b3`
+  — the app id already in this repo — answers each product's datapoint
+  table: `data_type` (`bool`, `enum`, `uint8`, `uint16`), the enum's
+  LABELS, the uint's min/max, and whether it is writable. No user
+  credential is involved. Read it BEFORE closing any vocabulary or
+  widening any range; the twelve modelled keys were measured this way
+  and the results are the reason `mode` keeps its closed set while
+  every read register does not: `mode` is `enum [cft, eco, fro, stop]`
+  on the Glow family, the same plus `cft1, cft2` on every Pilote and
+  the Pro, the four Chinese labels on the V1 — and `off` is declared
+  NOWHERE (the 2020 vendor document publishes it; the alias is
+  insurance against a spelling, not a declaration). `cur_mode` is
+  `uint8 0..10` on the Glow family and an enum on the Pro; `com_temp`
+  is `0..255` there and `0..100` on the Pro; `derog_mode` is `0..5` on
+  the Glow family and the Pro but `0..2` on every Pilote; the switches
+  are `bool` (`on_off`, `window_switch`), `uint8 0..1` (`lock_switch`,
+  `timer_switch`, `LOCK_C`) — and the one enum-declared switch,
+  `temp_set_step` on the Pro, is what answered the string `off` in
+  report f6f78df8. Three declared attributes stay UNMODELLED on
+  purpose, each for a stated reason: `temp_set_step` (writable, its
+  polarity unknown — the vendor says the step toggles between 1 °C and
+  0,5 °C but never which label is which), `Heating_state` (read-only
+  `bool` whose NAME says "heating" while the vendor's own description
+  says "the target temperature has been reached" — opposite meanings),
+  and the Glow family's `power_cnt`/`power_dataH`/`power_dataL` (no
+  documented semantics at all). Each needs a field observation, not a
+  guess.
 - **A refused payload names what was received, only where no
   credential rides** (19.0.0). zod keeps no input in its issues, and
   enabling its `reportInput` would print a container's whole subtree —

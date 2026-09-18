@@ -296,6 +296,15 @@ describe('deviceDataSchema', () => {
     })
   })
 
+  // The vendor's 2020 API document lists index 3 as `off` where its
+  // 2018 one spells the same index `stop` — one state, two vendor
+  // spellings, so a read must accept both and a write keeps `stop`.
+  it('reads the vendor spelling off as the stop mode', () => {
+    expect(DeviceDataSchema.parse({ attr: { mode: 'off' } }).attr.mode).toBe(
+      Mode.stop,
+    )
+  })
+
   it.each([
     { expected: Switch.on, field: 'on_off', isOn: true },
     { expected: Switch.off, field: 'window_switch', isOn: false },
@@ -304,6 +313,24 @@ describe('deviceDataSchema', () => {
     ({ expected, field, isOn }) => {
       const { attr } = DeviceDataSchema.parse({
         attr: { ...proAttributes, [field]: isOn },
+      })
+
+      expect(attr).toMatchObject({ [field]: expected })
+    },
+  )
+
+  // A Pilote Pro answered its `temp_set_step` — a datapoint the vendor
+  // documents as `Bool (0-1)` — with the string `off` (field report
+  // f6f78df8). A switch this SDK DOES model, declared the same way,
+  // would have failed the whole device read.
+  it.each([
+    { expected: Switch.off, field: 'lock_switch', label: 'off' },
+    { expected: Switch.on, field: 'timer_switch', label: 'on' },
+  ])(
+    'normalises the label $label of $field to its numeric switch',
+    ({ expected, field, label }) => {
+      const { attr } = DeviceDataSchema.parse({
+        attr: { ...proAttributes, [field]: label },
       })
 
       expect(attr).toMatchObject({ [field]: expected })
