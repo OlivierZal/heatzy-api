@@ -1,6 +1,7 @@
 export type {
   Attributes,
   Bindings,
+  ControlAttributes,
   DeviceBinding,
   DeviceData,
   DevicePostData,

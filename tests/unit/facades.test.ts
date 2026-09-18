@@ -470,6 +470,24 @@ describe(DeviceProFacade, () => {
   // The Pro regulates on its own sensor, so the order it puts on the
   // pilot wire (`cur_signal`, its own read-only datapoint) can differ
   // from the commanded mode.
+  // The presence derogation is the Pro's own capability: only its
+  // facade widens `setValues` to it, and the write must go through the
+  // same seam — wire call, echo, merge into the entity.
+  it('writes the presence derogation only its own product accepts', async () => {
+    const { api, device, facade } = createProFacade()
+    const attributes = { derog_mode: DerogationMode.presence }
+
+    await expect(facade.setValues(attributes)).resolves.toStrictEqual(
+      attributes,
+    )
+
+    expect(api.updateValues).toHaveBeenCalledWith({
+      id: 'did-pro',
+      postData: { attrs: attributes },
+    })
+    expect(device.data).toStrictEqual({ ...proAttributes, ...attributes })
+  })
+
   it('reads the pilot-wire order the module is sending', () => {
     const { facade } = createProFacade({ ...proAttributes, cur_signal: 'eco' })
 

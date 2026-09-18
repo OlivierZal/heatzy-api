@@ -12,6 +12,25 @@ export const DerogationMode = {
   presence: 3,
   vacation: 1,
 } as const
+/**
+ * The derogations EVERY product with a derogation register accepts.
+ * The vendor documents `derog_mode` as `Enum (0-2)` — no derogation,
+ * vacation, boost — on the Pilote modules AND on the Glow family, and
+ * as `Enum (0-3)` on the Pilote Pro alone, whose sensor adds the
+ * presence detection. Presence is therefore the Pro's own capability,
+ * and {@link DeviceProFacade} is the only place this SDK offers it.
+ *
+ * The API's DECLARED range says otherwise and must not be read as a
+ * capability: it answers `uint8 0..5` for the Glow family and the Pro
+ * alike (measured 2026-09-18 over the twelve modelled product keys),
+ * which is the register's WIDTH, not what the product does with it.
+ * @category Constants
+ */
+export type CommonDerogationMode = Exclude<
+  DerogationMode,
+  typeof DerogationMode.presence
+>
+
 export type DerogationMode =
   (typeof DerogationMode)[keyof typeof DerogationMode]
 

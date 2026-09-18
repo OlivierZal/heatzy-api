@@ -1,4 +1,5 @@
 import type {
+  CommonDerogationMode,
   DerogationMode,
   Mode,
   POST_DATA_UNIT,
@@ -46,6 +47,17 @@ export interface Bindings {
 }
 
 /**
+ * Everything `/control/{did}` itself accepts — {@link PostAttributes}
+ * plus the presence detection only the Pilote Pro owns. It is the
+ * TRANSPORT's shape, not an invitation: a consumer writes through a
+ * facade, and only `DeviceProFacade` widens its `setValues` to this.
+ * @category Types
+ */
+export interface ControlAttributes extends Omit<PostAttributes, 'derog_mode'> {
+  readonly derog_mode?: DerogationMode | undefined
+}
+
+/**
  * One `/bindings` entry — the wire identity of a bound device.
  * @category Types
  */
@@ -69,7 +81,7 @@ export interface DeviceData {
  * @category Types
  */
 export interface DevicePostData {
-  readonly attrs: PostAttributes
+  readonly attrs: ControlAttributes
 }
 
 /**
@@ -109,9 +121,14 @@ export interface LoginData {
 }
 
 /**
- * Writable attribute set accepted by `/control/{did}`. Availability is
+ * What EVERY product accepts as a write. Availability is
  * product-dependent — the comments group fields by the generations
- * that support them.
+ * that support them — and one field is narrowed rather than
+ * commented: `derog_mode` carries {@link CommonDerogationMode}, the
+ * three derogations the vendor documents on every generation. The
+ * presence detection is the Pilote Pro's own capability and is offered
+ * where it belongs, on `DeviceProFacade.setValues`, which takes the
+ * wider {@link ControlAttributes}.
  * @category Types
  */
 export interface PostAttributes {
@@ -123,7 +140,7 @@ export interface PostAttributes {
   // Not V1, V2, V4: a calibration register (see TemperatureCompensation)
   readonly com_temp?: number | undefined
   // Not V1
-  readonly derog_mode?: DerogationMode | undefined
+  readonly derog_mode?: CommonDerogationMode | undefined
   readonly derog_time?: number | undefined
   // Pro
   readonly eco_temp?: number | undefined

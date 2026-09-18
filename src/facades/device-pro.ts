@@ -1,3 +1,4 @@
+import type { ControlAttributes } from '../types/index.ts'
 import {
   DerogationMode,
   isMode,
@@ -72,6 +73,21 @@ export class DeviceProFacade extends DeviceGlowFacade {
       this.derogationMode === DerogationMode.presence &&
       this.currentMode === Mode.comfort
     )
+  }
+
+  /**
+   * The Pro accepts one derogation its siblings do not: the presence
+   * detection its own sensor drives (`derog_mode` 3, the vendor's
+   * `Enum (0-3)` where every other generation documents `Enum (0-2)`).
+   * Its write surface is therefore the transport's, not the shared one.
+   * @param attributes - Writable attributes, presence derogation
+   * included.
+   * @returns The echoed attribute payload.
+   */
+  public override async setValues(
+    attributes: ControlAttributes,
+  ): Promise<ControlAttributes> {
+    return this.applyValues(attributes)
   }
 
   protected override getTemperature(

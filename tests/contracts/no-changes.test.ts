@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import type { HeatzyAPIAdapter } from '../../src/api/index.ts'
-import type { PostAttributes } from '../../src/types/index.ts'
+import type {
+  ControlAttributes,
+  PostAttributes,
+} from '../../src/types/index.ts'
 import { Mode } from '../../src/constants.ts'
 import { Device } from '../../src/entities/index.ts'
 import { DeviceGlowFacade } from '../../src/facades/device-glow.ts'
@@ -53,7 +56,7 @@ interface Attempt {
   /**
    * Performs the write.
    */
-  readonly write: (values: PostAttributes) => Promise<PostAttributes>
+  readonly write: (values: PostAttributes) => Promise<ControlAttributes>
 }
 
 /**
@@ -148,7 +151,7 @@ for (const { build, name } of GENERATIONS) {
     const facade = build(api)
     return {
       wireCalls: (): number => vi.mocked(api.updateValues).mock.calls.length,
-      write: async (values): Promise<PostAttributes> =>
+      write: async (values): Promise<ControlAttributes> =>
         facade.setValues(values),
     }
   })

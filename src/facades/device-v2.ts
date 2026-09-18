@@ -1,4 +1,4 @@
-import type { PostAttributes } from '../types/index.ts'
+import type { ControlAttributes } from '../types/index.ts'
 import { DerogationMode, isDerogationMode } from '../constants.ts'
 import { DeviceFacade } from './device.ts'
 
@@ -78,8 +78,8 @@ export class DeviceV2Facade extends DeviceFacade {
   }
 
   protected override async control(
-    attributes: PostAttributes,
-  ): Promise<PostAttributes> {
+    attributes: ControlAttributes,
+  ): Promise<ControlAttributes> {
     if (Object.keys(attributes).length > 0) {
       await this.api.updateValues({
         id: this.id,

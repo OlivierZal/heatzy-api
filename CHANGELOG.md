@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [20.0.0] - 2026-09-18
+
+### Breaking changes
+
+- **The presence derogation is the Pilote Pro's, and the types say so now.** `PostAttributes.derog_mode` narrows from `DerogationMode` to the new `CommonDerogationMode` — off, vacation, boost — which is what the vendor documents on EVERY generation (`Enum (0-2)` on the Pilote modules and on the Glow family alike). The Pro documents `Enum (0-3)`, its sensor driving the presence detection, so `DeviceProFacade.setValues` widens its parameter to the new `ControlAttributes`, the transport's own shape. A write of `DerogationMode.presence` therefore compiles on a Pro facade and fails to compile anywhere else — the guarantee moves from a convention to the compiler. Migration: a consumer that wrote the presence derogation narrows its facade first (`supportsPro`), and one that types a payload as `PostAttributes` keeps compiling unless that payload could carry presence.
+- **`setValues` answers `ControlAttributes`.** The echo is the transport's shape on every facade, since a Pro echo can carry the presence derogation. A consumer that assigned the result to `PostAttributes` widens the annotation.
+- **`DeviceFacade.applyValues` is the one decorated write seam** (protected): `setValues` narrows the PUBLIC surface and delegates to it, so the echo merge and the sync notification exist once for the whole hierarchy rather than once per signature.
+
+### Changed
+
+- **`DevicePostData.attrs` carries `ControlAttributes`.** The wire accepts what the Pro can send; only the public write surface is narrowed.
+
+### Why this is a type change and not a range check
+
+The products' datapoint declarations answer `uint8 0..5` for `derog_mode` on the Glow family and the Pro alike, while the vendor's own sheets document three derogations on the Glow family and four on the Pro. A declared range is a register's WIDTH, not a capability: encoding it would have authorised the presence detection on a Glow, which the vendor denies. The capability is read from the sheets, stated once in the type, and enforced by the compiler.
+
 ## [19.1.0] - 2026-09-18
 
 ### Fixed
@@ -307,6 +323,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[20.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v19.1.0...v20.0.0
 [19.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v19.0.0...v19.1.0
 [19.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v18.1.0...v19.0.0
 [18.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v18.0.1...v18.1.0
