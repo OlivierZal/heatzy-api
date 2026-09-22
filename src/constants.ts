@@ -22,7 +22,7 @@ export const DerogationMode = {
  *
  * The API's DECLARED range says otherwise and must not be read as a
  * capability: it answers `uint8 0..5` for the Glow family and the Pro
- * alike (measured 2026-09-18 over the twelve modelled product keys),
+ * alike (the twelve modelled product keys' declarations),
  * which is the register's WIDTH, not what the product does with it.
  * @category Constants
  */

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [20.1.0] - 2026-09-22
+
+### Changed
+
+- **The failure streaks are the core's.** A device whose read fails and a listing with drops are streaked by `@olivierzal/api-core`'s `FailureStreaks` (public since 1.9.0) instead of a local copy of the same mechanism, written the day before the core shipped it. Reported when the streak opens, when its reason changes and at most every FIVE MINUTES while it stands — a window, not a count: the previous "every sixty identical cycles" equalled five minutes only at the default five-second cadence — then closed by one recovery line counting the whole episode. The reminder is the opening line again, error object included, rather than a count-bearing variant. A streak's identity stays the failing paths for a schema refusal and is otherwise the core's `failureReason`. The `logError` override keeps its one job, now stated against the core's own streaks: the pipeline's five-minute reminder for a device already reported here is held back; the pipeline's opening line and its recovery line are not.
+- Comments in `src` state constraints without the release numbers, dates and report ids that CLAUDE.md and this changelog already carry.
+
 ## [20.0.0] - 2026-09-18
 
 ### Breaking changes
@@ -320,6 +327,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[20.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.0.0...v20.1.0
 [20.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v19.1.0...v20.0.0
 [19.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v19.0.0...v19.1.0
 [19.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v18.1.0...v19.0.0

@@ -16,17 +16,17 @@ import { ValidationError } from '../errors/index.ts'
 // keys that the compile-time types already document.
 //
 // A READ checks the wire's TYPE, not a vocabulary this SDK happens to
-// know: 10.0.0 put closed literals on `com_temp` and `cur_mode`, and
-// every Glow, Onyx and Shine (numeric `cur_mode`, a calibration such
-// as 5) plus every calibrated Pro failed its whole `/devdata` read
-// from then on. The facades turn an unmodelled value into `null`.
+// know: a closed literal on `com_temp` or `cur_mode` fails the whole
+// `/devdata` read of every Glow, Onyx and Shine (numeric `cur_mode`, a
+// calibration such as 5) and of every calibrated Pro. The facades turn
+// an unmodelled value into `null`.
 // Only `mode` stays a closed set: it is the write vocabulary, and a
 // label this SDK cannot map is a real protocol change.
 
 // A V1 answers its Chinese label; every later generation, the Latin
 // one. Measured against the products' own datapoint declarations
-// (Gizwits `/app/datapoint`, fetched 2026-09-18 for the twelve modelled
-// `product_key`s): `mode` is an enum of `cft, eco, fro, stop` on the
+// (Gizwits `/app/datapoint`, the twelve modelled `product_key`s —
+// CLAUDE.md records the reading): `mode` is an enum of `cft, eco, fro, stop` on the
 // Glow family, the same plus `cft1, cft2` on every Pilote and the Pro,
 // and the four Chinese labels on the V1. NO product declares `off` —
 // the vendor's 2020 API document does, for the same index its 2018 one
@@ -39,12 +39,12 @@ const ModeSchema = z.preprocess(
 )
 
 // Gizwits answers a datapoint's DECLARED form, and the declarations
-// differ per switch (measured 2026-09-18 over the twelve products):
+// differ per switch (the twelve products' declarations):
 // `on_off` and `window_switch` are `bool`, `lock_switch`, `timer_switch`
 // and `LOCK_C` are `uint8 0..1`, and an enum-declared switch answers
 // its LABELS — witnessed in the field on a Pilote Pro, whose
 // `temp_set_step` (declared `enum [off, on]`, documented `Bool (0-1)`)
-// answered the string `off` (report f6f78df8, 2026-09-16). No switch
+// answered the string `off`. No switch
 // this SDK models is enum-declared today; accepting the labels costs
 // one branch and spares the whole device read if one ever is. Every
 // form reads back as the one `Switch` value; writes stay 0/1.
