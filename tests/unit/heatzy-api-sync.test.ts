@@ -1,5 +1,14 @@
+import { FAILURE_REMINDER_INTERVAL_MS } from '@olivierzal/api-core'
 import { createLogger, createServerError } from '@olivierzal/api-core/testing'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  type MockInstance,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
 
 import type { RequestErrorEvent, SyncCallback } from '../../src/api/types.ts'
 import { HeatzyAPI } from '../../src/api/heatzy.ts'
@@ -47,6 +56,13 @@ const stageRegistry = (wire: {
             bindings: wire.bindings(),
           }),
   })
+}
+
+// The failure-streak windows ride `performance.now()`; a jump past one
+// stands in for the wait, and the clause that made it restores the spy.
+const jumpClock = (ms: number): MockInstance<() => number> => {
+  const start = performance.now()
+  return vi.spyOn(performance, 'now').mockReturnValue(start + ms)
 }
 
 describe(HeatzyAPI, () => {
@@ -162,11 +178,12 @@ describe(HeatzyAPI, () => {
   })
 
   // A device that stays unreadable fails the same way on every cycle.
-  // At the five-second cadence one line per failed read was 17,280 full
-  // error entries a day: the failure is reported when its streak starts,
-  // when its reason changes and every sixty identical cycles — so a
+  // At the five-second cadence one line per failed read is 17,280 full
+  // error entries a day: the failure is reported when its streak opens,
+  // when its reason changes and at most every five minutes — so a
   // diagnostic report's tail still carries it — and closed by one
-  // recovery line.
+  // recovery line. The streaks are the core's; a monotonic-clock jump
+  // stands in for the window.
   describe('failure streaks', () => {
     const SKIP_LINE =
       'Skipping device did-pro: its live attributes could not be read'
@@ -204,7 +221,7 @@ describe(HeatzyAPI, () => {
       )
     })
 
-    it('reminds of the streak every sixty identical failures', async () => {
+    it('reminds of the streak once its window elapses', async () => {
       const logger = createLogger()
       const { api } = await createAuthedApi({ logger })
       stageRegistry({
@@ -212,11 +229,15 @@ describe(HeatzyAPI, () => {
         mode: () => 'cft3',
       })
 
-      await fetchCycles(api, 60)
+      await fetchCycles(api, 3)
+      const clock = jumpClock(FAILURE_REMINDER_INTERVAL_MS)
+      await api.fetch()
+      clock.mockRestore()
 
       expect(logger.error).toHaveBeenCalledTimes(2)
       expect(logger.error).toHaveBeenLastCalledWith(
-        'Skipping device did-pro: still unreadable after 60 consecutive reads (ValidationError: attr.mode)',
+        SKIP_LINE,
+        expect.any(ValidationError),
       )
     })
 
@@ -268,8 +289,9 @@ describe(HeatzyAPI, () => {
       ])
     })
 
-    // The request pipeline logs every failed attempt; once the streak
-    // is open, those lines would repeat it on every cycle.
+    // The pipeline streaks the HTTP subject on its own: its opening
+    // line and its recovery line stay, its five-minute reminder is held
+    // back while the device's own streak reports it.
     it('lets the streak alone report a device whose read keeps failing at the transport', async () => {
       const logger = createLogger()
       const { api } = await createAuthedApi({ logger })
@@ -292,6 +314,43 @@ describe(HeatzyAPI, () => {
         [expect.stringContaining('"url": "/devdata/did-pro/latest"')],
         [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
       ])
+    })
+
+    it('holds back the pipeline reminder for a device its own streak reports, and keeps both recovery lines', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      let isFailing = true
+      stageHeatzyWire(mockRequest, {
+        login: () => mockResponse(buildLoginData()),
+        rest: (config) => {
+          if (isFailing && config.url === '/devdata/did-pro/latest') {
+            throw createServerError(404, config.url)
+          }
+          return heatzyRegistryResponse(config, {
+            attributes: proAttributes,
+            bindings: [buildBinding('pro')],
+          })
+        },
+      })
+
+      await fetchCycles(api, 3)
+      const clock = jumpClock(FAILURE_REMINDER_INTERVAL_MS)
+      await api.fetch()
+      clock.mockRestore()
+      isFailing = false
+      await api.fetch()
+
+      expect(vi.mocked(logger.error).mock.calls).toStrictEqual([
+        [expect.stringContaining('"url": "/devdata/did-pro/latest"')],
+        [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
+        [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
+      ])
+      expect(logger.log).toHaveBeenCalledWith(
+        'GET /devdata/did-pro/latest answered again after 4 failed attempts',
+      )
+      expect(logger.log).toHaveBeenCalledWith(
+        'Device did-pro: its live attributes are readable again after 4 failed reads',
+      )
     })
 
     it('closes the streak with one recovery line', async () => {
@@ -371,6 +430,10 @@ describe(HeatzyAPI, () => {
       await api.fetch()
 
       expect(logger.error).toHaveBeenCalledTimes(2)
+      // The departure ends the streak SILENTLY: no recovery line.
+      expect(logger.log).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Device did-pro:/v),
+      )
     })
 
     it('starts a new streak after a sign-out', async () => {
@@ -405,7 +468,7 @@ describe(HeatzyAPI, () => {
       )
     })
 
-    it('reminds of a listing drop every sixty identical listings', async () => {
+    it('reminds of a listing drop once its window elapses', async () => {
       const logger = createLogger()
       const { api } = await createAuthedApi({ logger })
       stageRegistry({
@@ -413,12 +476,13 @@ describe(HeatzyAPI, () => {
         mode: () => 'cft',
       })
 
-      await fetchCycles(api, 60)
+      await fetchCycles(api, 3)
+      const clock = jumpClock(FAILURE_REMINDER_INTERVAL_MS)
+      await api.fetch()
+      clock.mockRestore()
 
       expect(logger.error).toHaveBeenCalledTimes(2)
-      expect(logger.error).toHaveBeenLastCalledWith(
-        `${DROPPED_LINE} (unchanged over 60 listings)`,
-      )
+      expect(logger.error).toHaveBeenLastCalledWith(DROPPED_LINE)
     })
   })
 

@@ -119,22 +119,29 @@ Architecture, toolchain and process are aligned on the sibling
   and left the line alone: one stuck device became 17,280 full error
   entries a day, and a schema regression hits every device of a
   generation, so the failed reads DID grow with the listing. A streak
-  (`FailureStreak` in `src/api/heatzy.ts`) is reported when it starts
-  (full line, error object and cause), when its reason changes, and
-  every 60 identical failures — the five minutes the 16.0.0 verdict
-  accepted, and enough for a diagnostic report's tail to still carry
-  it — then closed by one `log` line. The `/bindings` drop line
-  follows the same rule. A streak's identity is the error's name and
-  message, and for a zod refusal its failing PATHS
-  (`describeRefusedPaths`): the message names the values received, and
-  a drifting value must not reopen the streak on every read. The core's
-  per-attempt `logError` line would repeat an HTTP failure on every
-  cycle, so `HeatzyAPI` overrides it to hold back that line for a
-  `/devdata` read whose device already has an open streak — the cycle
-  that opens the streak still logs it, the shape of melcloud's Home
-  override for the `/context` 404. The state is in memory, stored BEFORE the
-  line is written (a throwing host logger never loses it), pruned for
-  a device that leaves the listing, and cleared on sign-out.
+  is the core's `FailureStreaks` (public since api-core 1.9.0), one
+  instance for the device reads (subject: the `did`) and the `/bindings`
+  drops (subject: `/bindings`): reported when it opens (full line, error
+  object and cause), when its reason changes, and at most every five
+  minutes while it stands — the core's WINDOW, not a count; the sixty
+  identical cycles this SDK once counted were five minutes only at the
+  default cadence — then closed by one `log` line counting the whole
+  episode. A streak's identity is `streakReason`: the failing PATHS for
+  a zod refusal (`describeRefusedPaths` — the message names the values
+  received, and a drifting value must not reopen the streak on every
+  read), otherwise the core's `failureReason`. The core streaks the HTTP
+  subject on its own too, so `HeatzyAPI` overrides `logError` to hold
+  back every pipeline line for a device whose streak is open here — its
+  five-minute reminder, and its opening line when a schema refusal had
+  opened the device's streak first (the reason-change clause pins it).
+  The pipeline's opening line when it opens the episode, and its
+  recovery line, are written. The state lives in the core's class, in
+  memory, stored BEFORE the line is written (a throwing host logger
+  never loses it); a device that leaves the listing ends its streak
+  silently (the previous listing is diffed against the current one), and
+  a sign-out clears every streak. Until 20.1.0 this SDK carried its own
+  copy of the mechanism, written the day before the core shipped it —
+  the hand-mirrored twin the core exists to end.
 - **A READ checks wire TYPES, not a vocabulary; `null` answers the
   unmodelled** (19.0.0). The 10.0.0 rewrite put closed literals on
   `com_temp` (0|50|100, copied from a 2024 enum that read the vendor
