@@ -130,10 +130,12 @@ Architecture, toolchain and process are aligned on the sibling
   a zod refusal (`describeRefusedPaths` — the message names the values
   received, and a drifting value must not reopen the streak on every
   read), otherwise the core's `failureReason`. The core streaks the HTTP
-  subject on its own too, so `HeatzyAPI` overrides `logError` for ONE
-  line: the pipeline's five-minute reminder for a device whose streak is
-  open here; the pipeline's opening line (the transport details) and its
-  recovery line are kept. The state lives in the core's class, in
+  subject on its own too, so `HeatzyAPI` overrides `logError` to hold
+  back every pipeline line for a device whose streak is open here — its
+  five-minute reminder, and its opening line when a schema refusal had
+  opened the device's streak first (the reason-change clause pins it).
+  The pipeline's opening line when it opens the episode, and its
+  recovery line, are written. The state lives in the core's class, in
   memory, stored BEFORE the line is written (a throwing host logger
   never loses it); a device that leaves the listing ends its streak
   silently (the previous listing is diffed against the current one), and

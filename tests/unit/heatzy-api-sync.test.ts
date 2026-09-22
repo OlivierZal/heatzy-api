@@ -430,6 +430,10 @@ describe(HeatzyAPI, () => {
       await api.fetch()
 
       expect(logger.error).toHaveBeenCalledTimes(2)
+      // The departure ends the streak SILENTLY: no recovery line.
+      expect(logger.log).not.toHaveBeenCalledWith(
+        expect.stringMatching(/^Device did-pro:/v),
+      )
     })
 
     it('starts a new streak after a sign-out', async () => {

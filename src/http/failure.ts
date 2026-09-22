@@ -1,9 +1,8 @@
 // The reason Gizwits gives for a refusal. Every non-2xx body carries the
-// pair below (`error_code` too, which the message does not need); June's
-// error path surfaced `detail_message ?? error_message`, and the
-// extraction onto the core's transport dropped it — every failure read
-// "Request failed with status code N" until 18.1.0 seated this reader
-// through `HttpClientConfig.describeFailure`.
+// pair below (`error_code` too, which the message does not need); this
+// reader seats `detail_message ?? error_message` through
+// `HttpClientConfig.describeFailure`, so a failure names the vendor's
+// reason rather than the bare "Request failed with status code N".
 import type { ErrorData } from '../types/index.ts'
 
 const isReason = (value: unknown): value is string | null =>

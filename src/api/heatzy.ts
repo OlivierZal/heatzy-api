@@ -490,10 +490,11 @@ export class HeatzyAPI
   }
 
   // The core streaks the HTTP subject on its own (`GET
-  // /devdata/<did>/latest`): its opening line carries the transport
-  // details and its recovery line the count, both kept. Its five-minute
-  // reminder would double this device streak's, so that one line is
-  // held back while the device's streak is open.
+  // /devdata/<did>/latest`). Its lines for a device whose streak is
+  // open here would double this streak's, so they are held back — its
+  // five-minute reminder, and its opening line when a schema refusal
+  // opened the device's streak first. The line that opens the episode
+  // and the recovery line (`log`, not `logError`) are the core's own.
   protected override logError(error: unknown): void {
     if (
       isHttpError(error) &&
