@@ -575,7 +575,7 @@ extend `tsconfig/library` directly and keep the path-bearing keys local
 (`outDir`, `include`; the build config narrows `include` to `src` and
 sets `rootDir`) — configs 5.0.0 ships the two plain bases and nothing
 else, the content-free `-build` aliases it used to export having never
-been extended here. All eleven workflows are stubs calling the family
+been extended here. All ten workflows are stubs calling the family
 reusables in OlivierZal/configs, pinned `@<sha> # vX.Y.Z` — since
 configs 5.0.0 `publish.yml` and `docs.yml` too (`reusable-publish.yml`,
 `reusable-docs.yml`): the caller keeps the `release` trigger and grants
