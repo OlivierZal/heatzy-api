@@ -4,7 +4,7 @@ Thanks for considering a contribution. This document describes the local workflo
 
 ## Prerequisites
 
-- Node.js: [`.nvmrc`](.nvmrc) names the install floor (22.22.2 — the lowest Node the development tree installs on, derived in `@olivierzal/configs`); `engines.node` in `package.json` (`>= 22.20`) is the lower runtime floor the published package needs, and stays there on purpose
+- Node.js: [`.nvmrc`](.nvmrc) names the install floor (22.23.0 — the lowest Node the development tree installs on, derived in `@olivierzal/configs` from the tree: es-x `^22.23.0`); `engines.node` in `package.json` (`>= 22.20`) is the lower runtime floor the published package needs, and stays there on purpose
 - npm 10+
 - A GitHub personal access token with the `read:packages` scope, exported as `NODE_AUTH_TOKEN` (the `.npmrc` reads from this env var to fetch `@olivierzal` scoped dependencies)
 
