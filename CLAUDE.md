@@ -2,9 +2,10 @@
 
 Typed Node.js client for the Heatzy (Gizwits) API. ESM only,
 Node >= 22.20 (`engines`, the device floor the code needs where it
-runs; `.nvmrc` names the INSTALL floor, 22.22.2 — the lowest Node the
-dev tree installs on, derived in `@olivierzal/configs` and re-derived
-there, never nudged here), published to GitHub Packages.
+runs; `.nvmrc` names the INSTALL floor, 22.23.0 — the lowest Node the
+dev tree installs on, derived in `@olivierzal/configs` from the tree
+(es-x `^22.23.0` since configs 7.0.0) and re-derived there, never
+nudged here), published to GitHub Packages.
 `erasableSyntaxOnly` is on:
 no runtime enums, no parameter properties, no runtime namespaces.
 Architecture, toolchain and process are aligned on the sibling

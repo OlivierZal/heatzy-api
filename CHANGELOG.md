@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **The exact `@olivierzal/configs` pin advances to 7.0.0** (three plugins admitted — `@eslint-community/eslint-plugin-eslint-comments`, `eslint-plugin-regexp` and, for the apps' webview floor only, `eslint-plugin-es-x` — plus the widened core, typescript-eslint, import-x, unicorn and vitest tables, `capitalized-comments` among them). Measured before any fix: ONE finding over the 78 linted files, `package-json/require-publishConfig`, answered below; the sources and the tests adapt nowhere. The install floor `.nvmrc` names moves to 22.23.0 — the lowest Node the development tree installs on, derived in configs from the tree (es-x `^22.23.0`) — while `engines.node` stays at `>=22.20.0`, the device floor the published package runs on.
+- **`package.json` declares `publishConfig` (`{ "registry": "https://npm.pkg.github.com" }`)**, the shape `@olivierzal/api-core` already carries: a scoped package published to a non-default registry says so in its own manifest, where until now only `.npmrc` and the publish workflow knew. No change to what is published or where.
+
 ## [20.1.0] - 2026-09-22
 
 ### Changed
@@ -327,6 +334,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[Unreleased]: https://github.com/OlivierZal/heatzy-api/compare/v20.1.0...HEAD
 [20.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.0.0...v20.1.0
 [20.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v19.1.0...v20.0.0
 [19.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v19.0.0...v19.1.0
