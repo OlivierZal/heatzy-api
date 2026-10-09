@@ -353,10 +353,14 @@ Architecture, toolchain and process are aligned on the sibling
   `product_key` (identifiers) and `product_name` (the vendor's label),
   which a report needs to tell a Pilote from a Glow. `remark`, the
   free-text device remark the 2020 vendor document lists beside
-  `dev_alias`, is deliberately NOT declared: this SDK types it nowhere,
-  no fixture or scrubbed dump in the repo has ever carried it, and the
-  vendor's own listing example holds a machine-written `range=…|gid=…`
-  string — declare it the day a field `/bindings` answer shows it. The
+  `dev_alias` (and takes as free text on the alias-update endpoint, so
+  a person CAN write it), and `dev_label`, the voice-control tags listed
+  beside them, are deliberately NOT declared: this SDK types neither, no
+  fixture or scrubbed dump in the repo has ever carried either, and the
+  vendor's own listing example holds a machine-written
+  `range=…|gid=…|groupname=…` string (the `groupname=` slot is where a
+  user-named group would ride) and an empty tag list — declare them the
+  day a field `/bindings` answer shows them. The
   one engine carries both tiers to every seat (the dispatch lines, the
   `HttpError` snapshot), so no new seat exists and the credential tier
   is untouched (the personal tier can only ever ADD). Pinned in

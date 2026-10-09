@@ -32,13 +32,16 @@ const EXTRA_SENSITIVE_KEYS = ['passcode', 'x-gizwits-user-token']
 // the vendor's product label — a report needs all three to tell a
 // Pilote from a Glow. Not declared: `remark`, the free-text "device
 // remark" the vendor's 2020 API document lists on a binding beside
-// `dev_alias`. This SDK types it nowhere, no fixture or scrubbed dump
-// in this repo has ever carried it, and the vendor's own listing
-// example holds a machine-written `range=…|gid=…` string rather than a
-// person's words — so it stays unverified until a field `/bindings`
-// answer shows it. Extend this ONE tier when a wire field carries a
-// user-entered string, never the credential tier above: the two answer
-// different rules.
+// `dev_alias` — and takes as free text on the alias-update endpoint,
+// so a person CAN write it — and `dev_label`, the voice-control tags
+// listed beside them. This SDK types neither, no fixture or scrubbed
+// dump in this repo has ever carried either, and the vendor's own
+// listing example holds a machine-written `range=…|gid=…|groupname=…`
+// string (the `groupname=` slot is where a user-named group would
+// ride) and an empty tag list — so both stay unverified until a field
+// `/bindings` answer shows them. Extend this ONE tier when a wire field
+// carries a user-entered string, never the credential tier above: the
+// two answer different rules.
 const PERSONAL_DATA_KEYS = ['dev_alias']
 
 /**
