@@ -17,6 +17,14 @@ import {
 } from '../heatzy-api-harness.ts'
 import { mockResponse } from '../helpers.ts'
 
+// The `log`-level lines a host logger received, as the core's dispatch
+// wrote them — the request/response dumps the redaction clauses read.
+const loggedLines = (logger: ReturnType<typeof createLogger>): string[] =>
+  vi
+    .mocked(logger.log)
+    .mock.calls.map(([line]): unknown => line)
+    .filter((line): line is string => typeof line === 'string')
+
 describe(HeatzyAPI, () => {
   beforeEach(wireSetup)
 
@@ -226,10 +234,7 @@ describe(HeatzyAPI, () => {
 
       await api.getValues({ id: 'did-pro' })
 
-      const lines = vi
-        .mocked(logger.log)
-        .mock.calls.map(([line]): unknown => line)
-        .filter((line): line is string => typeof line === 'string')
+      const lines = loggedLines(logger)
       const requestLine = defined(
         lines.find((line) => line.includes('"API request"')),
       )
@@ -238,6 +243,32 @@ describe(HeatzyAPI, () => {
       expect(
         lines.filter((line) => line.includes('top-secret-token')),
       ).toStrictEqual([])
+    })
+
+    // The personal-data tier reaches the same lines through the same
+    // engine: the response dump prints the whole `/bindings` body on
+    // purpose, so the name a user typed for each radiator stays out of
+    // a pasted report only because this SDK declares `dev_alias` —
+    // while the ids a report needs to tell the devices apart stay.
+    it('blanks the device alias in the core response dump and keeps the ids', async () => {
+      const logger = createLogger()
+      const { api } = await createAuthedApi({ logger })
+      mockRequest.mockResolvedValue(
+        mockResponse({
+          devices: [buildBinding('pro', { dev_alias: 'Salon' })],
+        }),
+      )
+
+      await api.list()
+
+      const lines = loggedLines(logger)
+      const responseLine = defined(
+        lines.find((line) => line.includes('"API response"')),
+      )
+
+      expect(responseLine).toContain(`"dev_alias": "${REDACTED}"`)
+      expect(responseLine).toContain('"did": "did-pro"')
+      expect(lines.filter((line) => line.includes('Salon'))).toStrictEqual([])
     })
   })
 })

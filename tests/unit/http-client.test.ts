@@ -8,6 +8,7 @@ import {
   HttpStatus,
   isHttpError,
 } from '../../src/http/index.ts'
+import { buildBinding } from '../fixtures.ts'
 
 // Thin WIRING suite: the transport MECHANISM (URL building, body
 // serialization, signals, parsing — and its full suite) lives in
@@ -74,6 +75,32 @@ describe(HttpClient, () => {
     // Redaction is a reporting concern, not a transport one: the wire
     // still carried the real credential.
     expect(extractHeaders().Authorization).toBe('Bearer secret')
+  })
+
+  // The personal-data tier is seated at construction like the
+  // credentials: a `/bindings` answer that fails echoes every device
+  // name its owner typed, and the thrown snapshot must not hand them to
+  // a host logger — while the ids a report needs to tell the devices
+  // apart stay.
+  it('blanks the device aliases of a /bindings body that failed', async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse(
+        { devices: [buildBinding('pro', { dev_alias: 'Salon' })] },
+        {},
+        500,
+      ),
+    )
+    const client = new HttpClient({ baseURL: BASE_URL, timeout: 0 })
+
+    await expect(client.request({ url: '/bindings' })).rejects.toMatchObject({
+      response: {
+        data: {
+          devices: [
+            { dev_alias: '******', did: 'did-pro', product_name: 'pro' },
+          ],
+        },
+      },
+    })
   })
 
   it('throws the shared HttpError class', async () => {
