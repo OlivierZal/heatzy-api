@@ -337,6 +337,38 @@ Architecture, toolchain and process are aligned on the sibling
   payload, never a contract. What the retry policies read
   (`retry-after` and friends) passes through untouched. When a wire
   field names a credential, extend the ONE vocabulary in context.ts.
+- **Personal data is the SECOND tier of that same engine, declared
+  apart, blanked alike** (20.2.0, api-core 1.10.0). The core's dispatch
+  prints every `/bindings` body whole at `log` level — a report needs
+  it — so a diagnostic report pasted into a public issue reproduced the
+  name the user typed for each radiator, while every SDK-authored line
+  (the aggregated drop line, the streak lines) already obeyed the rule
+  melcloud-api states as "type and id only, never a user-entered
+  string". The engine is a key-name vocabulary and the core knows no
+  wire's field names, so the declaration is this SDK's:
+  `createRedaction(EXTRA_SENSITIVE_KEYS, { personalDataKeys })` in
+  `src/observability/context.ts`, where `PERSONAL_DATA_KEYS` is
+  `['dev_alias']` — the device name its owner typed (`Device.name`),
+  matched in any casing. Kept in the dumps by that rule: `did` and
+  `product_key` (identifiers) and `product_name` (the vendor's label),
+  which a report needs to tell a Pilote from a Glow. `remark`, the
+  free-text device remark the 2020 vendor document lists beside
+  `dev_alias` (and takes as free text on the alias-update endpoint, so
+  a person CAN write it), and `dev_label`, the voice-control tags listed
+  beside them, are deliberately NOT declared: this SDK types neither, no
+  fixture or scrubbed dump in the repo has ever carried either, and the
+  vendor's own listing example holds a machine-written
+  `range=…|gid=…|groupname=…` string (the `groupname=` slot is where a
+  user-named group would ride) and an empty tag list — declare them the
+  day a field `/bindings` answer shows them. The
+  one engine carries both tiers to every seat (the dispatch lines, the
+  `HttpError` snapshot), so no new seat exists and the credential tier
+  is untouched (the personal tier can only ever ADD). Pinned in
+  `observability.test.ts` (both tiers on one `/bindings` dump),
+  `heatzy-api.test.ts` (the core's response line through the real
+  client) and `http-client.test.ts` (the thrown snapshot). When a wire
+  field carries a user-entered string, extend THAT tier, never the
+  credential one — the two answer different rules.
 
 ## Ledger (deviations from melcloud-api — deliberate verdicts, plus one recorded failure)
 
