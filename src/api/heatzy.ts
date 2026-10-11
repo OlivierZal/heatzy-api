@@ -83,10 +83,10 @@ const buildTransport = (transport: TransportConfig | undefined): HttpClient =>
  */
 interface DroppedBinding {
   /**
-   * The entry's `did`, or `null` when the wire did not spell a string
-   * one — the entry is still reported, unnamed.
+   * The entry's `did`, or `undefined` when the wire did not spell a
+   * string one — the entry is still reported, unnamed.
    */
-  readonly did: string | null
+  readonly did: string | undefined
   /**
    * Which verdict the entry failed, pre-worded — the unmodelled form
    * names the offending `product_key`, so the report says which map
@@ -114,19 +114,21 @@ interface DroppedBindingCollector {
 
 const UNREADABLE_ENTRY_VERDICT = 'an entry this SDK cannot read'
 
-const describeDroppedBinding = ({ did, verdict }: DroppedBinding): string =>
-  `device ${did ?? 'unknown'} (${verdict})`
+const describeDroppedBinding = ({
+  did = 'unknown',
+  verdict,
+}: DroppedBinding): string => `device ${did} (${verdict})`
 
 // The `did` of an entry the schema refused, salvaged so the report can
 // still name the device: a drop is only actionable when the user can
 // tell WHICH radiator went missing.
-const salvageDid = (device: unknown): string | null =>
+const salvageDid = (device: unknown): string | undefined =>
   typeof device === 'object' &&
   device !== null &&
   'did' in device &&
   typeof device.did === 'string'
     ? device.did
-    : null
+    : undefined
 
 /**
  * Opens a collector for ONE listing cycle.
@@ -332,7 +334,6 @@ export class HeatzyAPI
     // The attribute payload carries no credential, so a refusal may
     // name the values received.
     const { attr } = await this.#requestData({
-      method: 'get',
       schema: DeviceDataSchema,
       shouldReportReceived: true,
       url: deviceDataPath(id),
@@ -367,7 +368,6 @@ export class HeatzyAPI
    */
   public async list(): Promise<readonly DeviceBinding[]> {
     const { devices } = await this.#requestData<Bindings>({
-      method: 'get',
       schema: BindingsSchema,
       url: '/bindings',
     })
@@ -653,23 +653,23 @@ export class HeatzyAPI
 
   // Strip the envelope and parse the body against the endpoint's
   // schema; throw on transport failure — the contract the two
-  // validated reads (`/bindings`, `/devdata`) want. The body-carrying
-  // calls go through the core directly: `/login` through `dispatch`,
-  // `/control` — whose response nothing consumes — through `request`.
+  // validated reads (`/bindings`, `/devdata`) want, both GETs, which
+  // is why the verb is fixed here rather than passed. The
+  // body-carrying calls go through the core directly: `/login` through
+  // `dispatch`, `/control` — whose response nothing consumes — through
+  // `request`.
   async #requestData<T>({
-    method,
     schema,
     shouldReportReceived,
     url,
   }: {
-    readonly method: string
     readonly schema: z.ZodType<T>
     readonly url: string
     readonly shouldReportReceived?: boolean
   }): Promise<T> {
-    const { data } = await this.request<T>(method, url)
+    const { data } = await this.request<T>('get', url)
     return parseOrThrow(schema, data, {
-      context: `${method.toUpperCase()} ${url}`,
+      context: `GET ${url}`,
       shouldReportReceived,
     })
   }
