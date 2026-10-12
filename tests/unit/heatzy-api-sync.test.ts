@@ -311,7 +311,7 @@ describe(HeatzyAPI, () => {
       await fetchCycles(api, 3)
 
       expect(vi.mocked(logger.error).mock.calls).toStrictEqual([
-        [expect.stringContaining('"url": "/devdata/did-pro/latest"')],
+        [expect.stringContaining('"url":"/devdata/did-pro/latest"')],
         [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
       ])
     })
@@ -341,7 +341,7 @@ describe(HeatzyAPI, () => {
       await api.fetch()
 
       expect(vi.mocked(logger.error).mock.calls).toStrictEqual([
-        [expect.stringContaining('"url": "/devdata/did-pro/latest"')],
+        [expect.stringContaining('"url":"/devdata/did-pro/latest"')],
         [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
         [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
       ])

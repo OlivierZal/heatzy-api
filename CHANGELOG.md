@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [20.3.0] - 2026-10-12
+
+### Changed
+
+- **The diagnostic dumps blank `mac`, the module's MAC address, which the vendor's 2020 bindings contract lists beside `did`.** A MAC address is a unique device identifier the Article 29 Working Party treated as personal data (Opinion 13/2011), and it serves no diagnosis: `did` is the id a report names a device by, and it stays, with `product_key` and `product_name`. This SDK neither types `mac` nor holds a fixture carrying it; it is declared on the contract alone, unlike `remark` in 20.2.0, because the question is not whether a person writes it but whether a network identifier belongs in a report, and blanking a key the wire never carries costs nothing. `PERSONAL_DATA_KEYS` is now `['dev_alias', 'mac']`; `observability.test.ts` pins the key in any casing and on a `/bindings` dump.
+- **The exact `@olivierzal/api-core` pin advances to 1.12.0: one request/response record per line, bodies bounded at 4 KiB.** A Homey diagnostic report keeps about the last hundred lines of an app's stdout (measured on a com.melcloud report), and an indented body filled that window alone, hiding every other line. A record is now one line, and a body above 4 KiB is omitted whole and counted, so a hundred records also fit the report's upload. A `/bindings` answer for a few radiators stays under the bound.
+
 ## [20.2.0] - 2026-10-10
 
 ### Changed
@@ -335,6 +342,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[20.3.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.2.0...v20.3.0
 [20.2.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.1.0...v20.2.0
 [20.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.0.0...v20.1.0
 [20.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v19.1.0...v20.0.0
