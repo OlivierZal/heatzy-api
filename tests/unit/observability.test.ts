@@ -54,8 +54,9 @@ describe.concurrent('the Gizwits personal-data tier', () => {
     expect(redaction.isSensitive('DEV_ALIAS')).toBe(true)
   })
 
-  // A MAC address is a network identifier, personal data like an IP
-  // address; `did` is the id a report names a device by.
+  // A MAC address is a unique device identifier (personal data in the
+  // Article 29 Working Party's reading); `did` is the id a report
+  // names a device by.
   it('marks the module MAC address personal data in any casing', () => {
     expect(redaction.isSensitive('mac')).toBe(true)
     expect(redaction.isSensitive('MAC')).toBe(true)

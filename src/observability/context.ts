@@ -23,15 +23,21 @@ const EXTRA_SENSITIVE_KEYS = ['passcode', 'x-gizwits-user-token']
 // different rule: a credential stays out of a log because it opens an
 // account, a personal-data field because its owner wrote it and a
 // diagnostic report pasted into a public issue reproduces it. The
-// core's dispatch prints every `/bindings` body whole, on purpose (a
-// report needs it), so a device's name stays out of a pasted report
+// core's dispatch prints every `/bindings` body up to its 4 KiB bound
+// (a report needs it), so a device's name stays out of a pasted report
 // only because its key is declared here; the engine matches keys in
 // any casing. Declared: `dev_alias`, the device name its owner typed
-// in the Heatzy app (`Device.name`), and `mac`, the module's Wi-Fi MAC
-// address the vendor's 2020 bindings contract lists beside `did` — a
-// network identifier, personal data in the EDPB's reading (GDPR
-// Recital 30's "online identifiers"), and of no diagnostic use: `did`
-// names the device. Kept, by the rule "type and id only": `did` and
+// in the Heatzy app (`Device.name`), and `mac`, the module's MAC
+// address, which the vendor's 2020 bindings contract (the document the
+// `passcode` citation above reads) lists beside `did` — a field this
+// SDK neither types nor has a fixture for. It is declared on the
+// contract alone, unlike `remark` below, because the question differs:
+// not whether a person writes it, but whether a network identifier
+// belongs in a report — a MAC address is a unique device identifier the
+// Article 29 Working Party treated as personal data (Opinion 13/2011),
+// it serves no diagnosis (`did` names the device), and blanking a key
+// the wire never carries costs nothing.
+// Kept, by the rule "type and id only": `did` and
 // `product_key` are identifiers and `product_name` is the vendor's
 // product label — a report needs all three to tell a Pilote from a
 // Glow. Not declared: `remark`, the free-text "device
