@@ -348,8 +348,11 @@ Architecture, toolchain and process are aligned on the sibling
   wire's field names, so the declaration is this SDK's:
   `createRedaction(EXTRA_SENSITIVE_KEYS, { personalDataKeys })` in
   `src/observability/context.ts`, where `PERSONAL_DATA_KEYS` is
-  `['dev_alias']` — the device name its owner typed (`Device.name`),
-  matched in any casing. Kept in the dumps by that rule: `did` and
+  `['dev_alias', 'mac']` — the device name its owner typed
+  (`Device.name`), and since 20.3.0 the module's Wi-Fi MAC address the
+  vendor's bindings contract lists beside `did` (a network identifier,
+  personal data in the EDPB's reading of GDPR Recital 30), both matched
+  in any casing. Kept in the dumps by that rule: `did` and
   `product_key` (identifiers) and `product_name` (the vendor's label),
   which a report needs to tell a Pilote from a Glow. `remark`, the
   free-text device remark the 2020 vendor document lists beside

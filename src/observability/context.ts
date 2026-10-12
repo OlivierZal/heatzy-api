@@ -27,10 +27,14 @@ const EXTRA_SENSITIVE_KEYS = ['passcode', 'x-gizwits-user-token']
 // report needs it), so a device's name stays out of a pasted report
 // only because its key is declared here; the engine matches keys in
 // any casing. Declared: `dev_alias`, the device name its owner typed
-// in the Heatzy app (`Device.name`). Kept, by the rule "type and id
-// only": `did` and `product_key` are identifiers and `product_name` is
-// the vendor's product label — a report needs all three to tell a
-// Pilote from a Glow. Not declared: `remark`, the free-text "device
+// in the Heatzy app (`Device.name`), and `mac`, the module's Wi-Fi MAC
+// address the vendor's 2020 bindings contract lists beside `did` — a
+// network identifier, personal data in the EDPB's reading (GDPR
+// Recital 30's "online identifiers"), and of no diagnostic use: `did`
+// names the device. Kept, by the rule "type and id only": `did` and
+// `product_key` are identifiers and `product_name` is the vendor's
+// product label — a report needs all three to tell a Pilote from a
+// Glow. Not declared: `remark`, the free-text "device
 // remark" the vendor's 2020 API document lists on a binding beside
 // `dev_alias` — and takes as free text on the alias-update endpoint,
 // so a person CAN write it — and `dev_label`, the voice-control tags
@@ -42,7 +46,7 @@ const EXTRA_SENSITIVE_KEYS = ['passcode', 'x-gizwits-user-token']
 // `/bindings` answer shows them. Extend this ONE tier when a wire field
 // carries a user-entered string, never the credential tier above: the
 // two answer different rules.
-const PERSONAL_DATA_KEYS = ['dev_alias']
+const PERSONAL_DATA_KEYS = ['dev_alias', 'mac']
 
 /**
  * The redaction engine bound to the Gizwits vocabulary — the ONE

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [20.3.0] - 2026-10-12
+
+### Changed
+
+- **The diagnostic dumps blank `mac`, the module's Wi-Fi MAC address each `/bindings` entry carries.** A MAC address is a network identifier, personal data in the EDPB's reading (GDPR Recital 30's "online identifiers"), and of no diagnostic use: `did` is the id a report names a device by, and it stays, with `product_key` and `product_name`. `PERSONAL_DATA_KEYS` is now `['dev_alias', 'mac']`; `observability.test.ts` pins the key in any casing and on a `/bindings` dump.
+- **The exact `@olivierzal/api-core` pin advances to 1.11.0: one request/response record per line.** Homey keeps about the last hundred lines of an app's stdout for a diagnostic report, and an indented body filled that window alone, hiding every other line. Compact JSON keeps every byte of the dump; a call now costs two lines.
+
 ## [20.2.0] - 2026-10-10
 
 ### Changed
@@ -335,6 +342,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[20.3.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.2.0...v20.3.0
 [20.2.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.1.0...v20.2.0
 [20.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.0.0...v20.1.0
 [20.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v19.1.0...v20.0.0
