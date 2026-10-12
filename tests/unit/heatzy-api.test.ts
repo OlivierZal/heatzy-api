@@ -239,7 +239,7 @@ describe(HeatzyAPI, () => {
         lines.find((line) => line.includes('"API request"')),
       )
 
-      expect(requestLine).toContain(`"X-Gizwits-User-token": "${REDACTED}"`)
+      expect(requestLine).toContain(`"X-Gizwits-User-token":"${REDACTED}"`)
       expect(
         lines.filter((line) => line.includes('top-secret-token')),
       ).toStrictEqual([])
@@ -266,8 +266,8 @@ describe(HeatzyAPI, () => {
         lines.find((line) => line.includes('"API response"')),
       )
 
-      expect(responseLine).toContain(`"dev_alias": "${REDACTED}"`)
-      expect(responseLine).toContain('"did": "did-pro"')
+      expect(responseLine).toContain(`"dev_alias":"${REDACTED}"`)
+      expect(responseLine).toContain('"did":"did-pro"')
       expect(lines.filter((line) => line.includes('Salon'))).toStrictEqual([])
     })
   })
