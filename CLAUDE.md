@@ -475,6 +475,19 @@ Architecture, toolchain and process are aligned on the sibling
   the one direction they never tested: it applies to fixes of ideas a
   twin EXPORTED, not only to mechanisms it copied. Being the
   shorthand's author is no exemption from re-importing its repair.
+- **`FacadeManager.get` keeps its three-rung ladder until 21.0.0**
+  (verified 2026-10-14): the `undefined → null` rung is dead — the only
+  production caller, com.heatzy's app, null-checks the registry lookup
+  before calling — but narrowing a published method is a major for
+  about eight lines, and the same rung lives in melcloud-api's
+  `HomeFacadeManager`. Both go in the same release pair, parked in
+  melcloud-api's "Next major (60.0.0)" ledger.
+- **`TransportConfig` keeps its `{ timeoutMs }` arm** (verified
+  2026-10-14): no host passes it, but it is the deliberate successor of
+  `requestTimeout` (melcloud-api PR #1477, mirrored here) and the only
+  public way to tune the timeout — the Gizwits base URL and application
+  id are module-private, so a host could not build its own
+  `HttpClient` instead. Documented in the README rather than removed.
 
 ## Mechanism boundary (@olivierzal/api-core)
 
