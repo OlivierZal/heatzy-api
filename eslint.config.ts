@@ -1,4 +1,4 @@
-import { library } from '@olivierzal/configs/eslint/library'
+import { library } from '@olivierzal/configs/eslint'
 import { type Config, defineConfig } from 'eslint/config'
 
 const config: Config[] = defineConfig([
