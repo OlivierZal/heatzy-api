@@ -50,17 +50,11 @@ export class FacadeManager {
 
   /**
    * Returns the cached facade for the given entity, lazily creating
-   * one on first access; passing `undefined` returns `null`.
-   * @param instance - Registry entity to wrap, or `undefined`.
-   * @returns The facade, or `null` when no instance was supplied.
+   * one on first access.
+   * @param instance - Registry entity to wrap.
+   * @returns The facade cached for that entity, created on first access.
    */
-  public get(instance: Device): DeviceFacadeAny
-  public get(): null
-  public get(instance?: Device): DeviceFacadeAny | null
-  public get(instance?: Device): DeviceFacadeAny | null {
-    if (instance === undefined) {
-      return null
-    }
+  public get(instance: Device): DeviceFacadeAny {
     let facade = this.#facades.get(instance)
     if (facade === undefined) {
       facade = createFacade(this.#api, instance)

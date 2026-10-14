@@ -630,12 +630,6 @@ describe(FacadeManager, () => {
 
     expect(manager.get(device)).toBe(manager.get(device))
   })
-
-  it('returns null without an entity', () => {
-    const manager = new FacadeManager(createMockAdapter())
-
-    expect(manager.get()).toBeNull()
-  })
 })
 
 describe('capability guards', () => {

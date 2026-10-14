@@ -475,13 +475,12 @@ Architecture, toolchain and process are aligned on the sibling
   the one direction they never tested: it applies to fixes of ideas a
   twin EXPORTED, not only to mechanisms it copied. Being the
   shorthand's author is no exemption from re-importing its repair.
-- **`FacadeManager.get` keeps its three-rung ladder until 21.0.0**
-  (verified 2026-10-14): the `undefined → null` rung is dead — the only
-  production caller, com.heatzy's app, null-checks the registry lookup
-  before calling — but narrowing a published method is a major for
-  about eight lines, and the same rung lives in melcloud-api's
-  `HomeFacadeManager`. Both go in the same release pair, parked in
-  melcloud-api's "Next major (60.0.0)" ledger.
+- **`FacadeManager.get(instance)` takes a definite entity** (21.0.0,
+  2026-10-14): the three-rung overload ladder and its `undefined → null`
+  rung were copied from melcloud-api's five-class manager without the
+  reason (one entity class here), and the only production caller,
+  com.heatzy's app, null-checks the registry lookup before calling.
+  melcloud-api's `HomeFacadeManager` lost the same rung in 60.0.0.
 - **`TransportConfig` keeps its `{ timeoutMs }` arm** (verified
   2026-10-14): no host passes it, but it is the deliberate successor of
   `requestTimeout` (melcloud-api PR #1477, mirrored here) and the only
