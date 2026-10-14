@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [20.4.0] - 2026-10-14
+
+### Changed
+
+- **The `/bindings` listing filter is a loop in `list()` with one pure verdict function, not a closure factory.** `createDroppedBindingCollector`, its two module-private interfaces and a 20-line doc block that restated `list()`'s own were opened once per cycle and consumed in three lines; `inspectBinding(device)` now answers the modelled entry or its worded drop, and `list()` collects both. Same validation order per entry, same drop records in the same order, the aggregated line byte-identical (two suites pin it).
+- **`#readDevice` is one method.** The `#readDevice → #readOrRecord → #recordUnreadable` chain, each with one caller, is folded; the streak is still recorded before the line is written and the error still rethrown for `Promise.allSettled`.
+- **`syncIntervalMinutes` is no longer re-declared on `HeatzyAPIConfig`.** The re-declaration carried a doc that said "default 5 minutes" while the cadence has been five seconds since 18.1.0 — the drift the re-declaration existed to risk. The inherited member and the core's doc ("the subclass default") are right.
+- **`src/time-units.ts` is gone**: a re-export shim with one importer; `heatzy.ts` imports the two constants from `@olivierzal/api-core/time-units`.
+- **The exact `@olivierzal/api-core` pin advances to 1.13.0**, and `tests/helpers.ts` loses its `mockResponse` copy for the core's `mockHttpResponse`: the envelope it staged is the core `HttpResponse<T>` the transport spy is typed on, not a dialect shape — the header of that file said so itself.
+
 ## [20.3.0] - 2026-10-12
 
 ### Changed
@@ -342,6 +352,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[20.4.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.3.0...v20.4.0
 [20.3.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.2.0...v20.3.0
 [20.2.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.1.0...v20.2.0
 [20.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.0.0...v20.1.0

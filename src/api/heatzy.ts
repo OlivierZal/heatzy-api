@@ -1,4 +1,8 @@
 import { FailureStreaks, failureReason, SessionAPI } from '@olivierzal/api-core'
+import {
+  MS_PER_SECOND,
+  SESSION_REFRESH_AHEAD_MS,
+} from '@olivierzal/api-core/time-units'
 import { z } from 'zod'
 
 import type {
@@ -16,7 +20,6 @@ import { HttpClient, HttpStatus, isHttpError } from '../http/index.ts'
 import { redaction } from '../observability/context.ts'
 import { isSessionExpired } from '../resilience/index.ts'
 import { Temporal } from '../temporal.ts'
-import { MS_PER_SECOND, SESSION_REFRESH_AHEAD_MS } from '../time-units.ts'
 import {
   BindingsSchema,
   DeviceBindingSchema,
@@ -72,56 +75,21 @@ const buildTransport = (transport: TransportConfig | undefined): HttpClient =>
         timeout: transport?.timeoutMs ?? DEFAULT_TIMEOUT_MS,
       })
 
-/**
- * One `/bindings` entry the listing boundary dropped. The two verdicts
- * are worded APART because they call for opposite responses: a
- * malformed entry is a wire regression (fix the schema), an unresolved
- * `product_key` is a radiator Heatzy shipped after this release
- * (extend the product map in `constants.ts`, with its PDF in
- * `references/`). A silent or undifferentiated drop would leave one
- * indistinguishable symptom — "a device disappeared".
- */
-interface DroppedBinding {
-  /**
-   * The entry's `did`, or `undefined` when the wire did not spell a
-   * string one — the entry is still reported, unnamed.
-   */
-  readonly did: string | undefined
-  /**
-   * Which verdict the entry failed, pre-worded — the unmodelled form
-   * names the offending `product_key`, so the report says which map
-   * entry is missing.
-   */
-  readonly verdict: string
-}
-
-/**
- * The one filter of a listing cycle: it keeps the entries this SDK
- * models and remembers what it rejected, so the boundary can name the
- * drops instead of performing them in silence.
- */
-interface DroppedBindingCollector {
-  /**
-   * The modelled form of one raw `/bindings` entry, or `null` when the
-   * boundary drops it. Rejections are recorded, never merely returned.
-   */
-  readonly keep: (device: unknown) => DeviceBinding | null
-  /**
-   * The cycle's one report line, or `null` when nothing was dropped.
-   */
-  readonly summarize: () => string | null
-}
-
 const UNREADABLE_ENTRY_VERDICT = 'an entry this SDK cannot read'
 
-const describeDroppedBinding = ({
-  did = 'unknown',
-  verdict,
-}: DroppedBinding): string => `device ${did} (${verdict})`
+// One dropped `/bindings` entry, named: a drop is only actionable when
+// the user can tell WHICH radiator went missing. The two verdicts are
+// worded APART because they call for opposite responses — a malformed
+// entry is a wire regression (fix the schema), an unresolved
+// `product_key` is a radiator Heatzy shipped after this release (extend
+// the product map in `constants.ts`, with its PDF in `references/`).
+const describeDroppedBinding = (
+  did: string | undefined,
+  verdict: string,
+): string => `device ${did ?? 'unknown'} (${verdict})`
 
 // The `did` of an entry the schema refused, salvaged so the report can
-// still name the device: a drop is only actionable when the user can
-// tell WHICH radiator went missing.
+// still name the device.
 const salvageDid = (device: unknown): string | undefined =>
   typeof device === 'object' &&
   device !== null &&
@@ -130,56 +98,21 @@ const salvageDid = (device: unknown): string | undefined =>
     ? device.did
     : undefined
 
-/**
- * Opens a collector for ONE listing cycle.
- *
- * An entry is kept only when this SDK can model it: the shape has to
- * validate AND the `product_key` has to resolve, because
- * `new Device(...)` calls `getProduct`, which throws on a key this SDK
- * predates — inside the registry sync, after the wire answered 200 and
- * after the sign-in stored its token. The registry runs no guard of
- * its own; this boundary is what it relies on.
- *
- * The volume verdict lives here: `/bindings` carries every device of
- * the account and runs on every sync cycle, so a line per dropped
- * entry would storm the host's logger — hardest exactly when a wire
- * regression takes the whole payload down and the diagnostic report
- * most needs to stay readable. The collector emits ONE aggregated line
- * per cycle instead, bounded by the cycle rather than by the listing's
- * size, and that line still names every dropped entry with its
- * verdict: the ids are what makes it actionable, since a consumer
- * degrades a pruned device to a warning over frozen values and the
- * report has to say WHICH device went stale and why.
- * @returns A collecting filter plus the cycle's report line.
- */
-const createDroppedBindingCollector = (): DroppedBindingCollector => {
-  const dropped: DroppedBinding[] = []
-  let total = 0
-  return {
-    keep: (device: unknown): DeviceBinding | null => {
-      total += 1
-      const parsed = DeviceBindingSchema.safeParse(device)
-      if (!parsed.success) {
-        dropped.push({
-          did: salvageDid(device),
-          verdict: UNREADABLE_ENTRY_VERDICT,
-        })
-        return null
-      }
-      const { did, product_key: productKey } = parsed.data
-      if (!isModelledProduct(productKey)) {
-        dropped.push({ did, verdict: `unknown product_key ${productKey}` })
-        return null
-      }
-      return parsed.data
-    },
-    summarize: (): string | null =>
-      dropped.length === 0
-        ? null
-        : `Dropped ${String(dropped.length)} of ${String(total)} /bindings entries: ${dropped
-            .map((entry) => describeDroppedBinding(entry))
-            .join(', ')}`,
+// The modelled form of one raw `/bindings` entry, or its worded drop. An
+// entry is kept only when this SDK can model it: the shape has to
+// validate AND the `product_key` has to resolve, because
+// `new Device(...)` calls `getProduct`, which throws on a key this SDK
+// predates — inside the registry sync, after the wire answered 200. The
+// registry runs no guard of its own; this verdict is what it relies on.
+const inspectBinding = (device: unknown): string | DeviceBinding => {
+  const parsed = DeviceBindingSchema.safeParse(device)
+  if (!parsed.success) {
+    return describeDroppedBinding(salvageDid(device), UNREADABLE_ENTRY_VERDICT)
   }
+  const { did, product_key: productKey } = parsed.data
+  return isModelledProduct(productKey)
+    ? parsed.data
+    : describeDroppedBinding(did, `unknown product_key ${productKey}`)
 }
 
 /**
@@ -371,9 +304,21 @@ export class HeatzyAPI
       schema: BindingsSchema,
       url: '/bindings',
     })
-    const { keep, summarize } = createDroppedBindingCollector()
-    const bindings = devices.flatMap((device) => keep(device) ?? [])
-    this.#reportDroppedBindings(summarize())
+    const bindings: DeviceBinding[] = []
+    const dropped: string[] = []
+    for (const device of devices) {
+      const entry = inspectBinding(device)
+      if (typeof entry === 'string') {
+        dropped.push(entry)
+      } else {
+        bindings.push(entry)
+      }
+    }
+    this.#reportDroppedBindings(
+      dropped.length === 0
+        ? null
+        : `Dropped ${String(dropped.length)} of ${String(devices.length)} /bindings entries: ${dropped.join(', ')}`,
+    )
     return bindings
   }
 
@@ -601,7 +546,20 @@ export class HeatzyAPI
   }
 
   async #readDevice(did: string): Promise<readonly [string, Attributes]> {
-    const attributes = await this.#readOrRecord(did)
+    let attributes: Attributes
+    try {
+      attributes = await this.getValues({ id: did })
+    } catch (error) {
+      // The state is stored BEFORE the line is written, so a throwing
+      // host logger never loses the streak.
+      if (this.#streaks.shouldReport(did, streakReason(error))) {
+        this.logger.error(
+          `Skipping device ${did}: its live attributes could not be read`,
+          error,
+        )
+      }
+      throw error
+    }
     const failures = this.#streaks.close(did)
     if (failures !== null) {
       this.logger.log(
@@ -609,26 +567,6 @@ export class HeatzyAPI
       )
     }
     return [did, attributes]
-  }
-
-  async #readOrRecord(did: string): Promise<Attributes> {
-    try {
-      return await this.getValues({ id: did })
-    } catch (error) {
-      this.#recordUnreadable(did, error)
-      throw error
-    }
-  }
-
-  // The state is stored BEFORE the line is written, so a throwing host
-  // logger never loses the streak.
-  #recordUnreadable(did: string, error: unknown): void {
-    if (this.#streaks.shouldReport(did, streakReason(error))) {
-      this.logger.error(
-        `Skipping device ${did}: its live attributes could not be read`,
-        error,
-      )
-    }
   }
 
   // `error`, not `log`: a device the account owns has left the
