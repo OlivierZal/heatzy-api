@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [21.0.0] - 2026-10-14
+
+### Breaking changes
+
+- **`FacadeManager.get(instance)` takes a definite entity.** The three-rung overload ladder (`get(instance)`, `get(): null`, `get(instance?)`) and its `undefined → null` branch were copied from melcloud-api's five-class manager without the reason that justified them there (one entity class here). The only production caller, com.heatzy's app, null-checks the registry lookup before calling, so nothing changes for it; a consumer that passed a possibly-undefined entity now narrows it first. melcloud-api's `HomeFacadeManager` loses the same rung in 60.0.0.
+- **api-core 2.0.0 adopted.** The auto-timer drives `syncRegistry()` in the core; the `syncCallback` option this SDK wired to the same `fetch()` is gone from its `super(...)` call. No behaviour change: same refresh cycle, same log lines.
+
+### Kept, on purpose
+
+- `TransportConfig`'s `{ timeoutMs }` arm stays: the deliberate successor of `requestTimeout`, and the only public way to tune the request timeout, the Gizwits base URL and application id being module-private. It is documented in the README since 20.4.0's follow-up.
+
 ## [20.4.0] - 2026-10-14
 
 ### Changed
@@ -352,6 +363,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[21.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.4.0...v21.0.0
 [20.4.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.3.0...v20.4.0
 [20.3.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.2.0...v20.3.0
 [20.2.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.1.0...v20.2.0

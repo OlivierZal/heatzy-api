@@ -196,7 +196,6 @@ export class HeatzyAPI
       // `X-Gizwits-User-token` through in clear.
       redaction,
       transport: buildTransport(transport),
-      syncCallback: async () => this.fetch(),
       // NO logLabel: a single client — nothing to disambiguate, and a
       // default would prefix every ledger-pinned diagnostic line.
       // NO rateLimitHours: the Gizwits wire has never surfaced a 429,
