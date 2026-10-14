@@ -3,16 +3,15 @@ import { vi } from 'vitest'
 import type { HeatzyAPIAdapter, SyncCallback } from '../src/api/index.ts'
 import { v1Attributes } from './fixtures.ts'
 
-// What is OURS: the two helpers below stage this dialect's own shapes —
-// the facade-facing adapter and the core `HttpResponse` envelope the
-// transport spy answers with. Everything the SDK suites used to copy
+// What is OURS: the one helper below stages this dialect's own shape —
+// the facade-facing adapter. Everything the SDK suites used to copy
 // from each other (`cast`, `defined`, `mock`, `createLogger`,
 // `createSettingStore`, `createMockHttpClient`, `mockFetchResponse`,
-// the `HttpError` factories, the `Temporal` clock spies) is
-// `@olivierzal/api-core/testing`'s since api-core 1.3.0 and is imported
-// from that subpath directly, never re-exported through this module.
-
-const HTTP_OK = 200
+// `mockHttpResponse` — the transport envelope this file kept as its own
+// until api-core 1.13.0 named it the mechanism's — the `HttpError`
+// factories, the `Temporal` clock spies) is `@olivierzal/api-core/testing`'s
+// and is imported from that subpath directly, never re-exported through
+// this module.
 
 /**
  * Build a fully-mocked {@link HeatzyAPIAdapter} with benign defaults.
@@ -35,13 +34,3 @@ export const createMockAdapter = (
     .mockResolvedValue(undefined),
   ...overrides,
 })
-
-export const mockResponse = (
-  data: unknown,
-  headers: Record<string, string | string[]> = {},
-  status: number = HTTP_OK,
-): {
-  data: unknown
-  headers: Record<string, string | string[]>
-  status: number
-} => ({ data, headers, status })

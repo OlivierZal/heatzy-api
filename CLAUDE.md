@@ -529,7 +529,7 @@ DOUBLES live there as well (api-core 1.3.0): the suites import `cast`,
 `createMockHttpClient`, `mockFetchResponse`, the `HttpError` factories
 and the native-`Temporal` clock spies from
 `@olivierzal/api-core/testing`, and `tests/helpers.ts` keeps only what
-is this dialect's own (`createMockAdapter`, `mockResponse`) — never a
+is this dialect's own (`createMockAdapter`; `mockResponse` was, until api-core 1.13.0's `mockHttpResponse` named the envelope the mechanism's) — never a
 local copy of a core helper, the drift that subpath exists to end. The
 subpath imports `vitest` and declares it nowhere (a peer, optional or
 not, would put the test framework on the Homey that installs this SDK

@@ -1,5 +1,9 @@
 import { REDACTED } from '@olivierzal/api-core'
-import { createLogger, defined } from '@olivierzal/api-core/testing'
+import {
+  createLogger,
+  defined,
+  mockHttpResponse,
+} from '@olivierzal/api-core/testing'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { SyncCallback } from '../../src/api/types.ts'
@@ -15,7 +19,6 @@ import {
   wireSetup,
   wireTeardown,
 } from '../heatzy-api-harness.ts'
-import { mockResponse } from '../helpers.ts'
 
 // The `log`-level lines a host logger received, as the core's dispatch
 // wrote them — the request/response dumps the redaction clauses read.
@@ -84,7 +87,7 @@ describe(HeatzyAPI, () => {
     it('lists bindings without touching the registry', async () => {
       const { api } = await createAuthedApi()
       const binding = buildBinding('v2')
-      mockRequest.mockResolvedValue(mockResponse({ devices: [binding] }))
+      mockRequest.mockResolvedValue(mockHttpResponse({ devices: [binding] }))
       const devices = await api.list()
 
       expect(devices).toStrictEqual([binding])
@@ -103,7 +106,7 @@ describe(HeatzyAPI, () => {
       const { api } = await createAuthedApi({ logger })
       const binding = buildBinding('v2')
       mockRequest.mockResolvedValue(
-        mockResponse({
+        mockHttpResponse({
           devices: [
             binding,
             { dev_alias: 'Malformed', product_name: 'v2' },
@@ -128,7 +131,7 @@ describe(HeatzyAPI, () => {
       const logger = createLogger()
       const { api } = await createAuthedApi({ logger })
       mockRequest.mockResolvedValue(
-        mockResponse({
+        mockHttpResponse({
           devices: [null, 'bogus', { did: 404 }, { did: 'did-named' }],
         }),
       )
@@ -142,7 +145,7 @@ describe(HeatzyAPI, () => {
 
     it('rejects a malformed /bindings payload with a ValidationError', async () => {
       const { api } = await createAuthedApi()
-      mockRequest.mockResolvedValue(mockResponse({ bindings: 'nope' }))
+      mockRequest.mockResolvedValue(mockHttpResponse({ bindings: 'nope' }))
       const listPromise = api.list()
 
       await expect(listPromise).rejects.toBeInstanceOf(ValidationError)
@@ -153,7 +156,9 @@ describe(HeatzyAPI, () => {
 
     it('rejects a malformed /devdata payload with a ValidationError', async () => {
       const { api } = await createAuthedApi()
-      mockRequest.mockResolvedValue(mockResponse({ attr: { mode: 'nope' } }))
+      mockRequest.mockResolvedValue(
+        mockHttpResponse({ attr: { mode: 'nope' } }),
+      )
       const valuesPromise = api.getValues({ id: 'did-pro' })
 
       await expect(valuesPromise).rejects.toBeInstanceOf(ValidationError)
@@ -169,7 +174,7 @@ describe(HeatzyAPI, () => {
       'posts the $dialect dialect to /control verbatim',
       async ({ postData }) => {
         const { api } = await createAuthedApi()
-        mockRequest.mockResolvedValue(mockResponse({}))
+        mockRequest.mockResolvedValue(mockHttpResponse({}))
 
         await expect(
           api.updateValues({ id: 'did-pro', postData }),
@@ -187,7 +192,7 @@ describe(HeatzyAPI, () => {
     it('returns the parsed login payload', async () => {
       const api = await createApi()
       const loginData = buildLoginData(1_700_000_000)
-      mockRequest.mockResolvedValue(mockResponse(loginData))
+      mockRequest.mockResolvedValue(mockHttpResponse(loginData))
 
       await expect(
         api.login({
@@ -198,7 +203,7 @@ describe(HeatzyAPI, () => {
 
     it('rejects a malformed login payload with a ValidationError', async () => {
       const api = await createApi()
-      mockRequest.mockResolvedValue(mockResponse({ token: 'user-token' }))
+      mockRequest.mockResolvedValue(mockHttpResponse({ token: 'user-token' }))
       const loginPromise = api.login({
         postData: { password: 'secret', username: 'user@test.com' },
       })
@@ -230,7 +235,7 @@ describe(HeatzyAPI, () => {
       const logger = createLogger()
       const { api, settingManager } = await createAuthedApi({ logger })
       settingManager.set('token', 'top-secret-token')
-      mockRequest.mockResolvedValue(mockResponse({ attr: proAttributes }))
+      mockRequest.mockResolvedValue(mockHttpResponse({ attr: proAttributes }))
 
       await api.getValues({ id: 'did-pro' })
 
@@ -254,7 +259,7 @@ describe(HeatzyAPI, () => {
       const logger = createLogger()
       const { api } = await createAuthedApi({ logger })
       mockRequest.mockResolvedValue(
-        mockResponse({
+        mockHttpResponse({
           devices: [buildBinding('pro', { dev_alias: 'Salon' })],
         }),
       )
