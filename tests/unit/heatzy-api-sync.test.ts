@@ -1,5 +1,9 @@
 import { FAILURE_REMINDER_INTERVAL_MS } from '@olivierzal/api-core'
-import { createLogger, createServerError } from '@olivierzal/api-core/testing'
+import {
+  createLogger,
+  createServerError,
+  mockHttpResponse,
+} from '@olivierzal/api-core/testing'
 import {
   type MockInstance,
   afterEach,
@@ -23,7 +27,6 @@ import {
   wireSetup,
   wireTeardown,
 } from '../heatzy-api-harness.ts'
-import { mockResponse } from '../helpers.ts'
 
 // Thin SYNC WIRING suite since the SessionAPI adoption: the sync-cycle
 // template — timer arming and disposal, the best-effort downgrade, the
@@ -47,10 +50,10 @@ const stageRegistry = (wire: {
   mode: () => unknown
 }): void => {
   stageHeatzyWire(mockRequest, {
-    login: () => mockResponse(buildLoginData()),
+    login: () => mockHttpResponse(buildLoginData()),
     rest: (config) =>
       config.url === '/devdata/did-pro/latest'
-        ? mockResponse({ attr: { ...proAttributes, mode: wire.mode() } })
+        ? mockHttpResponse({ attr: { ...proAttributes, mode: wire.mode() } })
         : heatzyRegistryResponse(config, {
             attributes: proAttributes,
             bindings: wire.bindings(),
@@ -108,7 +111,7 @@ describe(HeatzyAPI, () => {
         logger,
       })
       stageHeatzyWire(mockRequest, {
-        login: () => mockResponse(buildLoginData()),
+        login: () => mockHttpResponse(buildLoginData()),
         rest: (config) => {
           if (config.url === UNREADABLE_DEVICE_PATH) {
             throw createServerError(503, config.url)
@@ -145,10 +148,10 @@ describe(HeatzyAPI, () => {
       mockWire({ bindings: [buildBinding('pro')] })
       await api.fetch()
       stageHeatzyWire(mockRequest, {
-        login: () => mockResponse(buildLoginData()),
+        login: () => mockHttpResponse(buildLoginData()),
         rest: (config) =>
           config.url === '/devdata/did-pro/latest'
-            ? mockResponse({ attr: { mode: 'cft3' } })
+            ? mockHttpResponse({ attr: { mode: 'cft3' } })
             : heatzyRegistryResponse(config, {
                 attributes: proAttributes,
                 bindings: [buildBinding('pro', { dev_alias: 'Renamed' })],
@@ -264,7 +267,7 @@ describe(HeatzyAPI, () => {
       const { api } = await createAuthedApi({ logger })
       let isRefusing = true
       stageHeatzyWire(mockRequest, {
-        login: () => mockResponse(buildLoginData()),
+        login: () => mockHttpResponse(buildLoginData()),
         rest: (config) => {
           if (config.url !== '/devdata/did-pro/latest') {
             return heatzyRegistryResponse(config, {
@@ -273,7 +276,9 @@ describe(HeatzyAPI, () => {
             })
           }
           if (isRefusing) {
-            return mockResponse({ attr: { ...proAttributes, mode: 'cft3' } })
+            return mockHttpResponse({
+              attr: { ...proAttributes, mode: 'cft3' },
+            })
           }
           throw createServerError(404, config.url)
         },
@@ -296,7 +301,7 @@ describe(HeatzyAPI, () => {
       const logger = createLogger()
       const { api } = await createAuthedApi({ logger })
       stageHeatzyWire(mockRequest, {
-        login: () => mockResponse(buildLoginData()),
+        login: () => mockHttpResponse(buildLoginData()),
         rest: (config) => {
           if (config.url === '/devdata/did-pro/latest') {
             throw createServerError(404, config.url)
@@ -321,7 +326,7 @@ describe(HeatzyAPI, () => {
       const { api } = await createAuthedApi({ logger })
       let isFailing = true
       stageHeatzyWire(mockRequest, {
-        login: () => mockResponse(buildLoginData()),
+        login: () => mockHttpResponse(buildLoginData()),
         rest: (config) => {
           if (isFailing && config.url === '/devdata/did-pro/latest') {
             throw createServerError(404, config.url)
@@ -384,7 +389,7 @@ describe(HeatzyAPI, () => {
       const logger = createLogger()
       const { api } = await createAuthedApi({ logger })
       const readDevice = vi
-        .fn<() => Promise<ReturnType<typeof mockResponse>>>()
+        .fn<() => Promise<ReturnType<typeof mockHttpResponse>>>()
         .mockRejectedValueOnce('offline')
         .mockRejectedValueOnce('offline')
         .mockRejectedValueOnce(7)
@@ -490,7 +495,7 @@ describe(HeatzyAPI, () => {
     it('applies the configured abortSignal to outgoing requests', async () => {
       const controller = new AbortController()
       const { api } = await createAuthedApi({ abortSignal: controller.signal })
-      mockRequest.mockResolvedValue(mockResponse({ attr: proAttributes }))
+      mockRequest.mockResolvedValue(mockHttpResponse({ attr: proAttributes }))
       await api.getValues({ id: 'did-pro' })
 
       expect(mockRequest).toHaveBeenCalledWith(
@@ -500,7 +505,7 @@ describe(HeatzyAPI, () => {
 
     it('omits the signal when no abortSignal is configured', async () => {
       const { api } = await createAuthedApi()
-      mockRequest.mockResolvedValue(mockResponse({ attr: proAttributes }))
+      mockRequest.mockResolvedValue(mockHttpResponse({ attr: proAttributes }))
       await api.getValues({ id: 'did-pro' })
 
       expect(mockRequest.mock.lastCall?.[0]).not.toHaveProperty('signal')

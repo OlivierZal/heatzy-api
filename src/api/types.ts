@@ -109,11 +109,6 @@ export interface HeatzyAPIConfig
    */
   readonly shouldResumeSessionInBackground?: boolean | undefined
   /**
-   * Auto-sync timer in minutes. `false` disables the timer entirely
-   * (manual `fetch()` only). Omit to use the default (5 minutes).
-   */
-  readonly syncIntervalMinutes?: number | false | undefined
-  /**
    * IANA timezone identifier anchoring derogation end dates. Defaults
    * to the runtime system timezone.
    */

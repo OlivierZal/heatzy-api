@@ -4,6 +4,7 @@ import {
   createMockHttpClient,
   createServerError,
   createSettingStore,
+  mockHttpResponse,
   mockTemporalNowInstant,
 } from '@olivierzal/api-core/testing'
 import { type MockInstance, vi } from 'vitest'
@@ -18,7 +19,6 @@ import {
 } from '../src/http/index.ts'
 import { Temporal } from '../src/temporal.ts'
 import { buildBinding, buildLoginData, proAttributes } from './fixtures.ts'
-import { mockResponse } from './helpers.ts'
 
 // The transport under test is THIS SDK's `HttpClient` subclass — the
 // one seating the Gizwits redaction vocabulary, and the one
@@ -82,10 +82,10 @@ export const heatzyRegistryResponse = (
   }: { attributes: Attributes; bindings: readonly unknown[] },
 ): HttpResponse => {
   if (url === BINDINGS_PATH) {
-    return mockResponse({ devices: bindings })
+    return mockHttpResponse({ devices: bindings })
   }
   const isDeviceRead = url?.startsWith(DEVDATA_PREFIX) === true
-  return mockResponse(isDeviceRead ? { attr: attributes } : {})
+  return mockHttpResponse(isDeviceRead ? { attr: attributes } : {})
 }
 
 // Routes the three Heatzy endpoints to canned success responses so
@@ -101,7 +101,7 @@ export const mockWire = ({
   loginData?: LoginData
 } = {}): void => {
   stageHeatzyWire(mockRequest, {
-    login: () => mockResponse(loginData ?? buildLoginData()),
+    login: () => mockHttpResponse(loginData ?? buildLoginData()),
     rest: (config) => heatzyRegistryResponse(config, { attributes, bindings }),
   })
 }
@@ -113,9 +113,9 @@ export const mockWire = ({
 // cycle, after the sign-in already stored its token.
 export const mockDriftedWire = (): void => {
   stageHeatzyWire(mockRequest, {
-    login: () => mockResponse(buildLoginData()),
+    login: () => mockHttpResponse(buildLoginData()),
     rest: (config) =>
-      mockResponse(
+      mockHttpResponse(
         config.url === BINDINGS_PATH
           ? { devices: 'not-a-device-list' }
           : { attr: proAttributes },
@@ -164,7 +164,7 @@ export const wireSetup = (): void => {
   vi.useFakeTimers()
   mockTemporalNowInstant()
   mockRequest.mockReset()
-  mockRequest.mockResolvedValue(mockResponse({}))
+  mockRequest.mockResolvedValue(mockHttpResponse({}))
 }
 
 export const wireTeardown = (): void => {

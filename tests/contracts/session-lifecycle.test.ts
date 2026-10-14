@@ -3,6 +3,7 @@ import {
   createLogger,
   createServerError,
   createSettingStore,
+  mockHttpResponse,
 } from '@olivierzal/api-core/testing'
 import {
   type MockInstance,
@@ -46,7 +47,6 @@ import {
   wireSetup,
   wireTeardown,
 } from '../heatzy-api-harness.ts'
-import { mockResponse } from '../helpers.ts'
 
 // The session lifecycle and the request pipeline of `src/api/heatzy.ts`,
 // pinned against the REAL client rather than a synthetic subclass. The
@@ -73,9 +73,10 @@ import { mockResponse } from '../helpers.ts'
 // — the class the transport-resolution clause needs, and naming it here
 // is the point of that clause — and the core's `./testing` doubles
 // (`createLogger`, `createServerError`, `createSettingStore`, since
-// 17.0.0), which stage the wire and never stand in for what a clause
-// pins; `mockResponse` stays this repo's own, the envelope being the
-// transport spy's shape, not the core's.
+// 17.0.0, and `mockHttpResponse` since 20.4.0 — the envelope the
+// transport spy answers with is the core's `HttpResponse<T>`, so the
+// helper is the mechanism's, not this repo's), which stage the wire and
+// never stand in for what a clause pins.
 //
 // Every clause is worded about THE REGISTRY CYCLE — and on this dialect
 // the cycle is PER-DEVICE, not bulk: `#fetch` reads the `/bindings`
@@ -403,7 +404,7 @@ const answerLogin = (): HttpResponse => {
   if (heatzyWire.login === 'refuse') {
     throw createServerError(HttpStatus.BadRequest, LOGIN_PATH)
   }
-  return mockResponse(buildLoginData())
+  return mockHttpResponse(buildLoginData())
 }
 
 /**
@@ -416,11 +417,11 @@ const answerLogin = (): HttpResponse => {
  */
 const answerDegraded = (url: string): HttpResponse | null => {
   if (url === BINDINGS_PATH && heatzyWire.outcome === 'drifted-registry') {
-    return mockResponse(DRIFTED_ENVELOPE)
+    return mockHttpResponse(DRIFTED_ENVELOPE)
   }
   return url === `${DEVDATA_PREFIX}${UNREADABLE_DEVICE_ID}/latest` &&
     heatzyWire.outcome === 'partial-fan-out'
-    ? mockResponse({ attr: { mode: UNSHIPPED_MODE } })
+    ? mockHttpResponse({ attr: { mode: UNSHIPPED_MODE } })
     : null
 }
 

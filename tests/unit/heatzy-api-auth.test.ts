@@ -1,6 +1,7 @@
 import {
   createServerError,
   createSettingStore,
+  mockHttpResponse,
 } from '@olivierzal/api-core/testing'
 import {
   afterEach,
@@ -33,7 +34,6 @@ import {
   wireSetup,
   wireTeardown,
 } from '../heatzy-api-harness.ts'
-import { mockResponse } from '../helpers.ts'
 
 // Thin AUTH WIRING suite since the SessionAPI adoption: the session
 // lifecycle mechanism — the login backoff, the resume single-flight,
@@ -92,7 +92,7 @@ describe(HeatzyAPI, () => {
       // already resolved — the restore runs off the critical path.
       expect(api.registry.getDevices()).toHaveLength(0)
 
-      bindingsGate.resolve(mockResponse({ devices: [buildBinding()] }))
+      bindingsGate.resolve(mockHttpResponse({ devices: [buildBinding()] }))
       await vi.advanceTimersByTimeAsync(0)
 
       expect(api.registry.getDevices()).toHaveLength(1)
@@ -269,7 +269,7 @@ const stageRefusedLogin = (status: number): Error => {
     login: () => {
       throw rejection
     },
-    rest: () => mockResponse({}),
+    rest: () => mockHttpResponse({}),
   })
   return rejection
 }
