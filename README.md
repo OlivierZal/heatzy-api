@@ -114,6 +114,8 @@ The request pipeline applies two policies, outermost first:
 1. **Auth retry (HTTP 400/401)** — a single re-authentication + replay, as described above.
 2. **Transient retry (GET only)** — 502/503/504 responses are retried up to 4 times with exponential backoff and jitter (1 s initial delay, 16 s cap). Mutations (`POST`) are **never** retried automatically: a write that may have landed server-side must not be silently duplicated. Each retry is observable through the `onRequestRetry` lifecycle event.
 
+The transport itself is configurable through `transport`: pass a pre-built `HttpClient` (the seam the test suites use to script responses), or `{ timeoutMs }` to change the 30 s per-request timeout (`0` disables it — not recommended). Omit it for the fetch-backed default.
+
 ## Documentation
 
 Full API reference at <https://olivierzal.github.io/heatzy-api/>.
