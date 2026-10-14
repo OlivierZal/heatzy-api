@@ -27,19 +27,18 @@ export class DeviceV2Facade extends DeviceFacade {
     ) {
       return null
     }
-    return derogationMode === DerogationMode.vacation
-      ? derogationEndDate.toLocaleString(this.api.locale, {
-          day: 'numeric',
-          hour: '2-digit',
-          hourCycle: 'h23',
-          minute: '2-digit',
-          month: 'short',
-        })
-      : derogationEndDate.toLocaleString(this.api.locale, {
-          hour: '2-digit',
-          hourCycle: 'h23',
-          minute: '2-digit',
-        })
+    return derogationEndDate.toLocaleString(
+      this.api.locale,
+      derogationMode === DerogationMode.vacation
+        ? {
+            day: 'numeric',
+            hour: '2-digit',
+            hourCycle: 'h23',
+            minute: '2-digit',
+            month: 'short',
+          }
+        : { hour: '2-digit', hourCycle: 'h23', minute: '2-digit' },
+    )
   }
 
   /**
