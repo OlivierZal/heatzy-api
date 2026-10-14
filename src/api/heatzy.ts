@@ -303,16 +303,14 @@ export class HeatzyAPI
       schema: BindingsSchema,
       url: '/bindings',
     })
-    const bindings: DeviceBinding[] = []
-    const dropped: string[] = []
-    for (const device of devices) {
-      const entry = inspectBinding(device)
-      if (typeof entry === 'string') {
-        dropped.push(entry)
-      } else {
-        bindings.push(entry)
-      }
-    }
+    // Two typed passes rather than one loop pushing to either array: the
+    // ternary form `(isDropped ? dropped : bindings).push(entry)` the
+    // lint asks for does not type-check (a call on a union of array types
+    // takes the intersection of their element types), and the inferred
+    // type predicates keep each list typed.
+    const entries = devices.map((device) => inspectBinding(device))
+    const dropped = entries.filter((entry) => typeof entry === 'string')
+    const bindings = entries.filter((entry) => typeof entry !== 'string')
     this.#reportDroppedBindings(
       dropped.length === 0
         ? null
