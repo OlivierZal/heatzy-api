@@ -122,8 +122,12 @@ Architecture, toolchain and process are aligned on the sibling
   generation, so the failed reads DID grow with the listing. A streak
   is the core's `FailureStreaks` (public since api-core 1.9.0), one
   instance for the device reads (subject: the `did`) and the `/bindings`
-  drops (subject: `/bindings`): reported when it opens (full line, error
-  object and cause), when its reason changes, and at most every five
+  drops (subject: `/bindings`): reported when it opens (full line — the
+  failure and its cause chain spelled on that ONE line through the
+  core's `logFailure`, no stack: a timed-out `/devdata` read must not
+  print the transport's frames under every opening line, while a
+  programming error alone keeps the stack that locates it), when its
+  reason changes, and at most every five
   minutes while it stands — the core's WINDOW, not a count; the sixty
   identical cycles this SDK once counted were five minutes only at the
   default cadence — then closed by one `log` line counting the whole
@@ -481,6 +485,13 @@ Architecture, toolchain and process are aligned on the sibling
   reason (one entity class here), and the only production caller,
   com.heatzy's app, null-checks the registry lookup before calling.
   melcloud-api's `HomeFacadeManager` lost the same rung in 60.0.0.
+- **No `idempotent` POST read** (21.1.0, api-core 2.1.0): the knob
+  declares a POST that reads so the transient rung retries it like a
+  GET (MELCloud Classic serves its reports over POST). Both validated
+  reads here, `/bindings` and `/devdata`, travel over GET and get the
+  rung — a 500/502/503/504, a failed connection or a request timeout,
+  four retries with backoff — on their own; `/control`, the one POST,
+  is a write and must never be replayed. Nothing to declare.
 - **`TransportConfig` keeps its `{ timeoutMs }` arm** (verified
   2026-10-14): no host passes it, but it is the deliberate successor of
   `requestTimeout` (melcloud-api PR #1477, mirrored here) and the only
@@ -496,8 +507,11 @@ login backoff, the logOut-epoch protocol, the single-flight refresh
 and resume, the accepted-sign-ins verdict counter, the refusal record,
 the request pipeline and the sync-cycle template — plus the HTTP
 client and `HttpError` (whole-snapshot redaction seated in the
-constructor), the redaction engine, the observability shells and
-`LifecycleEmitter`, the resilience primitives, `SyncManager`, the
+constructor), the redaction engine, the observability shells,
+`LifecycleEmitter` and the one-line failure log (`logFailure`,
+`isKnownFailure`, `failureCauseChain` — the sync cycle's and the
+resume's lines are the core's, the per-device streak line this SDK's,
+all three through it), the resilience primitives, `SyncManager`, the
 temporal entry point, the time units, the `setting` and `syncDevices`
 decorators (the latter in factory form, `@syncDevices()`, since
 17.0.0) and the error family (`APIError`, `AuthenticationError`,
