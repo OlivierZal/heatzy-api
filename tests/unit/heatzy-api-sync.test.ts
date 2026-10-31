@@ -16,7 +16,6 @@ import {
 
 import type { RequestErrorEvent, SyncCallback } from '../../src/api/types.ts'
 import { HeatzyAPI } from '../../src/api/heatzy.ts'
-import { ValidationError } from '../../src/errors/index.ts'
 import { buildBinding, buildLoginData, proAttributes } from '../fixtures.ts'
 import {
   createAuthedApi,
@@ -131,8 +130,7 @@ describe(HeatzyAPI, () => {
       expect(api.registry.getDevices()).toHaveLength(1)
       expect(api.registry.devices.getById('did-pro')).toBeDefined()
       expect(logger.error).toHaveBeenCalledWith(
-        'Skipping device did-v2: its live attributes could not be read',
-        expect.any(Error),
+        'Skipping device did-v2: its live attributes could not be read: HttpError: Status 503',
       )
       expect(onRequestError).toHaveBeenCalledWith(
         expect.objectContaining({ url: UNREADABLE_DEVICE_PATH }),
@@ -188,8 +186,15 @@ describe(HeatzyAPI, () => {
   // recovery line. The streaks are the core's; a monotonic-clock jump
   // stands in for the window.
   describe('failure streaks', () => {
+    // The label alone: a failure nothing classifies — a non-Error
+    // rejection — keeps the object form beside it.
     const SKIP_LINE =
-      'Skipping device did-pro: its live attributes could not be read'
+      'Skipping device did-pro: its live attributes could not be read:'
+    // A refused payload's line: the failure this SDK words — the path
+    // refused and the value received — then zod's issue list, folded
+    // onto the same line by the core.
+    const SKIP_REFUSED_LINE = `${SKIP_LINE} ValidationError: Invalid API response shape (GET /devdata/did-pro/latest): attr.mode (received "cft3") — caused by ZodError: [ { "code": "invalid_value", "values": [ "cft", "cft1", "cft2", "eco", "fro", "stop" ], "path": [ "attr", "mode" ], "message": "Invalid option: expected one of \\"cft\\"|\\"cft1\\"|\\"cft2\\"|\\"eco\\"|\\"fro\\"|\\"stop\\"" } ]`
+    const SKIP_NOT_FOUND_LINE = `${SKIP_LINE} HttpError: Status 404`
     const DROPPED_LINE =
       'Dropped 1 of 2 /bindings entries: device did-new (unknown product_key unshipped)'
     const unshippedBinding = buildBinding('pro', {
@@ -218,10 +223,7 @@ describe(HeatzyAPI, () => {
 
       await fetchCycles(api, 3)
 
-      expect(logger.error).toHaveBeenCalledExactlyOnceWith(
-        SKIP_LINE,
-        expect.any(ValidationError),
-      )
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(SKIP_REFUSED_LINE)
     })
 
     it('reminds of the streak once its window elapses', async () => {
@@ -238,10 +240,7 @@ describe(HeatzyAPI, () => {
       clock.mockRestore()
 
       expect(logger.error).toHaveBeenCalledTimes(2)
-      expect(logger.error).toHaveBeenLastCalledWith(
-        SKIP_LINE,
-        expect.any(ValidationError),
-      )
+      expect(logger.error).toHaveBeenLastCalledWith(SKIP_REFUSED_LINE)
     })
 
     // The message names the value received; the streak is keyed on
@@ -256,10 +255,7 @@ describe(HeatzyAPI, () => {
       mode = 'cft4'
       await api.fetch()
 
-      expect(logger.error).toHaveBeenCalledExactlyOnceWith(
-        SKIP_LINE,
-        expect.any(ValidationError),
-      )
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(SKIP_REFUSED_LINE)
     })
 
     it('reports the failure in full again when its reason changes', async () => {
@@ -289,8 +285,8 @@ describe(HeatzyAPI, () => {
       await api.fetch()
 
       expect(vi.mocked(logger.error).mock.calls).toStrictEqual([
-        [SKIP_LINE, expect.any(ValidationError)],
-        [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
+        [SKIP_REFUSED_LINE],
+        [SKIP_NOT_FOUND_LINE],
       ])
     })
 
@@ -317,7 +313,7 @@ describe(HeatzyAPI, () => {
 
       expect(vi.mocked(logger.error).mock.calls).toStrictEqual([
         [expect.stringContaining('"url":"/devdata/did-pro/latest"')],
-        [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
+        [SKIP_NOT_FOUND_LINE],
       ])
     })
 
@@ -347,8 +343,8 @@ describe(HeatzyAPI, () => {
 
       expect(vi.mocked(logger.error).mock.calls).toStrictEqual([
         [expect.stringContaining('"url":"/devdata/did-pro/latest"')],
-        [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
-        [SKIP_LINE, expect.objectContaining({ isHttpError: true })],
+        [SKIP_NOT_FOUND_LINE],
+        [SKIP_NOT_FOUND_LINE],
       ])
       expect(logger.log).toHaveBeenCalledWith(
         'GET /devdata/did-pro/latest answered again after 4 failed attempts',
@@ -384,7 +380,8 @@ describe(HeatzyAPI, () => {
 
     // A host transport can reject with a value that is not an Error;
     // the leg receives it unwrapped (probed), and a streak still needs
-    // an identity for it.
+    // an identity for it. Nothing classifies such a value, so the line
+    // keeps the object form: the label, then the value itself.
     it('keys a streak on a non-Error rejection by its own value', async () => {
       const logger = createLogger()
       const { api } = await createAuthedApi({ logger })

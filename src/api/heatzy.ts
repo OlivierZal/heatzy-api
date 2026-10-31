@@ -1,4 +1,9 @@
-import { FailureStreaks, failureReason, SessionAPI } from '@olivierzal/api-core'
+import {
+  FailureStreaks,
+  failureReason,
+  logFailure,
+  SessionAPI,
+} from '@olivierzal/api-core'
 import {
   MS_PER_SECOND,
   SESSION_REFRESH_AHEAD_MS,
@@ -548,10 +553,15 @@ export class HeatzyAPI
       attributes = await this.getValues({ id: did })
     } catch (error) {
       // The state is stored BEFORE the line is written, so a throwing
-      // host logger never loses the streak.
+      // host logger never loses the streak. The line spells the failure
+      // and its causes with no stack — a `/devdata` read that times out
+      // would otherwise print the transport's frames under the line a
+      // report needs to read — while a programming error keeps the
+      // stack that locates it.
       if (this.#streaks.shouldReport(did, streakReason(error))) {
-        this.logger.error(
-          `Skipping device ${did}: its live attributes could not be read`,
+        logFailure(
+          this.logger,
+          `Skipping device ${did}: its live attributes could not be read:`,
           error,
         )
       }
@@ -589,7 +599,9 @@ export class HeatzyAPI
   // Strip the envelope and parse the body against the endpoint's
   // schema; throw on transport failure — the contract the two
   // validated reads (`/bindings`, `/devdata`) want, both GETs, which
-  // is why the verb is fixed here rather than passed. The
+  // is why the verb is fixed here rather than passed — and why neither
+  // needs the core's `idempotent` declaration to reach the transient
+  // retry rung. The
   // body-carrying calls go through the core directly: `/login` through
   // `dispatch`, `/control` — whose response nothing consumes — through
   // `request`.

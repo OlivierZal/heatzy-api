@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [21.1.0] - 2026-10-31
+
+### Changed
+
+- **The exact `@olivierzal/api-core` pin advances from 2.0.0 to 2.3.0.** Three minors, nothing to absorb — the hooks and signatures this SDK subclasses are unchanged (`SessionAPI.request` gains an optional `idempotent` flag, declared nowhere here: both validated reads, `/bindings` and `/devdata`, travel over GET, and `/control`, the one POST, is a write that must never be replayed) — and three things change for a Heatzy account:
+  - **A `500`, a failed connection or a request timeout on a read is retried like a 502/503/504** (2.1.0, 2.2.0): four retries, a second to sixteen with jitter, on the `/bindings` listing and on every `/devdata` leg. The transient predicate covers undici's `fetch failed` — DNS, connect timeout, reset, TLS — and the client's own `TimeoutError`, anywhere in the `cause` chain; a caller's `AbortError` is a decision, never retried. A deterministic 500 still fails once the budget is spent and reaches the device's streak as before.
+  - **The failed-request line spells its cause chain** (2.2.0): `TypeError: fetch failed — caused by ConnectTimeoutError: Connect Timeout Error (UND_ERR_CONNECT_TIMEOUT)` where `fetch failed` alone named nothing.
+  - **A known failure is ONE line from the sync cycle and the session resume** (2.3.0). `Failed to fetch devices:` and `Session resume failed:` print a failure this family has a class for — an `HttpError`, the `APIError` family, a transport failure, a `RegistrySyncError` judged by what it wraps — as the label followed by its cause chain and no stack: `Session resume failed: AuthenticationError: Heatzy rejected the credentials — caused by HttpError: Status 400`. A validator's multi-line issue list folds onto that line; a programming error keeps the stack that locates it. The two kernel clauses that pinned the object form for a refused credential (`'Session resume failed:', expect.any(AuthenticationError)` and its `Failed to fetch devices:` twin) pin the one-line form.
+- **The per-device streak line goes through the core's `logFailure` too.** `Skipping device <did>: its live attributes could not be read:` is followed on the same line by the failure's cause chain — `ValidationError: …` (the failing paths and the values received) `— caused by ZodError: […]` (the issue list, folded) for a refused payload, `HttpError: Status 503` for a refused request, the transport's own code for a failed connection — where it used to hand the host logger the error object, whose stack the host then prints under the line — the transport's frames, for a `/devdata` read that times out, in the diagnostic report the line exists for. A programming error keeps its stack there as well. The kernel's partial-fan-out clause and every streak clause of the sync suite pin the one-line forms (`… could not be read: HttpError: Status 503`, `… ValidationError: … — caused by ZodError: […]`); a rejection that is not an Error keeps the object form, label then value. The streak itself is untouched: same opening, reason-change and five-minute reminder rules, same recovery line, and the pipeline's lines for a streaked device are held back as before.
+
 ## [21.0.0] - 2026-10-14
 
 ### Breaking changes
@@ -363,6 +373,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[21.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v21.0.0...v21.1.0
 [21.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.4.0...v21.0.0
 [20.4.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.3.0...v20.4.0
 [20.3.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.2.0...v20.3.0

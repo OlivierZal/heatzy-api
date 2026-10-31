@@ -27,7 +27,6 @@ import { Mode } from '../../src/constants.ts'
 import {
   AuthenticationError,
   RegistrySyncError,
-  ValidationError,
 } from '../../src/errors/index.ts'
 import {
   type HttpRequestConfig,
@@ -751,8 +750,7 @@ const describeSessionLifecycleContract = (
       expect(driver.deviceReadCount()).toBe(2)
       expect(deviceCount()).toBe(1)
       expect(logger.error).toHaveBeenCalledWith(
-        `Skipping device ${UNREADABLE_DEVICE_ID}: its live attributes could not be read`,
-        expect.any(ValidationError),
+        `Skipping device ${UNREADABLE_DEVICE_ID}: its live attributes could not be read: ValidationError: Invalid API response shape (GET /devdata/${UNREADABLE_DEVICE_ID}/latest): attr.mode (received "cft3") — caused by ZodError: [ { "code": "invalid_value", "values": [ "cft", "cft1", "cft2", "eco", "fro", "stop" ], "path": [ "attr", "mode" ], "message": "Invalid option: expected one of \\"cft\\"|\\"cft1\\"|\\"cft2\\"|\\"eco\\"|\\"fro\\"|\\"stop\\"" } ]`,
       )
     })
 
@@ -818,8 +816,7 @@ const describeSessionLifecycleContract = (
       // about the verdict, never about clearing.
       expect(api.isAuthenticated()).toBe(true)
       expect(logger.error).toHaveBeenCalledWith(
-        'Session resume failed:',
-        expect.any(AuthenticationError),
+        'Session resume failed: AuthenticationError: Heatzy rejected the credentials — caused by HttpError: Status 400',
       )
     })
 
@@ -1088,8 +1085,7 @@ const describeSessionLifecycleContract = (
       await expect(api.fetch()).resolves.toStrictEqual([])
 
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to fetch devices:',
-        expect.any(AuthenticationError),
+        'Failed to fetch devices: AuthenticationError: registry cycle refused',
       )
     })
 
