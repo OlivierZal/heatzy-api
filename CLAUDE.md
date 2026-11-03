@@ -511,9 +511,10 @@ constructor), the redaction engine, the observability shells,
 `LifecycleEmitter` and the one-line failure log (`logFailure`,
 `isKnownFailure`, `failureCauseChain` — the sync cycle's and the
 resume's lines are the core's, the per-device streak line this SDK's,
-all three through it; exported since 21.2.0 as bare forwards through
-`src/observability/index.ts` and the root barrel, like the error
-family, so the apps' own cloud-failure lines take the same form through
+all three through it; exported since 21.2.0 as bare forwards from
+`src/errors/index.ts`, beside the error family — the twin's home for
+them too, melcloud-api 60.4.0 — and the root barrel, so the apps' own
+cloud-failure lines take the same form through
 their one SDK pin — this package is their only API boundary, and the
 core never becomes a direct app dependency; `Logger`, the first
 argument's type, travels on the root barrel too. A bare forward renders
@@ -521,7 +522,7 @@ the core's own doc, so that doc must resolve from this package — every
 `{@link}` it carries names an export of this barrel and each symbol
 carries its `@category`, which api-core 2.3.1's `failure-log` docs do
 (`failureReason`, not exported here, is spelled in code font) — and
-`observability.test.ts` holds the one clause that the three names reach
+`errors.test.ts` holds the one clause that the three names reach
 the root barrel as the core's functions), the resilience primitives,
 `SyncManager`, the
 temporal entry point, the time units, the `setting` and `syncDevices`
@@ -552,8 +553,7 @@ sign-in path, so `doAuthenticate` constructs no `AuthenticationError`
 of its own; NO `logLabel`; NO `rateLimitHours`), the twelve dialect
 hooks in `src/api/heatzy.ts`, the wire types, the schemas and the
 facades; the directory barrels (`errors/`, `http/`, `resilience/`,
-`decorators/`, `types/`, `observability/`) forward the core's names
-directly — the
+`decorators/`, `types/`) forward the core's names directly — the
 one-line re-export shims that once sat between were folded in 18.0.1,
 and the two local `APIError` subclasses extend the core's class through
 the package specifier, never through the errors barrel (an eval-time

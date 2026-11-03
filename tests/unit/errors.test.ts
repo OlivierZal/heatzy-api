@@ -1,3 +1,8 @@
+import {
+  failureCauseChain as coreFailureCauseChain,
+  isKnownFailure as coreIsKnownFailure,
+  logFailure as coreLogFailure,
+} from '@olivierzal/api-core'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -5,6 +10,11 @@ import {
   AttributeNotFoundError,
   isAPIError,
 } from '../../src/errors/index.ts'
+import {
+  failureCauseChain,
+  isKnownFailure,
+  logFailure,
+} from '../../src/index.ts'
 
 // Thin VOCABULARY suite: the error MECHANISMS — the `APIError` base,
 // `isAPIError`'s guard and narrowing, `AuthenticationError`'s name and
@@ -15,8 +25,10 @@ import {
 // `heatzy-api-auth.test.ts`, through `parseOrThrow` in
 // `validation.test.ts`, and in the session-lifecycle kernel). What this
 // file pins is the Gizwits layer's own obligation: the one protocol
-// error it still declares, and that it sits inside the one family-wide
-// `APIError` hierarchy.
+// error it still declares, that it sits inside the one family-wide
+// `APIError` hierarchy, and that the failure-log helpers the package
+// root hands a host are the core's own, so a host's line and the SDK's
+// seats judge one failure the same way, through the SDK's pin alone.
 
 describe.concurrent('the Gizwits protocol errors', () => {
   it('attributeNotFoundError derives its message from the attribute', () => {
@@ -42,4 +54,19 @@ describe.concurrent('the Gizwits protocol errors', () => {
 
     expect(isAPIError(error)).toBe(true)
   })
+})
+
+describe.concurrent('the failure-log forwards', () => {
+  // Typed `unknown`: the rows are compared by identity, and left to
+  // inference the table would narrow every helper to the void shape.
+  it.each<[string, unknown, unknown]>([
+    ['failureCauseChain', failureCauseChain, coreFailureCauseChain],
+    ['isKnownFailure', isKnownFailure, coreIsKnownFailure],
+    ['logFailure', logFailure, coreLogFailure],
+  ])(
+    '%s reaches the package root as the core helper itself',
+    (_name, local, core) => {
+      expect(local).toBe(core)
+    },
+  )
 })

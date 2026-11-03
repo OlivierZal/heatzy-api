@@ -51,7 +51,10 @@ export {
   AttributeNotFoundError,
   AuthenticationError,
   EntityNotFoundError,
+  failureCauseChain,
   isAPIError,
+  isKnownFailure,
+  logFailure,
   RegistrySyncError,
   ValidationError,
 } from './errors/index.ts'
@@ -76,10 +79,5 @@ export {
   HttpStatus,
   isHttpError,
 } from './http/index.ts'
-export {
-  failureCauseChain,
-  isKnownFailure,
-  logFailure,
-} from './observability/index.ts'
 export { Temporal } from './temporal.ts'
 export { getTargetTemperature } from './utils.ts'

@@ -15,5 +15,6 @@ export type {
 // with it, and its doc already names the Gizwits fact — the pair is
 // also the verbatim `/login` body — which `HeatzyAPI.login`'s own doc
 // repeats where the body is posted. A specifier comment would render
-// nowhere: typedoc reads one only where the declaration has none.
+// nowhere: typedoc never reads one for a type or a value, so a doc
+// lives on the declaration — the core's — or not at all.
 export type { LoginCredentials, UndefinedTolerant } from '@olivierzal/api-core'

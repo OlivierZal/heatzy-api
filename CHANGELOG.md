@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- **The package re-exports `@olivierzal/api-core`'s `logFailure`, `isKnownFailure` and `failureCauseChain` — bare forwards on the root barrel through the new `src/observability/index.ts`, like the error family — so the apps log their own cloud failures (`Write failed:`, `Device sync failed:`) the way the SDK logs its own since 21.1.0, a known failure as one line naming its cause chain and a programming error as the object that keeps its stack, through their one SDK pin rather than a direct api-core dependency; the exact `@olivierzal/api-core` pin advances from 2.3.0 to 2.3.1, the release whose docs for the three render from this package and so lets them travel bare.**
+- **The package re-exports `@olivierzal/api-core`'s `logFailure`, `isKnownFailure` and `failureCauseChain` — bare forwards on the root barrel from `src/errors/index.ts`, beside the error family (the twin's home for them too, melcloud-api 60.4.0) — so the apps log their own cloud failures (`Write failed:`, `Device sync failed:`) the way the SDK logs its own since 21.1.0, a known failure as one line naming its cause chain and a programming error as the object that keeps its stack, through their one SDK pin rather than a direct api-core dependency; the exact `@olivierzal/api-core` pin advances from 2.3.0 to 2.3.1, the release whose docs for the three render from this package and so lets them travel bare.**
 
 ## [21.1.0] - 2026-10-31
 
