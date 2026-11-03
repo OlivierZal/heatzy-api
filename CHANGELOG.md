@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [21.2.0] - 2026-11-03
+
+### Added
+
+- **The package re-exports `@olivierzal/api-core`'s `logFailure`, `isKnownFailure` and `failureCauseChain`, so the apps log their own cloud failures as one line without a direct api-core dependency.** Since 21.1.0 the SDK's own lines (`Failed to fetch devices:`, `Session resume failed:`, the per-device streak line) print a known failure as the label followed by its cause chain and no stack, and a programming error as the object that keeps its stack; the apps' own lines (`Write failed:`, `Device sync failed:`) still handed the host logger the error object, whose transport frames the host prints under every transient. The three helpers behind the form now travel on the root barrel through the new `src/observability/index.ts` — the exported names ARE the core's functions, pinned by identity in `observability.test.ts`, so a consumer's lines and the SDK's are one mechanism — and the SDK stays the apps' only API boundary: one pin for the family. They are `const` re-bindings rather than bare forwards, each with this SDK's own doc, because the core's docs cannot be rendered from here as they stand: `failureCauseChain`'s links `failureReason`, which this package does not export, and none carries a `@category` — the detour the `AuthenticationError` forward took until api-core 1.2.0 spelled its link in code font. `Logger`, the type of `logFailure`'s first argument, was already exported.
+
 ## [21.1.0] - 2026-10-31
 
 ### Changed
@@ -373,6 +379,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[21.2.0]: https://github.com/OlivierZal/heatzy-api/compare/v21.1.0...v21.2.0
 [21.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v21.0.0...v21.1.0
 [21.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.4.0...v21.0.0
 [20.4.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.3.0...v20.4.0

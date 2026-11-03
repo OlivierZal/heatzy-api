@@ -76,5 +76,10 @@ export {
   HttpStatus,
   isHttpError,
 } from './http/index.ts'
+export {
+  failureCauseChain,
+  isKnownFailure,
+  logFailure,
+} from './observability/index.ts'
 export { Temporal } from './temporal.ts'
 export { getTargetTemperature } from './utils.ts'
