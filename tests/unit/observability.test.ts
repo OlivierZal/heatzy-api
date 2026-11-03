@@ -21,10 +21,10 @@ import { buildBinding, PRODUCT_KEYS } from '../fixtures.ts'
 // hands it (pinned through the real client in `heatzy-api.test.ts`).
 // What this file pins is the Gizwits layer's own obligation: the two
 // vocabulary tiers of the one bound engine — the credential keys and
-// the personal-data keys — and that the failure-log helpers the root
-// barrel hands a consumer ARE the core's functions, so a consumer's own
-// cloud-failure lines and the SDK's are one mechanism, never a local
-// twin.
+// the personal-data keys — and that the failure-log helpers reach a
+// consumer through the root barrel as the core's own functions, so a
+// consumer's cloud-failure lines and the SDK's are one mechanism, never
+// a local twin.
 
 describe.concurrent('the Gizwits vocabulary', () => {
   it('marks the user-token header sensitive in any casing', () => {
@@ -113,9 +113,11 @@ describe.concurrent('the Gizwits personal-data tier', () => {
 })
 
 describe.concurrent('the failure-log forwards', () => {
-  it("hands a consumer the core's own functions", () => {
-    expect(failureCauseChain).toBe(coreFailureCauseChain)
-    expect(isKnownFailure).toBe(coreIsKnownFailure)
-    expect(logFailure).toBe(coreLogFailure)
+  it("reach a consumer through the root barrel as the core's own functions", () => {
+    expect({ failureCauseChain, isKnownFailure, logFailure }).toStrictEqual({
+      failureCauseChain: coreFailureCauseChain,
+      isKnownFailure: coreIsKnownFailure,
+      logFailure: coreLogFailure,
+    })
   })
 })

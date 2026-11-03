@@ -511,21 +511,19 @@ constructor), the redaction engine, the observability shells,
 `LifecycleEmitter` and the one-line failure log (`logFailure`,
 `isKnownFailure`, `failureCauseChain` — the sync cycle's and the
 resume's lines are the core's, the per-device streak line this SDK's,
-all three through it; exported since 21.2.0 through
-`src/observability/index.ts` and the root barrel so the apps' own
-cloud-failure lines take the same form through their one SDK pin —
-this package is their only API boundary, and the core never becomes a
-direct app dependency; `Logger`, the first argument's type, already
-travels on the root barrel. The three are `const` re-bindings of the
-core's functions — the same objects, pinned by identity in
-`observability.test.ts` — rather than bare forwards, each carrying this
-SDK's own doc: typedoc reads an export specifier's comment only where
-the declaration has none, and the core's `failureCauseChain` doc links
-`failureReason`, which resolves nowhere here and fails the docs build,
-while none of the three carries a `@category`. The `AuthenticationError`
-forward took the same detour until api-core 1.2.0 spelled its link in
-code font; the day the core's docs resolve here, the barrel returns to
-a bare forward), the resilience primitives, `SyncManager`, the
+all three through it; exported since 21.2.0 as bare forwards through
+`src/observability/index.ts` and the root barrel, like the error
+family, so the apps' own cloud-failure lines take the same form through
+their one SDK pin — this package is their only API boundary, and the
+core never becomes a direct app dependency; `Logger`, the first
+argument's type, travels on the root barrel too. A bare forward renders
+the core's own doc, so that doc must resolve from this package — every
+`{@link}` it carries names an export of this barrel and each symbol
+carries its `@category`, which api-core 2.3.1's `failure-log` docs do
+(`failureReason`, not exported here, is spelled in code font) — and
+`observability.test.ts` holds the one clause that the three names reach
+the root barrel as the core's functions), the resilience primitives,
+`SyncManager`, the
 temporal entry point, the time units, the `setting` and `syncDevices`
 decorators (the latter in factory form, `@syncDevices()`, since
 17.0.0) and the error family (`APIError`, `AuthenticationError`,
