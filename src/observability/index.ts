@@ -8,14 +8,14 @@
 // the same objects, never wrappers — rather than bare forwards, because
 // typedoc reads an export specifier's comment only where the declaration
 // has none, and the core's docs cannot be rendered from here as they
-// stand: `failureCauseChain`'s links `failureReason`, which this package
-// does not export, and none of the three carries a category. Each
-// re-binding therefore carries this SDK's own doc, and spells its type
-// (an exported binding must, under isolated declarations) — which is
-// also what gives the rendered page its parameters; the day the core's
-// docs resolve here, this barrel returns to a bare forward. The bound
-// `redaction` engine (`./context.ts`) stays module-private: it is a
-// seat, not a surface.
+// stand: `failureCauseChain`'s doc links `failureReason`, which this
+// package does not export, and none of the three carries a category.
+// Each re-binding therefore carries this SDK's own doc, and spells its
+// type (an exported binding must, under isolated declarations) — which
+// is also what gives the rendered page its parameters; the day the
+// core's docs resolve here, this barrel returns to a bare forward. The
+// bound `redaction` engine (`./context.ts`) stays module-private: it
+// is a seat, not a surface.
 import {
   type Logger,
   failureCauseChain as coreFailureCauseChain,
@@ -28,9 +28,10 @@ import {
  * fetch failed — caused by ConnectTimeoutError: Connect Timeout Error
  * (UND_ERR_CONNECT_TIMEOUT)` — where a host logger printing the error as
  * its message says `fetch failed` and names nothing. Each link is its
- * message plus its string `code` when it carries one; a message spanning
- * lines (a validator's issue list) is folded onto the one line; a thrown
- * primitive is spelled by its value.
+ * name and message (`HttpError: Status 503`) plus its string `code`
+ * when it carries one; a message spanning lines (a validator's issue
+ * list) is folded onto the one line; a thrown primitive is spelled by
+ * its value.
  * @param error - What the call threw.
  * @returns The chain, joined by ` — caused by `.
  * @category Errors
@@ -40,12 +41,15 @@ export const failureCauseChain: (error: unknown) => string =
 
 /**
  * Whether a failure is one this family has a class for — an
- * {@link HttpError}, the {@link APIError} family, or a transport failure
- * (undici's `fetch failed`, a request timeout, a caller's abort) —
- * anywhere in its `cause` chain; a {@link RegistrySyncError} is judged
- * by what it wraps. Such a failure is an expected condition of the wire,
- * and its cause chain says everything; anything else is a programming
- * error, whose stack is the one thing that locates it.
+ * {@link HttpError} without a `cause`, the {@link APIError} family, or
+ * a transport failure (undici's `fetch failed`, a request timeout, a
+ * caller's abort) — anywhere in its `cause` chain. A wrapper is judged
+ * by what it wraps: a {@link RegistrySyncError} carries whatever the
+ * enforced sync threw, and an `HttpError` with a `cause` carries its
+ * reader's own failure, so neither counts on its own. Such a failure is
+ * an expected condition of the wire, and its cause chain says
+ * everything; anything else is a programming error, whose stack is the
+ * one thing that locates it.
  * @param error - What the call threw.
  * @returns `true` for a failure whose cause chain says everything.
  * @category Errors

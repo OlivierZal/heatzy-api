@@ -12,15 +12,8 @@ export type {
   PostAttributes,
 } from './heatzy.ts'
 // The credential pair is the core's: its `doAuthenticate` hook is typed
-// with it. The Gizwits fact travels on the specifier's own doc, which
-// typedoc reads.
-export type {
-  /**
-   * Heatzy (Gizwits) user credentials — also the verbatim `/login`
-   * body (`HeatzyAPI.login` posts the pair as is), the one fact the
-   * core's doc asks this SDK to keep in its own types.
-   * @category Types
-   */
-  LoginCredentials,
-  UndefinedTolerant,
-} from '@olivierzal/api-core'
+// with it, and its doc already names the Gizwits fact — the pair is
+// also the verbatim `/login` body — which `HeatzyAPI.login`'s own doc
+// repeats where the body is posted. A specifier comment would render
+// nowhere: typedoc reads one only where the declaration has none.
+export type { LoginCredentials, UndefinedTolerant } from '@olivierzal/api-core'
