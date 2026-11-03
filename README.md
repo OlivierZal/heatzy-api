@@ -116,6 +116,8 @@ The request pipeline applies two policies, outermost first:
 
 A failure the SDK has a class for — an `HttpError`, the `APIError` family (`AuthenticationError`, `ValidationError`, a `RegistrySyncError` judged by what it wraps) or a transport failure — is logged as **one line** naming its cause chain, with no stack: `Session resume failed: AuthenticationError: Heatzy rejected the credentials — caused by HttpError: Status 400`, `Failed to fetch devices: TypeError: fetch failed — caused by ConnectTimeoutError: Connect Timeout Error (UND_ERR_CONNECT_TIMEOUT)`, and the device streak line above. A programming error keeps its stack, which is the one thing that locates it.
 
+The three helpers behind that form are this package's exports too — `logFailure(logger, label, error)`, `isKnownFailure(error)` and `failureCauseChain(error)` — so a consumer's own cloud-failure lines take the same shape through its one SDK dependency, without depending on `@olivierzal/api-core` itself: `logFailure(this, 'Write failed:', error)` prints `Write failed: HttpError: Request failed with status code 503` for a refused request whose body carries no reason (Gizwits's own `detail_message` or `error_message` stands in for the status line where it does), and the error object, stack included, for a programming error. The `Logger` type the first argument takes is exported alongside.
+
 The transport itself is configurable through `transport`: pass a pre-built `HttpClient` (the seam the test suites use to script responses), or `{ timeoutMs }` to change the 30 s per-request timeout (`0` disables it — not recommended). Omit it for the fetch-backed default.
 
 ## Documentation

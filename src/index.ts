@@ -51,7 +51,10 @@ export {
   AttributeNotFoundError,
   AuthenticationError,
   EntityNotFoundError,
+  failureCauseChain,
   isAPIError,
+  isKnownFailure,
+  logFailure,
   RegistrySyncError,
   ValidationError,
 } from './errors/index.ts'
