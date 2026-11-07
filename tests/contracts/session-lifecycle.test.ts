@@ -1086,10 +1086,16 @@ const describeSessionLifecycleContract = (
       expect(ticked).toBeGreaterThan(settled)
     })
 
-    it('disarms the timer and reports the loss when a cycle ends unauthenticated with recoverable state', async () => {
+    // A cycle that ends unauthenticated is settled by
+    // `#isLossDefinitive` (api-core 2.4.0), and only a DEFINITIVE loss —
+    // here, the stored credential refused — disarms the heartbeat and
+    // announces itself: rescheduling would replay a doomed sign-in every
+    // cycle. The stale session is what sends the cycle through a sign-in:
+    // an expired token is refreshed before the cycle's first request.
+    it('disarms the timer and reports the loss when a cycle ends on a refused credential', async () => {
       const onAuthenticationLost =
         vi.fn<NonNullable<LifecycleEvents['onAuthenticationLost']>>()
-      const { settingManager } = createSettingStore()
+      const { settingManager } = createSettingStore(driver.staleSession())
       driver.stage({ login: 'refuse', wire: 'refuse-registry' })
       const { api } = await driver.create({
         events: { onAuthenticationLost },
@@ -1097,7 +1103,8 @@ const describeSessionLifecycleContract = (
         syncIntervalMinutes: SYNC_INTERVAL_MINUTES,
       })
       // Credentials arrive AFTER construction, so the boot-time restore
-      // emitted nothing: the loss below is the cycle epilogue's own.
+      // emitted nothing: the loss below is the refusal the cycle's own
+      // sign-in met.
       seedCredentials(settingManager)
 
       await api.fetch()
@@ -1106,8 +1113,50 @@ const describeSessionLifecycleContract = (
       const ticked = driver.registryCycleCount()
       api[Symbol.dispose]()
 
+      expect(driver.loginCount()).toBe(1)
       expect(onAuthenticationLost).toHaveBeenCalledTimes(1)
       expect(ticked).toBe(settled)
+    })
+
+    // The same cycle over credentials nobody refused (api-core 2.4.0):
+    // nothing is announced — so no recovery either — and the client
+    // never goes dormant. The cycle's failed sign-in scheduled a retry,
+    // which owns the recovery instead of a heartbeat stacked on it and
+    // re-arms the heartbeat once it signs in. Until 2.4.0 this cycle
+    // disarmed and announced a loss: one blip left the client dormant
+    // for the life of the process (field report 2026-11-07).
+    it('never goes dormant when a cycle ends unauthenticated over credentials nobody refused', async () => {
+      const onAuthenticationLost =
+        vi.fn<NonNullable<LifecycleEvents['onAuthenticationLost']>>()
+      const onAuthenticationRestored =
+        vi.fn<NonNullable<LifecycleEvents['onAuthenticationRestored']>>()
+      const { settingManager } = createSettingStore(driver.staleSession())
+      driver.stage({ login: 'unreachable', wire: 'refuse-registry' })
+      const { api } = await driver.create({
+        events: { onAuthenticationLost, onAuthenticationRestored },
+        settingManager,
+        syncIntervalMinutes: SYNC_INTERVAL_MINUTES,
+      })
+      // After construction, as above: the sign-in that fails is the
+      // cycle's own.
+      seedCredentials(settingManager)
+
+      await api.fetch()
+      const settled = driver.registryCycleCount()
+      driver.stage({ login: 'accept', wire: 'ok' })
+      await vi.advanceTimersByTimeAsync(MS_PER_MINUTE)
+      const retried = driver.registryCycleCount()
+      await vi.advanceTimersByTimeAsync(SYNC_TICK_MS)
+      const ticked = driver.registryCycleCount()
+      api[Symbol.dispose]()
+
+      // The cycle's sign-in, then the retry's; the retry's enforced
+      // cycle, then the heartbeat it re-armed.
+      expect(driver.loginCount()).toBe(2)
+      expect(retried - settled).toBe(1)
+      expect(ticked - retried).toBe(1)
+      expect(onAuthenticationLost).not.toHaveBeenCalled()
+      expect(onAuthenticationRestored).not.toHaveBeenCalled()
     })
 
     it('logs the failure and answers an empty list when a best-effort cycle fails', async () => {
