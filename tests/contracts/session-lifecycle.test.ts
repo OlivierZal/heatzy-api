@@ -5,6 +5,7 @@ import {
   createSettingStore,
   mockHttpResponse,
 } from '@olivierzal/api-core/testing'
+import { MS_PER_MINUTE } from '@olivierzal/api-core/time-units'
 import {
   type MockInstance,
   afterEach,
@@ -34,7 +35,13 @@ import {
   HttpStatus,
 } from '../../src/http/index.ts'
 import { RetryGuard } from '../../src/resilience/index.ts'
-import { buildBinding, buildLoginData, proAttributes } from '../fixtures.ts'
+import {
+  buildBinding,
+  buildLoginData,
+  proAttributes,
+  tokenInvalidFailure,
+  wrongCredentialsFailure,
+} from '../fixtures.ts'
 import {
   BINDINGS_PATH,
   createApi,
@@ -397,11 +404,11 @@ const answerLogin = (): HttpResponse => {
   if (heatzyWire.login === 'unreachable') {
     throw createServerError(UNAVAILABLE_STATUS, LOGIN_PATH)
   }
-  // A refused Gizwits sign-in is an HTTP 400 carrying an error code in
-  // the body, not a 401 — the core's `toAuthFailure`, reading this SDK's
-  // `[401, 400]`, turns both into the shared `AuthenticationError`.
+  // A refused Gizwits sign-in is an HTTP 400 naming the credentials in
+  // its body (9020 here), not a 401 — the dialect's sign-in reads the
+  // code and turns it into the shared `AuthenticationError`.
   if (heatzyWire.login === 'refuse') {
-    throw createServerError(HttpStatus.BadRequest, LOGIN_PATH)
+    throw wrongCredentialsFailure(LOGIN_PATH)
   }
   return mockHttpResponse(buildLoginData())
 }
@@ -447,7 +454,9 @@ const answerWire = (config: HttpRequestConfig): HttpResponse => {
     heatzyWire.outcome === 'unauthorized-once' &&
     registryCycleCount() === heatzyWire.baseline + 1
   ) {
-    throw createServerError(heatzyWire.authFailureStatus, url)
+    throw heatzyWire.authFailureStatus === HttpStatus.BadRequest
+      ? tokenInvalidFailure(url)
+      : createServerError(heatzyWire.authFailureStatus, url)
   }
   return (
     answerDegraded(url) ??
@@ -519,7 +528,9 @@ const heatzyDriver: SessionLifecycleDriver = {
 // Gizwits reports an invalid or expired user token as HTTP 400 (error
 // code 9004 in the body) as well as 401, which is why `HeatzyAPI` hands
 // `AuthRetryPolicy` the pair `[401, 400]` (the `authFailureStatuses`
-// super() option). Both rows
+// super() option) — the 400 narrowed to the token codes by
+// `isAuthFailure`, so the 400 row carries the 9004 body; a 400 naming no
+// token is pinned in the auth wiring suite. Both rows
 // run the same reactive recovery: drop the status the wire actually uses
 // and every expired Gizwits token becomes a hard failure the user has to
 // resolve by signing in again.
@@ -756,22 +767,49 @@ const describeSessionLifecycleContract = (
 
     // The gate's negative half (`#armLoginBackoff`'s
     // `instanceof AuthenticationError` guard). A transport failure
-    // is not a rejected credential: the retry paths own those, and
-    // pausing sign-ins over a blip would lock a working account out for
-    // fifteen minutes at a time.
-    it('never arms the login backoff when the sign-in round-trip failed at transport', async () => {
-      const { settingManager } = createSettingStore(CREDENTIALS)
+    // is not a rejected credential: pausing an EXPLICIT sign-in over a
+    // blip would lock a working account out for fifteen minutes at a
+    // time.
+    it('never arms the login backoff when an explicit sign-in failed at transport', async () => {
+      const { settingManager } = createSettingStore()
       driver.stage({ login: 'unreachable', wire: 'ok' })
       const { api } = await driver.create({ settingManager })
-      const attempted = driver.loginCount()
+
+      await expect(api.authenticate(CREDENTIALS)).rejects.toThrow(
+        `Status ${String(UNAVAILABLE_STATUS)}`,
+      )
+
+      expect(settingManager.get('loginBackoffUntil') ?? '').toBe('')
+    })
+
+    // The AUTOMATIC half (api-core 2.4.0): a resume that failed at
+    // transport is retried a minute later — never parked, never
+    // announced as a loss — and automatic sign-ins wait for that retry,
+    // so a heartbeat cannot turn an outage into a sign-in per tick.
+    // Until 2.4.0 it scheduled nothing, and the cycle after it
+    // announced a loss and disarmed for good (field report
+    // 2026-11-07).
+    it('retries an automatic sign-in that failed at transport a minute later, announcing nothing', async () => {
+      const onAuthenticationLost =
+        vi.fn<NonNullable<LifecycleEvents['onAuthenticationLost']>>()
+      const { settingManager } = createSettingStore(CREDENTIALS)
+      driver.stage({ login: 'unreachable', wire: 'ok' })
+      const before = Date.now()
+      const { api } = await driver.create({
+        events: { onAuthenticationLost },
+        settingManager,
+      })
 
       await expect(api.resumeSession()).resolves.toBe(false)
 
-      expect(attempted).toBe(1)
-      // The gate stayed open: the next automatic resume tried again
-      // instead of being refused locally.
-      expect(driver.loginCount()).toBe(2)
-      expect(settingManager.get('loginBackoffUntil') ?? '').toBe('')
+      const retryAt = Number(settingManager.get('loginBackoffUntil'))
+
+      // The boot resume tried once; the one after it waited for the
+      // retry instead of spending another sign-in.
+      expect(driver.loginCount()).toBe(1)
+      expect(retryAt).toBeGreaterThan(before)
+      expect(retryAt).toBeLessThanOrEqual(Date.now() + MS_PER_MINUTE)
+      expect(onAuthenticationLost).not.toHaveBeenCalled()
     })
 
     it('lets a racing logOut win the sign-in epoch', async () => {
@@ -816,7 +854,7 @@ const describeSessionLifecycleContract = (
       // about the verdict, never about clearing.
       expect(api.isAuthenticated()).toBe(true)
       expect(logger.error).toHaveBeenCalledWith(
-        'Session resume failed: AuthenticationError: Heatzy rejected the credentials — caused by HttpError: Status 400',
+        'Session resume failed: AuthenticationError: Heatzy rejected the credentials — caused by HttpError: username or password error!',
       )
     })
 
@@ -828,7 +866,7 @@ const describeSessionLifecycleContract = (
     // the host reading "signed in" over a dead account for the
     // token's remaining life — `onAuthenticationLost` could never fire
     // while the token stood.
-    it('surfaces onAuthenticationLost once per episode when a cycle settles on a refused credential over a standing token', async () => {
+    it('surfaces onAuthenticationLost once per episode on a refused credential over a standing token', async () => {
       const { api, onAuthenticationLost } = await createObservedSession(
         driver,
         { login: 'accept', wire: 'ok' },
@@ -836,9 +874,9 @@ const describeSessionLifecycleContract = (
       driver.stage({ login: 'refuse', wire: 'ok' })
 
       await expect(api.resumeSession()).resolves.toBe(false)
-      // The cycle epilogue owns the surfacing, so nothing has been
-      // announced yet.
-      expect(onAuthenticationLost).not.toHaveBeenCalled()
+      // The refusal announces itself (api-core 2.4.0): one a deferred
+      // retry finds has no cycle after it to settle on.
+      expect(onAuthenticationLost).toHaveBeenCalledTimes(1)
 
       await api.fetch()
       await api.fetch()

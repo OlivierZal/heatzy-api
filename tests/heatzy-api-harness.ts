@@ -2,7 +2,6 @@ import {
   type MockHttpClient,
   createLogger,
   createMockHttpClient,
-  createServerError,
   createSettingStore,
   mockHttpResponse,
   mockTemporalNowInstant,
@@ -18,7 +17,13 @@ import {
   HttpClient,
 } from '../src/http/index.ts'
 import { Temporal } from '../src/temporal.ts'
-import { buildBinding, buildLoginData, proAttributes } from './fixtures.ts'
+import {
+  buildBinding,
+  buildLoginData,
+  proAttributes,
+  tokenInvalidFailure,
+  wrongCredentialsFailure,
+} from './fixtures.ts'
 
 // The transport under test is THIS SDK's `HttpClient` subclass — the
 // one seating the Gizwits redaction vocabulary, and the one
@@ -123,12 +128,16 @@ export const mockDriftedWire = (): void => {
   })
 }
 
-// Rejects every endpoint with the HTTP 400 Gizwits answers for an
-// invalid token and rejected credentials alike.
+// Rejects every endpoint as Gizwits does when the account is dead: the
+// login refuses the credentials (9020), every other call the token
+// (9004) — both an HTTP 400, told apart by the body's code.
 export const mockRejectedWire = (): void => {
   mockRequest.mockImplementation(async (config) => {
     await Promise.resolve()
-    throw createServerError(400, config.url ?? '/')
+    const url = config.url ?? '/'
+    throw url === LOGIN_PATH
+      ? wrongCredentialsFailure(url)
+      : tokenInvalidFailure(url)
   })
 }
 

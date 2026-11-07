@@ -19,10 +19,19 @@ import {
   AuthenticationError,
   RegistrySyncError,
 } from '../../src/errors/index.ts'
+import { GizwitsErrorCode } from '../../src/http/failure.ts'
 import { type HttpResponse, HttpStatus } from '../../src/http/index.ts'
 import { Temporal } from '../../src/temporal.ts'
-import { buildBinding } from '../fixtures.ts'
 import {
+  buildBinding,
+  buildLoginData,
+  gizwitsFailure,
+  serverErrorFailure,
+  tokenInvalidFailure,
+  wrongCredentialsFailure,
+} from '../fixtures.ts'
+import {
+  BINDINGS_PATH,
   createApi,
   LOGIN_PATH,
   loginCalls,
@@ -254,17 +263,14 @@ describe('in-memory persistence (no setting manager)', () => {
   })
 })
 
-// The sign-in normalization is the core's protected `toAuthFailure`,
-// whose MECHANISM — the narrowing, the preserved cause, the `null` that
-// rethrows — is pinned in api-core's suite. What is OURS is the
-// vocabulary it reads: the `[401, 400]` `authFailureStatuses` `HeatzyAPI`
-// hands `super()`, the ONE spelling both the reactive re-auth rung and
-// this path consult. So each status is pinned by its own row through the
-// real client, and an off-vocabulary rejection is pinned to surface
-// verbatim — a `/login` POST goes through `dispatch`, below every
-// policy rung, so nothing retries or re-maps it.
-const stageRefusedLogin = (status: number): Error => {
-  const rejection = createServerError(status, LOGIN_PATH)
+// The sign-in reads the CODE Gizwits puts in the body, not the status:
+// the wire answers a refused credential, a dead token, a server hiccup
+// and a throttle alike with HTTP 400, and only a refused credential may
+// park the pair and ask the user to sign in again. Every other login
+// failure surfaces verbatim — the core retries it a minute later — and
+// a `/login` POST goes through `dispatch`, below every policy rung, so
+// nothing else re-maps it.
+const stageRefusedLogin = (rejection: Error): Error => {
   stageHeatzyWire(mockRequest, {
     login: () => {
       throw rejection
@@ -280,16 +286,32 @@ describe('the sign-in normalization', () => {
   afterEach(wireTeardown)
 
   it.each([
-    { label: '401', status: HttpStatus.Unauthorized },
+    { label: 'a 401', rejection: createServerError(HttpStatus.Unauthorized) },
     {
-      label: '400, the status Gizwits itself uses',
-      status: HttpStatus.BadRequest,
+      label: 'a 400 naming wrong credentials (9020)',
+      rejection: wrongCredentialsFailure(LOGIN_PATH),
+    },
+    {
+      label: 'a 400 naming an unknown user (9005)',
+      rejection: gizwitsFailure({
+        code: GizwitsErrorCode.userDoesNotExist,
+        message: 'user does not exist!',
+        url: LOGIN_PATH,
+      }),
+    },
+    {
+      label: 'a 400 naming an invalid user (9026)',
+      rejection: gizwitsFailure({
+        code: GizwitsErrorCode.userInvalid,
+        message: 'user invalid!',
+        url: LOGIN_PATH,
+      }),
     },
   ])(
-    'rejects authenticate() with AuthenticationError on a $label, the rejection as cause',
-    async ({ status }) => {
+    'rejects authenticate() with AuthenticationError on $label, the rejection as cause',
+    async ({ rejection }) => {
       const api = await createApi()
-      const rejection = stageRefusedLogin(status)
+      stageRefusedLogin(rejection)
 
       const signIn = api.authenticate({ password: 'bad', username: 'user' })
 
@@ -302,13 +324,122 @@ describe('the sign-in normalization', () => {
     },
   )
 
-  it('propagates an off-vocabulary /login rejection verbatim', async () => {
+  // Field report 2026-11-07: a server hiccup read as a refused credential
+  // parked the pair and told the user to sign in again over credentials
+  // a restart accepted at once.
+  it.each([
+    {
+      label: 'a 400 naming a server error (9008)',
+      rejection: serverErrorFailure(LOGIN_PATH),
+    },
+    {
+      label: 'a 400 naming a throttle (9041)',
+      rejection: gizwitsFailure({
+        code: 9041,
+        message: 'request was throttled',
+        url: LOGIN_PATH,
+      }),
+    },
+    {
+      label: 'a 400 naming a dead token (9004)',
+      rejection: tokenInvalidFailure(LOGIN_PATH),
+    },
+    {
+      label: 'an off-vocabulary 503',
+      rejection: createServerError(HttpStatus.ServiceUnavailable, LOGIN_PATH),
+    },
+  ])('propagates $label on /login verbatim', async ({ rejection }) => {
     const api = await createApi()
-    const rejection = stageRefusedLogin(HttpStatus.ServiceUnavailable)
+    stageRefusedLogin(rejection)
 
     const signIn = api.authenticate({ password: 'pw', username: 'user' })
 
     await expect(signIn).rejects.toBe(rejection)
     expect(api.isAuthenticated()).toBe(false)
+  })
+
+  // Gizwits checks a user token BEFORE the credentials and refuses a
+  // login carrying a stale one with "token invalid" (9004), however
+  // valid the credentials (measured 2026-11-07): no session rides it.
+  it('signs in without the stored user token', async () => {
+    const { settingManager } = createSettingStore({
+      expiry: Temporal.Now.instant().add({ hours: 1 }).toString(),
+      token: 'stale-token',
+    })
+    mockWire()
+    const api = await createApi({ settingManager })
+
+    await api.authenticate({ password: 'pw', username: 'user' })
+
+    const login = mockRequest.mock.calls.find(
+      ([config]) => config.url === LOGIN_PATH,
+    )?.[0]
+
+    expect(login?.headers).not.toHaveProperty('X-Gizwits-User-token')
+  })
+})
+
+// The reactive re-auth owns a 400 only when Gizwits names the TOKEN in
+// the body (9004 token invalid, 9006 token expired): any other 400 is no
+// verdict on the session, and reading every 400 as an expired token
+// cleared a session valid until January on a server hiccup (field
+// report 2026-11-07).
+// The rejection is armed AFTER the sign-in, whose enforced cycle reads
+// `/bindings` too: it answers the next registry cycle, once.
+const stageWire = (): { arm: (rejection: Error) => void } => {
+  let pending: Error | undefined
+  stageHeatzyWire(mockRequest, {
+    login: () => mockHttpResponse(buildLoginData()),
+    rest: (config) => {
+      if (pending !== undefined && config.url === BINDINGS_PATH) {
+        const rejection = pending
+        pending = undefined
+        throw rejection
+      }
+      return mockHttpResponse({ devices: [] })
+    },
+  })
+  return {
+    arm: (rejection): void => {
+      pending = rejection
+    },
+  }
+}
+
+describe('the token-failure vocabulary', () => {
+  beforeEach(wireSetup)
+
+  afterEach(wireTeardown)
+
+  it('signs in again and replays on a 400 naming an expired token (9006)', async () => {
+    const wire = stageWire()
+    const api = await createApi()
+    await api.authenticate({ password: 'pw', username: 'user' })
+    wire.arm(
+      gizwitsFailure({
+        code: GizwitsErrorCode.tokenExpired,
+        message: 'token expired!',
+        url: BINDINGS_PATH,
+      }),
+    )
+    const before = loginCalls()
+
+    await api.fetch()
+
+    expect(loginCalls()).toBe(before + 1)
+    expect(api.isAuthenticated()).toBe(true)
+  })
+
+  it('keeps the token, signing in again never, on a 400 naming a server error', async () => {
+    const wire = stageWire()
+    const api = await createApi()
+    await api.authenticate({ password: 'pw', username: 'user' })
+    wire.arm(serverErrorFailure(BINDINGS_PATH))
+    const before = loginCalls()
+
+    await api.fetch()
+
+    expect(loginCalls()).toBe(before)
+    expect(api.isAuthenticated()).toBe(true)
   })
 })
