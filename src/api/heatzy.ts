@@ -1,4 +1,5 @@
 import {
+  AuthenticationError,
   FailureStreaks,
   failureReason,
   logFailure,
@@ -21,7 +22,13 @@ import type {
 import { isModelledProduct } from '../constants.ts'
 import { setting, syncDevices } from '../decorators/index.ts'
 import { type Device, DeviceRegistry } from '../entities/index.ts'
-import { HttpClient, HttpStatus, isHttpError } from '../http/index.ts'
+import { GizwitsErrorCode, gizwitsErrorCode } from '../http/failure.ts'
+import {
+  type HttpError,
+  HttpClient,
+  HttpStatus,
+  isHttpError,
+} from '../http/index.ts'
 import { redaction } from '../observability/context.ts'
 import { isSessionExpired } from '../resilience/index.ts'
 import { Temporal } from '../temporal.ts'
@@ -45,6 +52,43 @@ const APPLICATION_ID_HEADER = 'X-Gizwits-Application-Id'
 const APPLICATION_ID = 'c70a66ff039d41b4a220e198b0fcc8b3'
 const USER_TOKEN_HEADER = 'X-Gizwits-User-token'
 const LOGIN_PATH = '/login'
+
+// The codes that mean the session's token itself is dead. Any other
+// `400` — a server error (9008), a throttle (9041), "operation in
+// process" (9073) — is no verdict on the session: reading every `400` as
+// an expired token cleared a session valid until January on a server
+// hiccup (field report 2026-11-07).
+const TOKEN_FAILURE_CODES: ReadonlySet<number> = new Set([
+  GizwitsErrorCode.tokenExpired,
+  GizwitsErrorCode.tokenInvalid,
+])
+
+// The codes that mean the credentials themselves were refused — the one
+// login failure that must park the pair and ask the user to sign in
+// again. Anything else on the login is transient, and the core retries
+// it a minute later.
+const CREDENTIAL_REFUSAL_CODES: ReadonlySet<number> = new Set([
+  GizwitsErrorCode.userDoesNotExist,
+  GizwitsErrorCode.userInvalid,
+  GizwitsErrorCode.wrongCredentials,
+])
+
+const carriesCode = (error: HttpError, codes: ReadonlySet<number>): boolean => {
+  const code = gizwitsErrorCode(error.response.data)
+  return code !== null && codes.has(code)
+}
+
+// A 401 the wire never sends is still owned, so a protocol change to
+// the standard status keeps working; a `400` is owned only when Gizwits
+// names the token in its body.
+const isTokenFailure = (error: HttpError): boolean =>
+  error.response.status === HttpStatus.Unauthorized ||
+  carriesCode(error, TOKEN_FAILURE_CODES)
+
+const isCredentialRefusal = (error: unknown): boolean =>
+  isHttpError(error) &&
+  (error.response.status === HttpStatus.Unauthorized ||
+    carriesCode(error, CREDENTIAL_REFUSAL_CODES))
 
 // Five seconds, the cadence the app ran on for years: Gizwits pushes
 // nothing, so a radiator changed from the physical device or the Heatzy
@@ -195,6 +239,7 @@ export class HeatzyAPI
       // (`doAuthenticate` below), so it is never declared twice.
       authFailureStatuses: [HttpStatus.Unauthorized, HttpStatus.BadRequest],
       defaultSyncIntervalMinutes: DEFAULT_SYNC_INTERVAL_MINUTES,
+      isAuthFailure: isTokenFailure,
       // The Gizwits-bound engine, so the core's request/response log
       // lines redact the user-token header the wire rides credentials
       // on — the base vocabulary matches keys exactly and would let
@@ -337,7 +382,12 @@ export class HeatzyAPI
   }: {
     postData: LoginCredentials
   }): Promise<LoginData> {
+    // No session rides the login: Gizwits checks a user token BEFORE the
+    // credentials and refuses a login carrying a stale one with "token
+    // invalid" (9004), however valid the credentials (measured
+    // 2026-11-07) — which is what a refresh at the token's end sent.
     const { data } = await this.dispatch<LoginData>('post', LOGIN_PATH, {
+      authenticated: false,
       data: postData,
     })
     return parseOrThrow(LoginDataSchema, data, { context: 'login' })
@@ -380,12 +430,13 @@ export class HeatzyAPI
   // One protocol sign-in round-trip. On success only the session
   // artifacts are stored here — both keys, a wholesale replacement of
   // any prior session; the core persists the credentials once this
-  // resolves. On failure every store is left untouched: the login
-  // rejection is narrowed to `AuthenticationError` where the wire
-  // means one — the core's `toAuthFailure`, reading the `[401, 400]`
-  // vocabulary handed to `super()` — and rethrown verbatim otherwise.
-  // The two-step form rather than `?? error`: the family lint refuses
-  // a thrown `unknown` that is not the caught variable itself.
+  // resolves. On failure every store is left untouched: a rejection
+  // that names the CREDENTIALS (9005/9020/9026, or a 401) becomes the
+  // shared `AuthenticationError`, which parks the pair and announces the
+  // loss; anything else is rethrown verbatim, and the core retries it a
+  // minute later. Not the core's `toAuthFailure`: the vocabulary it
+  // reads is the TOKEN one (`isTokenFailure`), and a login refusal is a
+  // different verdict.
   protected override async doAuthenticate(
     credentials: LoginCredentials,
   ): Promise<void> {
@@ -393,12 +444,10 @@ export class HeatzyAPI
     try {
       data = await this.login({ postData: credentials })
     } catch (error) {
-      const authError = this.toAuthFailure(
-        error,
-        'Heatzy rejected the credentials',
-      )
-      if (authError !== null) {
-        throw authError
+      if (isCredentialRefusal(error)) {
+        throw new AuthenticationError('Heatzy rejected the credentials', {
+          cause: error,
+        })
       }
       throw error
     }
@@ -471,8 +520,9 @@ export class HeatzyAPI
     await this.resumeSession()
   }
 
-  // Reactive refresh after an expired-token 400/401, before
-  // `AuthRetryPolicy` replays the request: the only recovery path is a
+  // Reactive refresh after a token failure (a 400 naming the token —
+  // 9004/9006 — or a 401), before `AuthRetryPolicy` replays the
+  // request: the only recovery path is a
   // best-effort re-login from persisted credentials. The rejected
   // token is cleared FIRST — the server just refused it, Gizwits
   // naming it in the 400/9004 — the dialect-specific half OPPOSITE

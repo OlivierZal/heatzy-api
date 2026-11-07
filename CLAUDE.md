@@ -46,15 +46,28 @@ Architecture, toolchain and process are aligned on the sibling
 
 ## Domain gotchas
 
-- **An expired or invalid Gizwits token is HTTP 400, not 401** (error
-  code 9004 in the body). `AuthRetryPolicy` triggers on 400 _and_ 401,
-  and the core's protected `toAuthFailure` — reading that same
-  `[401, 400]` `authFailureStatuses` the subclass hands `super()`, the
-  vocabulary's ONE spelling since 17.0.0 — maps both to
-  `AuthenticationError` on the login path. A genuinely malformed
-  request therefore pays one guarded re-login round-trip before its 400
-  propagates — the field-proven behavior of the previous Axios
-  interceptor.
+- **Gizwits answers nearly every failure with HTTP 400 — read the
+  body's `error_code`, never the status** (<https://api.gizwits.com/errors>;
+  `GizwitsErrorCode` in `src/http/failure.ts`). Since 21.3.0 three verdicts
+  hang on it. (1) The reactive re-auth: `authFailureStatuses` stays
+  `[401, 400]`, narrowed by `isAuthFailure: isTokenFailure` (api-core
+  2.4.0) to a 401 or a 400 naming the token — 9004 `token invalid!`, 9006
+  `token expired!`. (2) The sign-in: `doAuthenticate` raises
+  `AuthenticationError` only for a refusal naming the credentials — 9005
+  `user does not exist!`, 9020 `username or password error!`, 9026 `user
+invalid!`, or a 401 — and rethrows anything else verbatim, which the
+  core retries a minute later; not the core's `toAuthFailure`, whose
+  vocabulary is now the token one. (3) The login rides no session
+  (`dispatch(…, { authenticated: false })`): Gizwits checks a user token
+  BEFORE the credentials and refuses a login carrying a stale one with
+  9004, however valid they are — measured 2026-11-07 with fabricated
+  credentials (no token header: `400 / 9005`; a bogus one: `400 /
+9004`). Field report the same day: a server hiccup's 400 cleared a
+  session valid until January, the re-login met the same hiccup and was
+  read as refused credentials, the pair was parked and the owner told to
+  sign in again — a restart signed straight back in. Until 21.3.0 every
+  400 was a token verdict on a request and a credential verdict on the
+  login.
 - Wire-format types mirror the Gizwits API verbatim: snake_case and
   mixed keys (`dev_alias`, `derog_mode`, `cur_tempH`, `LOCK_C`) — do
   not rename them to satisfy style rules. The eslint overlay carries
@@ -546,11 +559,11 @@ every thrown snapshot, and `HeatzyAPI` hands it to the core through
 log lines the inherited dispatch emits — the seam this adoption caught
 missing in the unreleased core and had fixed there BEFORE adopting,
 now pinned through the real client in `heatzy-api.test.ts`), the
-subclass options (`[401, 400]` as the auth-failure statuses — spelled
-ONCE, into `super()`: the reactive re-auth rung owns the set and the
-core's protected `toAuthFailure(error, message)` consults it on the
-sign-in path, so `doAuthenticate` constructs no `AuthenticationError`
-of its own; NO `logLabel`; NO `rateLimitHours`), the twelve dialect
+subclass options (`[401, 400]` as the auth-failure statuses, narrowed
+by `isAuthFailure` to the Gizwits token codes since 21.3.0 — spelled
+ONCE, into `super()`; the sign-in classifies its own refusal by the
+credential codes, see Domain gotchas; NO `logLabel`; NO
+`rateLimitHours`), the twelve dialect
 hooks in `src/api/heatzy.ts`, the wire types, the schemas and the
 facades; the directory barrels (`errors/`, `http/`, `resilience/`,
 `decorators/`, `types/`) forward the core's names directly — the
@@ -624,7 +637,8 @@ only kernel byte that changed in the move; the flip is inert on a
 disposed instance); no log label is passed anywhere, so every line
 arrives unprefixed and the core's OPTIONAL `logLabel` stays unset here;
 the auth-failure vocabulary is `[401, 400]`, each status pinned by its
-own row; and the reactive `reauthenticate` hook clears the refused
+own row (the 400 one carrying the 9004 body; a 400 naming no token is
+pinned in the auth wiring suite); and the reactive `reauthenticate` hook clears the refused
 token FIRST, pinned as the dialect-specific half opposite melcloud's
 non-clearing Classic. The kernel also closes with three DECLARED
 ABSENCES — the login-throttle window, the rate-limit gate, and the

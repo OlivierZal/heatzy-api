@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [21.3.0] - 2026-11-07
+
+### Fixed
+
+- **A Gizwits server hiccup no longer signs the account out, nor asks the user to sign in again.** Gizwits answers nearly every failure with HTTP 400, and the SDK branched on the status: on a request every 400 was read as an expired token (the valid session was cleared and a re-login spent), and on the login every 400 was read as refused credentials (the pair was parked and `onAuthenticationLost` fired). Both verdicts now read the body's `error_code`: the reactive re-auth owns a 401 or a 400 naming the token (9004 `token invalid!`, 9006 `token expired!`), and a login refusal is a 401 or a 400 naming the credentials (9005 `user does not exist!`, 9020 `username or password error!`, 9026 `user invalid!`); any other login failure surfaces verbatim and is retried a minute later by `@olivierzal/api-core` 2.4.0, which also announces a loss only when it is definitive. Field report 2026-11-07: a restart signed straight back in with the stored credentials the hiccup had declared refused.
+- **The login rides no session.** It was sent with the stored user token attached, and Gizwits checks the token BEFORE the credentials: a stale one turns any login into `400 / 9004 "token invalid!"`, however valid the credentials (measured with fabricated ones). The login now dispatches with `authenticated: false`.
+
+### Changed
+
+- The exact `@olivierzal/api-core` pin advances from 2.3.1 to 2.4.0.
+
 ## [21.2.0] - 2026-11-03
 
 ### Added
@@ -379,6 +390,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[21.3.0]: https://github.com/OlivierZal/heatzy-api/compare/v21.2.0...v21.3.0
 [21.2.0]: https://github.com/OlivierZal/heatzy-api/compare/v21.1.0...v21.2.0
 [21.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v21.0.0...v21.1.0
 [21.0.0]: https://github.com/OlivierZal/heatzy-api/compare/v20.4.0...v21.0.0

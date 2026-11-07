@@ -4,6 +4,8 @@ import type {
   LoginData,
 } from '../src/types/index.ts'
 import { DerogationMode, Mode, Switch } from '../src/constants.ts'
+import { GizwitsErrorCode } from '../src/http/failure.ts'
+import { HttpError, HttpStatus } from '../src/http/index.ts'
 
 /**
  * One known `product_key` hash per product generation.
@@ -133,3 +135,64 @@ export const fieldV1Payload = { mode: '舒适' } as const
 export const buildLoginData = (
   expireAt: number = Math.trunc(Date.now() / 1000) + 3600,
 ): LoginData => ({ expire_at: expireAt, token: 'user-token' })
+
+/**
+ * A failed Gizwits response as the wire answers it: HTTP `400` for
+ * nearly every failure, the body naming the code
+ * (https://api.gizwits.com/errors) — which is what the SDK branches on.
+ * @param root0 - The failure.
+ * @param root0.code - The `error_code` the body carries.
+ * @param root0.message - The `error_message` the body carries.
+ * @param root0.url - The URL the call targeted.
+ * @returns The rejection the transport throws.
+ */
+export const gizwitsFailure = ({
+  code,
+  message,
+  url,
+}: {
+  code: number
+  message: string
+  url: string
+}): HttpError =>
+  new HttpError(message, {
+    config: { method: 'post', url },
+    response: {
+      data: { detail_message: null, error_code: code, error_message: message },
+      headers: {},
+      status: HttpStatus.BadRequest,
+    },
+  })
+
+/**
+ * The refusal of the credentials themselves (9020).
+ * @param url - The URL the call targeted.
+ * @returns The rejection the transport throws.
+ */
+export const wrongCredentialsFailure = (url: string): HttpError =>
+  gizwitsFailure({
+    code: GizwitsErrorCode.wrongCredentials,
+    message: 'username or password error!',
+    url,
+  })
+
+/**
+ * A dead user token (9004).
+ * @param url - The URL the call targeted.
+ * @returns The rejection the transport throws.
+ */
+export const tokenInvalidFailure = (url: string): HttpError =>
+  gizwitsFailure({
+    code: GizwitsErrorCode.tokenInvalid,
+    message: 'token invalid!',
+    url,
+  })
+
+/**
+ * A server hiccup Gizwits words as a `400` too (9008): no verdict on the
+ * session nor on the credentials.
+ * @param url - The URL the call targeted.
+ * @returns The rejection the transport throws.
+ */
+export const serverErrorFailure = (url: string): HttpError =>
+  gizwitsFailure({ code: 9008, message: 'server error', url })
