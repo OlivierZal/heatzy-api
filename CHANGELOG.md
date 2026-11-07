@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [21.3.1] - 2026-11-07
+
+### Changed
+
+- **The exact `@olivierzal/api-core` pin advances from 2.4.0 to 2.4.1**, a documentation release: the `onAuthenticationLost` and `onAuthenticationRestored` docs, which this package renders through its `LifecycleEvents` alias, now describe the events as 2.4.0 fires them — a loss only when it is definitive (the stored credential refused, or a persisted session dead with no credential to sign back in with) and nothing on a transient failure, which the core retries every minute.
+- **The session-lifecycle kernel pins the sync-cycle epilogue clause for clause with the melcloud twin.** A cycle ending on a refused credential disarms the heartbeat and reports the loss once; a cycle ending unauthenticated over credentials nobody refused never goes dormant — its failed sign-in is retried a minute later and re-arms the heartbeat, announcing neither a loss nor a recovery.
+
 ## [21.3.0] - 2026-11-07
 
 ### Fixed
@@ -390,6 +397,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[21.3.1]: https://github.com/OlivierZal/heatzy-api/compare/v21.3.0...v21.3.1
 [21.3.0]: https://github.com/OlivierZal/heatzy-api/compare/v21.2.0...v21.3.0
 [21.2.0]: https://github.com/OlivierZal/heatzy-api/compare/v21.1.0...v21.2.0
 [21.1.0]: https://github.com/OlivierZal/heatzy-api/compare/v21.0.0...v21.1.0
