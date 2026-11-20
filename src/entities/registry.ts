@@ -15,7 +15,8 @@ import { Device, syncDevice } from './device.ts'
 export class DeviceRegistry {
   public readonly devices = {
     /**
-     * Returns the device with the given id, or `undefined` when no such device is registered.
+     * Returns the device with the given id, or `undefined` when no such device
+     * is registered.
      * @param id - Device identifier (wire `did`).
      * @returns The device, or `undefined`.
      */

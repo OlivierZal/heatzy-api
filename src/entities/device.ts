@@ -72,7 +72,8 @@ export class Device {
   public readonly id: string
 
   /**
-   * Wire `dev_alias` — the user-facing device name; tracks renames across syncs.
+   * Wire `dev_alias` — the user-facing device name; tracks renames across
+   * syncs.
    */
   public name: string
 

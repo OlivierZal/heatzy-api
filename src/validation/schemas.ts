@@ -23,15 +23,14 @@ import { ValidationError } from '../errors/index.ts'
 // Only `mode` stays a closed set: it is the write vocabulary, and a
 // label this SDK cannot map is a real protocol change.
 
-// A V1 answers its Chinese label; every later generation, the Latin
-// one. Measured against the products' own datapoint declarations
-// (Gizwits `/app/datapoint`, the twelve modelled `product_key`s —
-// CLAUDE.md records the reading): `mode` is an enum of `cft, eco, fro, stop` on the
-// Glow family, the same plus `cft1, cft2` on every Pilote and the Pro,
-// and the four Chinese labels on the V1. NO product declares `off` —
-// the vendor's 2020 API document does, for the same index its 2018 one
-// spells `stop`, so the alias is insurance against a published
-// spelling, not against a declaration.
+// A V1 answers its Chinese label; every later generation, the Latin one.
+// Measured against the products' own datapoint declarations (Gizwits
+// `/app/datapoint`, the twelve modelled `product_key`s — CLAUDE.md records the
+// reading): `mode` is an enum of `cft, eco, fro, stop` on the Glow family, the
+// same plus `cft1, cft2` on every Pilote and the Pro, and the four Chinese
+// labels on the V1. NO product declares `off` — the vendor's 2020 API document
+// does, for the same index its 2018 one spells `stop`, so the alias is
+// insurance against a published spelling, not against a declaration.
 const ModeSchema = z.preprocess(
   (value) =>
     typeof value === 'string' ? (modeLabels.get(value) ?? value) : value,
