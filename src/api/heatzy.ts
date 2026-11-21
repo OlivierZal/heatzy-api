@@ -232,11 +232,11 @@ export class HeatzyAPI
     const { locale, password, timezone, transport, username } = config
     super(config, {
       // Gizwits reports an invalid or expired user token as HTTP 400
-      // (error code 9004 in the body), never 401 — both statuses arm
-      // the reactive re-auth, mirroring the field-proven Axios
-      // interceptor. The vocabulary's ONE spelling: the core's
-      // `toAuthFailure` reads this same set on the sign-in path
-      // (`doAuthenticate` below), so it is never declared twice.
+      // (error code 9004 or 9006 in the body), never 401 — both
+      // statuses arm the reactive re-auth, mirroring the field-proven
+      // Axios interceptor, and `isAuthFailure` below narrows the 400 to
+      // those token codes. The sign-in reads neither: `doAuthenticate`
+      // classifies its own refusal by the credential codes.
       authFailureStatuses: [HttpStatus.Unauthorized, HttpStatus.BadRequest],
       defaultSyncIntervalMinutes: DEFAULT_SYNC_INTERVAL_MINUTES,
       isAuthFailure: isTokenFailure,
@@ -308,8 +308,8 @@ export class HeatzyAPI
 
   /**
    * Read the live attribute payload of a single device, Zod-validated.
-   * @param root0 - Destructured options.
-   * @param root0.id - Device identifier (wire `did`).
+   * @param options - Which device to read.
+   * @param options.id - Device identifier (wire `did`).
    * @returns The live attributes.
    */
   public async getValues({ id }: { id: string }): Promise<Attributes> {
@@ -373,8 +373,8 @@ export class HeatzyAPI
    * Low-level POST to `/login`. Prefer {@link authenticate}, which
    * adds the login backoff, persists the resulting token/expiry, and
    * is triggered automatically on an expired token.
-   * @param root0 - Destructured options.
-   * @param root0.postData - Login credentials (the verbatim wire body).
+   * @param options - The sign-in request.
+   * @param options.postData - Login credentials (the verbatim wire body).
    * @returns The raw login payload, Zod-validated.
    */
   public async login({
@@ -396,9 +396,9 @@ export class HeatzyAPI
   /**
    * Send a control payload to a single device. The server's response
    * body is empty by contract and is not consumed.
-   * @param root0 - Destructured options.
-   * @param root0.id - Device identifier (wire `did`).
-   * @param root0.postData - Named attributes, or the V1 `raw` triplet.
+   * @param options - The write: the device addressed and its body.
+   * @param options.id - Device identifier (wire `did`).
+   * @param options.postData - Named attributes, or the V1 `raw` triplet.
    */
   public async updateValues({
     id,

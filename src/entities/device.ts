@@ -5,7 +5,7 @@ import type {
 } from '../types/index.ts'
 import { type Product, DerogationMode, getProduct, Mode } from '../constants.ts'
 import { Temporal } from '../temporal.ts'
-import { isKeyOf, omitUndefined } from '../utils.ts'
+import { createKeyGuard, omitUndefined } from '../utils.ts'
 
 /**
  * The last non-stop heating mode — what "back on" restores to.
@@ -19,7 +19,7 @@ const PRESENCE_END_MINUTES = {
   [Mode.comfortMinus2]: 30,
 } as const
 
-const isPresenceCountdownMode = isKeyOf(PRESENCE_END_MINUTES)
+const isPresenceCountdownMode = createKeyGuard(PRESENCE_END_MINUTES)
 
 // The wire's own read types: a transition can carry a `cur_mode` or a
 // `derog_mode` this SDK does not model, and must survive it.

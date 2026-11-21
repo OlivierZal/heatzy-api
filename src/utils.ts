@@ -10,15 +10,15 @@ import {
 const BYTE_MAX = 255
 
 /**
- * Curried own-key type guard: `isKeyOf(record)(key)` narrows `key` to
- * `keyof typeof record`. Prototype-safe (`Object.hasOwn`), so inherited
- * members like `toString` never pass.
+ * Factory for an own-key type guard: `createKeyGuard(record)(key)`
+ * narrows `key` to `keyof typeof record`. Prototype-safe
+ * (`Object.hasOwn`), so inherited members like `toString` never pass.
  * @template T - Object type whose own keys are tested.
  * @param record - The record whose own keys define the guard.
  * @returns A type guard checking own-key membership on `record`.
  * @category Utilities
  */
-export const isKeyOf =
+export const createKeyGuard =
   <T extends object>(record: T) =>
   (key: PropertyKey): key is keyof T =>
     Object.hasOwn(record, key)

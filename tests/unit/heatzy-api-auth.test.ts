@@ -52,8 +52,9 @@ import {
 // this file pins is the Gizwits half the hooks supply: the verbatim
 // `/login` exchange and its `expire_at` epoch-seconds conversion, the
 // user-token header, the persisted-key vocabulary, the RegistrySyncError
-// cause this dialect's cycle produces, and the `[401, 400]` vocabulary
-// the core's `toAuthFailure` reads on the sign-in path.
+// cause this dialect's cycle produces, the sign-in's own reading of a
+// refusal (the credential codes in the body, never the status) and the
+// token codes that narrow the reactive re-auth's `[401, 400]`.
 
 const SETTING_KEYS = [
   'expiry',

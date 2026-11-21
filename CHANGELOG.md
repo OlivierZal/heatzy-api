@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Documentation only: the doc comments follow the tables of `@olivierzal/configs` 8.11.0.** `HeatzyAPI.getValues`, `login` and `updateValues` document their destructured parameter as `options`, where the published pages read `root0`; the Glow and Pro overrides of `isLocked` and `isOn` say which register they read, as each product's public datapoint declaration has it (read 2026-11-21: the Pro declares `lock_switch` and no `on_off`, the Glow `LOCK_C` and `on_off`); the documented generics name their type parameters. Three comments still described the sign-in as it was before 21.3.0, through the core's `toAuthFailure` over the `[401, 400]` statuses: they say what `doAuthenticate` does since, which raises `AuthenticationError` itself, for a refusal naming the credentials and for nothing else. No behaviour, signature or export changes.
+
 ## [21.3.2] - 2026-11-21
 
 ### Changed
@@ -403,6 +409,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[Unreleased]: https://github.com/OlivierZal/heatzy-api/compare/v21.3.2...HEAD
 [21.3.2]: https://github.com/OlivierZal/heatzy-api/compare/v21.3.1...v21.3.2
 [21.3.1]: https://github.com/OlivierZal/heatzy-api/compare/v21.3.0...v21.3.1
 [21.3.0]: https://github.com/OlivierZal/heatzy-api/compare/v21.2.0...v21.3.0

@@ -1579,30 +1579,33 @@ describeSessionLifecycleContract('HeatzyAPI', heatzyDriver)
 //    fallback window, the announced one, and the cap on an absurd one).
 //    No throttle type exists here to carry a window, and none can be
 //    constructed. Decide it by reading:
-//      - The sign-in normalization — `src/` constructs NO
-//        `AuthenticationError` of its own since 17.0.0 (`grep -rn 'new
-//        AuthenticationError' src/` returns nothing): `doAuthenticate`
-//        throws what the core's `toAuthFailure(error, message)` answers,
-//        and that helper's whole body is `isAuthFailure(error) ? new
-//        AuthenticationError(message, { cause }) : null` over the
-//        `[401, 400]` `authFailureStatuses` handed to `super()` — one
-//        type, no window argument, no throttle branch — and `grep -rni
-//        throttl src/` hits only the doc comment of
-//        `src/errors/authentication.ts`, which names the core subclass
-//        this repo deliberately does not re-export.
-//      - `#armLoginBackoff` — the ONLY writer of the
-//        gate: `Temporal.Now.instant().epochMilliseconds +
-//        LOGIN_BACKOFF_FAILURE_MS`, a bare constant sum. Nothing reads a
-//        server-announced duration, so there is no window to honour, no
-//        default to fall back to, and no cap to enforce.
+//      - The sign-in normalization — `doAuthenticate` holds the one
+//        `new AuthenticationError` of `src/` (`grep -rn 'new
+//        AuthenticationError' src/` returns that line alone), raised
+//        for a refusal naming the CREDENTIALS and for nothing else
+//        (`isCredentialRefusal`: a 401, or a 400 carrying 9005, 9020 or
+//        9026). Every other login failure is rethrown verbatim, a
+//        throttle (9041) included — the auth wiring suite pins it — and
+//        the core retries it a minute later: one type, no window
+//        argument, no throttle branch. `grep -rni throttl src/` hits
+//        one comment, the list of the 400s that are no verdict on the
+//        session (`src/api/heatzy.ts`); the core's throttle subclass is
+//        imported nowhere.
+//      - The core's `#armLoginBackoff` — the writer of the gate after
+//        a REJECTED sign-in: `LOGIN_BACKOFF_FAILURE_MS`, a bare
+//        constant, for an `AuthenticationError`, and a server-announced
+//        duration only for the throttle subclass nothing constructs
+//        here. So there is no window to honour, no default to fall back
+//        to, and no cap to enforce.
 //    The same two expressions also decide the missing throttle rung of
 //    the refusal RECORD (melcloud excludes its
 //    `AuthenticationThrottledError` from the recorded verdict, a
 //    lockout saying nothing about the pair): with one error type and
-//    no window, every `AuthenticationError` here IS definitive, so
-//    `#reportResumeFailure`'s guard needs no exclusion.
-//    Should Gizwits ever surface a throttle code, the three rows — and
-//    the exclusion — come back with it.
+//    no window, every `AuthenticationError` here IS definitive, and the
+//    throttle exclusion of the core's `#settleRefusedResume` is never
+//    taken.
+//    Should a Gizwits throttle ever be given a window of its own, the
+//    three rows come back with it.
 //
 // 2. THE RATE-LIMIT GATE (melcloud's 429 clause: arm on `Retry-After`,
 //    refuse the next request locally, reopen on the announced window).

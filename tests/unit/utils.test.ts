@@ -1,21 +1,21 @@
 import { describe, expect, it } from 'vitest'
 
 import { Mode, modeToModeV1, Product } from '../../src/constants.ts'
-import { getTargetTemperature, isKeyOf } from '../../src/utils.ts'
+import { createKeyGuard, getTargetTemperature } from '../../src/utils.ts'
 
-describe(isKeyOf, () => {
+describe(createKeyGuard, () => {
   it('narrows an own key', () => {
     const key: PropertyKey = 'cft'
 
-    expect(isKeyOf(modeToModeV1)(key)).toBe(true)
+    expect(createKeyGuard(modeToModeV1)(key)).toBe(true)
   })
 
   it('rejects a missing key', () => {
-    expect(isKeyOf(modeToModeV1)('cft1')).toBe(false)
+    expect(createKeyGuard(modeToModeV1)('cft1')).toBe(false)
   })
 
   it('rejects the inherited toString member', () => {
-    expect(isKeyOf(modeToModeV1)('toString')).toBe(false)
+    expect(createKeyGuard(modeToModeV1)('toString')).toBe(false)
   })
 })
 

@@ -59,39 +59,6 @@ interface Attempt {
   readonly write: (values: PostAttributes) => Promise<ControlAttributes>
 }
 
-/**
- * Runs the no-op write contract against one product generation.
- * @param name - Implementation label used in the test titles.
- * @param attempt - Builds a fresh facade with its wire-call counter.
- */
-const describeNoChangesContract = (
-  name: string,
-  attempt: () => Attempt,
-): void => {
-  describe(`setValues — ${name}`, () => {
-    it.each(CASES)(
-      'sends nothing to the wire for $label',
-      async ({ values }) => {
-        const { wireCalls, write } = attempt()
-
-        await write(values)
-
-        expect(wireCalls()).toBe(0)
-      },
-    )
-
-    // Without this clause the one above would also pass on a facade that
-    // refuses every write, including the ones it should send.
-    it('sends a real change to the wire', async () => {
-      const { wireCalls, write } = attempt()
-
-      await write({ mode: Mode.eco })
-
-      expect(wireCalls()).toBe(1)
-    })
-  })
-}
-
 // The facade resolves its device per access, so every generation seats
 // its entity into the adapter's lookup — the registry a real client
 // would hold.
@@ -145,8 +112,10 @@ const GENERATIONS = [
   },
 ] as const
 
-for (const { build, name } of GENERATIONS) {
-  describeNoChangesContract(name, () => {
+// The no-op write contract, run against each product generation.
+describe.each(GENERATIONS)('setValues — $name', ({ build }) => {
+  // A fresh facade with its wire-call counter.
+  const attempt = (): Attempt => {
     const api = createMockAdapter()
     const facade = build(api)
     return {
@@ -154,5 +123,23 @@ for (const { build, name } of GENERATIONS) {
       write: async (values): Promise<ControlAttributes> =>
         facade.setValues(values),
     }
+  }
+
+  it.each(CASES)('sends nothing to the wire for $label', async ({ values }) => {
+    const { wireCalls, write } = attempt()
+
+    await write(values)
+
+    expect(wireCalls()).toBe(0)
   })
-}
+
+  // Without this clause the one above would also pass on a facade that
+  // refuses every write, including the ones it should send.
+  it('sends a real change to the wire', async () => {
+    const { wireCalls, write } = attempt()
+
+    await write({ mode: Mode.eco })
+
+    expect(wireCalls()).toBe(1)
+  })
+})
