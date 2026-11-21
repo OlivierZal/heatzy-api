@@ -55,10 +55,22 @@ export class DeviceProFacade extends DeviceGlowFacade {
     return Boolean(this.getValue('window_switch'))
   }
 
+  /**
+   * Whether the physical controls are locked. The Pro holds its child
+   * lock in `lock_switch`, the register of the V2 and V4 generations,
+   * read here again in place of the Glow family's `LOCK_C`.
+   * @returns `true` when the child lock is on.
+   */
   public override get isLocked(): boolean {
     return Boolean(this.getValue('lock_switch'))
   }
 
+  /**
+   * Whether the device is heating (mode is not stop). The Pro has no
+   * on/off switch of its own, so the mode is read here again in place
+   * of the Glow family's `on_off`.
+   * @returns `true` while any heating mode is active.
+   */
   public override get isOn(): boolean {
     return this.mode !== Mode.stop
   }

@@ -14,6 +14,10 @@ interface HasUpdate {
  * into the host's in-memory model **before** returning it — so a
  * mutation echo (`setValues`) or a fresh read (`values`) immediately
  * refreshes the registry entity without waiting for the next sync.
+ * @template TArgs - Argument list of the decorated method, passed
+ * through unchanged.
+ * @template TResult - The (possibly partial) attribute payload the
+ * decorated method resolves to.
  * @param target - The decorated method; must resolve to a (possibly
  * partial) attribute payload.
  * @param _context - TC39 decoration context; pins the decorator kind

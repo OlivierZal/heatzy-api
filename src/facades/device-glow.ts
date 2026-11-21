@@ -34,10 +34,22 @@ export class DeviceGlowFacade extends DeviceV2Facade {
     return this.getTargetTemperature(Mode.eco)
   }
 
+  /**
+   * Whether the physical controls are locked. The Glow family holds its
+   * child lock in a register of its own (wire `LOCK_C`), read here in
+   * place of the `lock_switch` of the other generations.
+   * @returns `true` when the child lock is on.
+   */
   public override get isLocked(): boolean {
     return Boolean(this.getValue('LOCK_C'))
   }
 
+  /**
+   * Whether the device is switched on. The Glow family has a dedicated
+   * on/off switch (wire `on_off`), read here in place of the mode: the
+   * mode is a separate register and is not consulted.
+   * @returns `true` while the switch is on.
+   */
   public override get isOn(): boolean {
     return Boolean(this.getValue('on_off'))
   }

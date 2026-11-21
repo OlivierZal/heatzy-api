@@ -15,14 +15,14 @@ import {
 } from '../constants.ts'
 import { syncDevices, updateDevice } from '../decorators/index.ts'
 import { AttributeNotFoundError, EntityNotFoundError } from '../errors/index.ts'
-import { isKeyOf, omitUndefined } from '../utils.ts'
+import { createKeyGuard, omitUndefined } from '../utils.ts'
 
 // `null` is a value here: a read the wire answers with `null` (a
 // Glow-family `cur_mode`) is returned, only an absent key throws.
 const isDefined = <T>(value: T): value is Exclude<T, undefined> =>
   value !== undefined
 
-const isModeV1 = isKeyOf(modeToModeV1)
+const isModeV1 = createKeyGuard(modeToModeV1)
 
 /**
  * Behavioral wrapper around a registry {@link Device} for first-generation

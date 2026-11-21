@@ -19,6 +19,7 @@ const config = {
       'Entities',
       'Errors',
       'Configuration',
+      'Constants',
       'Decorators',
       'HTTP',
       'Types',

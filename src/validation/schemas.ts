@@ -170,6 +170,7 @@ export const describeRefusedPaths = (error: z.ZodError): string =>
  * mismatch. The message names each failing path once — and, when the caller
  * opts in, the primitive value received there — while the full issue
  * list stays in the ZodError `cause`, so a logged error prints it once.
+ * @template T - Type the schema parses to, and so the type returned.
  * @param schema - Zod schema to validate against.
  * @param data - Untrusted data from an upstream API response.
  * @param options - Parsing options.
