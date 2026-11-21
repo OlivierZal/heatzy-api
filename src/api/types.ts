@@ -50,14 +50,11 @@ export interface HeatzyAPIAdapter {
   /**
    * Read the live attribute payload of a single device.
    */
-  readonly getValues: ({ id }: { id: string }) => Promise<Attributes>
+  readonly getValues: (options: { id: string }) => Promise<Attributes>
   /**
    * Send a control payload to a single device.
    */
-  readonly updateValues: ({
-    id,
-    postData,
-  }: {
+  readonly updateValues: (options: {
     id: string
     postData: DevicePostDataAny
   }) => Promise<void>
