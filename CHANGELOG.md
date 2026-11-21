@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [21.3.2] - 2026-11-21
+
+### Changed
+
+- **The exact `@olivierzal/api-core` pin advances from 2.4.1 to 2.4.2.** The line a retried read writes names what failed, as `failureCauseChain` spells it everywhere else, and prints its delay in whole milliseconds: `Transient failure on /devices (HttpError: Request failed with status code 502): retry 1 in 1187 ms`, where it read `Transient server error on <url>: retry 1 in 1234.5678 ms` whatever made the read transient, a DNS failure included. Log wording only: what is retried and how often are unchanged.
+
 ## [21.3.1] - 2026-11-07
 
 ### Changed
@@ -397,6 +403,7 @@ Full rewrite aligning the library on the `melcloud-api` architecture, toolchain 
 - Auto-retry of transient 502/503/504 on GET with exponential backoff, observable via `onRequestRetry`.
 - 100% test coverage (branches, functions, lines, statements), enforced in CI.
 
+[21.3.2]: https://github.com/OlivierZal/heatzy-api/compare/v21.3.1...v21.3.2
 [21.3.1]: https://github.com/OlivierZal/heatzy-api/compare/v21.3.0...v21.3.1
 [21.3.0]: https://github.com/OlivierZal/heatzy-api/compare/v21.2.0...v21.3.0
 [21.2.0]: https://github.com/OlivierZal/heatzy-api/compare/v21.1.0...v21.2.0
