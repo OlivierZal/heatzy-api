@@ -1,5 +1,6 @@
 import { HttpClient as CoreHttpClient } from '@olivierzal/api-core'
 import {
+  cast,
   createLogger,
   createServerError,
   createSettingStore,
@@ -1422,7 +1423,7 @@ const describeSessionLifecycleContract = (
       const { api, deviceCount } = await driver.create({
         abortSignal: AbortSignal.abort(),
         settingManager,
-        transport: client,
+        transport: cast(client),
       })
 
       await api.fetch()
