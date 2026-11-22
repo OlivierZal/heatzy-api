@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Documentation only: `Mode` says which products declare `cft1` and `cft2`.** Its comment read that the two "do not exist on V1 and V2 products". The products' own declarations, re-read on 2026-11-22, list them on every Pilote from the second generation, on the Pro and on the Onyx, and not on the first-generation Pilote, the Glow or the Shine. No value and no type changes.
 - `HeatzyAPIAdapter` names the parameter of its two function-typed members that destructured it, `getValues` and `updateValues` (`options`): the published docs read `__namedParameters` in its place. The type is the same.
 - **Documentation only: the doc comments follow the tables of `@olivierzal/configs` 8.11.0.** `HeatzyAPI.getValues`, `login` and `updateValues` document their destructured parameter as `options`, where the published pages read `root0`; the Glow and Pro overrides of `isLocked` and `isOn` say which register they read, as each product's public datapoint declaration has it (read 2026-11-21: the Pro declares `lock_switch` and no `on_off`, the Glow `LOCK_C` and `on_off`); the documented generics name their type parameters. Three comments still described the sign-in as it was before 21.3.0, through the core's `toAuthFailure` over the `[401, 400]` statuses: they say what `doAuthenticate` does since, which raises `AuthenticationError` itself, for a refusal naming the credentials and for nothing else. No behaviour, signature or export changes.
 
