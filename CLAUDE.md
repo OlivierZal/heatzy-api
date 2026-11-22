@@ -199,10 +199,16 @@ invalid!`, or a 401 — and rethrows anything else verbatim, which the
   widening any range; the twelve modelled keys were measured this way
   and the results are the reason `mode` keeps its closed set while
   every read register does not: `mode` is `enum [cft, eco, fro, stop]`
-  on the Glow family, the same plus `cft1, cft2` on every Pilote and
-  the Pro, the four Chinese labels on the V1 — and `off` is declared
-  NOWHERE (the 2020 vendor document publishes it; the alias is
-  insurance against a spelling, not a declaration). `cur_mode` is
+  on the Glow and the Shine, the same plus `cft1, cft2` on the Onyx, on
+  every Pilote from the second generation and on the Pro, the four
+  Chinese labels on the V1 (the twelve keys re-read 2026-11-22: the
+  Onyx declares the two, which the first reading had left with the Glow
+  family) — and `off` is declared NOWHERE (the 2020 vendor document
+  publishes it; the alias is insurance against a spelling, not a
+  declaration). A declaration says what the wire accepts, not what a
+  radiator does with it: `Mode` stays one closed set for every product
+  here, and which modes a host offers per product is the host's choice.
+  `cur_mode` is
   `uint8 0..10` on the Glow family and an enum on the Pro; `com_temp`
   is `0..255` there and `0..100` on the Pro; `derog_mode` is `0..5` on
   the Glow family and the Pro but `0..2` on every Pilote; the switches

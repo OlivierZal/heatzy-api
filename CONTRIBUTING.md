@@ -42,7 +42,7 @@ The vitest doubles the SDK suites share (`cast`, `defined`, `mock`, `createLogge
 
 - Commit messages: short, imperative, present tense (`Add HomeFacade error mapping`). No conventional-commits prefix is required.
 - Keep PRs focused — a single concern per PR makes review and bisecting easier.
-- Describe user-visible changes in [`CHANGELOG.md`](CHANGELOG.md) under a versioned `## [x.y.z] - YYYY-MM-DD` section: the changelog carries no `[Unreleased]` heading — a section is written together with the version bump it ships in, and the maintainer cuts the release from it.
+- Describe user-visible changes in [`CHANGELOG.md`](CHANGELOG.md) under the `## [Unreleased]` heading; a release moves them under its versioned `## [x.y.z] - YYYY-MM-DD` section, and the maintainer cuts the release from it.
 - Breaking changes: call them out explicitly in the PR description and the changelog entry.
 
 ## Releases
