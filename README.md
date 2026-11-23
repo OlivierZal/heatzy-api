@@ -67,6 +67,23 @@ for (const facade of facades) {
 await facades[0]?.setValues({ mode: Mode.eco })
 ```
 
+### Options
+
+`create()` takes these options, all optional:
+
+| Option                            | Default                             | What it does                                                                                                         |
+| --------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `username`, `password`            | none                                | The account to sign in with. Without them, `create()` restores a stored session, or waits for `authenticate()`.      |
+| `settingManager`                  | none: everything stays in memory    | The store that keeps the session and the credentials across restarts (see "Keep the session across restarts").       |
+| `shouldResumeSessionInBackground` | `false`                             | `true` makes `create()` return at once and sign in in the background: `isAuthenticated()` can be `false` until then. |
+| `syncIntervalMinutes`             | 5 seconds                           | The minutes between two automatic refreshes of the devices (`0.5` for 30 seconds), or `false` for none.              |
+| `timezone`                        | the host's time zone                | The IANA time zone of the derogation end dates.                                                                      |
+| `locale`                          | the runtime's locale                | The BCP 47 locale `derogationEndString` is written in.                                                               |
+| `transport`                       | a built-in client, 30 s per request | `{ timeoutMs }`, or an `HttpClient` of your own (see "Handle failures").                                             |
+| `abortSignal`                     | none                                | Cancels the client's requests when it aborts (see "Refresh and shut down").                                          |
+| `logger`                          | `console`                           | Where the client logs (see "Logs and events").                                                                       |
+| `events`                          | none                                | Callbacks around requests, refreshes and the session (see "Logs and events").                                        |
+
 ## Usage
 
 ### Sign in
@@ -223,11 +240,16 @@ Besides the two errors of `authenticate()`, a call can throw the four below. All
 
 A read is retried up to 4 times, after about 1, 2, 4 and 8 seconds, when Heatzy answers 500, 502, 503 or 504, when the connection fails or when the request times out. A write is never retried on such a failure, and a request you abort is never retried at all. Each request times out after 30 seconds: the `transport: { timeoutMs }` option changes that, and `0` disables the timeout (not recommended).
 
-A device that cannot be read never prevents the sign-in or hides the other devices. If its product is unknown to the package, it is left out and named in the log. If its state cannot be read, it keeps its last known state, or stays out of `api.registry` when it was never read, and is read again at the next refresh. `fetch()` returns the devices it listed, so one whose `did` is unknown to `api.getDeviceById()` has not been read yet. `authenticate()` and a refresh fail as a whole only when the device list itself cannot be read.
+A device whose product is unknown to the package is left out and named in the log. One whose state cannot be read keeps its last known state, or stays out of `api.registry` when it was never read, and is read again at the next refresh. `fetch()` returns the devices it listed, so one whose `did` (Heatzy's device id) is unknown to `api.getDeviceById()` has not been read yet. `authenticate()` and a refresh fail as a whole only when the device list itself cannot be read.
 
 ### Logs and events
 
-The client writes to the `logger` option, a `Logger` (an object with `log` and `error`) that defaults to `console`: one `log` line per request and per response, in which passwords, usernames, tokens and device names are replaced by `******` and a body over 4 KiB is left out. That is many lines at the default pace, so pass your own `logger` to filter them. A failure that repeats is logged when it starts, when its reason changes, at most every five minutes while it lasts, and when it ends. `logFailure(logger, label, error)` writes your own failures the way the client writes its own: one line naming the causes for an expected failure, the error with its stack for anything else (`isKnownFailure()` and `failureCauseChain()` are its two halves).
+The client writes to the `logger` option, a `Logger` (an object with `log` and `error`) that defaults to `console`:
+
+- one `log` line per request and per response, which is many lines at the default pace: pass your own `logger` to filter them;
+- in those lines, passwords, usernames, tokens and device names read `******`, and a body over 4 KiB is left out;
+- a failure that repeats is logged when it starts, when its reason changes, at most every 5 minutes while it lasts, and when it ends;
+- `logFailure(logger, label, error)` writes your own failures the way the client writes its own: one line naming the causes for an expected failure, the error with its stack for anything else.
 
 The `events` option takes seven optional callbacks: `onSyncComplete`, `onAuthenticationLost`, `onAuthenticationRestored`, and around each read and write `onRequestStart`, `onRequestComplete`, `onRequestRetry` and `onRequestError`, which fires once the retries are spent, even for a failure the log no longer repeats. A callback that throws is caught and logged.
 
