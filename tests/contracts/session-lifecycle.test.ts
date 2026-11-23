@@ -1307,6 +1307,33 @@ const describeSessionLifecycleContract = (
       expect(standingSessionKeys(driver, settingManager)).toStrictEqual([])
     })
 
+    // A stored token and nothing to sign back in with: the session the
+    // server refuses is gone for good, and the host is told. The
+    // refused token is cleared first (the clause above), which used to
+    // leave the cycle's epilogue reading a client that had never signed
+    // in: silent, and disarmed for good (api-core 2.4.3 announces it
+    // from the reactive recovery itself).
+    it('announces a session the server refuses when no credentials are stored', async () => {
+      const onAuthenticationLost =
+        vi.fn<NonNullable<LifecycleEvents['onAuthenticationLost']>>()
+      const { settingManager } = createSettingStore(driver.persistedSession())
+      driver.stage({ wire: 'ok' })
+      const { api } = await driver.create({
+        events: { onAuthenticationLost },
+        settingManager,
+      })
+      driver.stage({
+        authFailureStatus: HttpStatus.BadRequest,
+        wire: 'unauthorized-once',
+      })
+
+      await expect(api.fetch()).resolves.toStrictEqual([])
+
+      expect(api.isAuthenticated()).toBe(false)
+      expect(driver.loginCount()).toBe(0)
+      expect(onAuthenticationLost).toHaveBeenCalledTimes(1)
+    })
+
     it.each(TRANSIENT_RUNG_CASES)(
       '$label',
       async ({ retriedMethods, send }) => {
