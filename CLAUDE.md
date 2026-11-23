@@ -212,8 +212,19 @@ invalid!`, or a 401 — and rethrows anything else verbatim, which the
   family) — and `off` is declared NOWHERE (the 2020 vendor document
   publishes it; the alias is insurance against a spelling, not a
   declaration). A declaration says what the wire accepts, not what a
-  radiator does with it: `Mode` stays one closed set for every product
-  here, and which modes a host offers per product is the host's choice.
+  radiator does with it. WHICH modes a product has is the vendor's
+  documentation to say (its data-point description of each product and
+  its guide to the Pilote generations, read 2026-11-23): `cft1` and
+  `cft2` reach the fourth-generation Pilote, the Pro and the Glow
+  family, and not the second- and third-generation Pilotes that declare
+  them. That documentation is approximate on key names and values, so
+  the wire's vocabulary is read from the declarations and features from
+  the documentation, never one for the other. Two products stand
+  between the two: the Glow and the Shine are documented with `cft1`
+  and `cft2` and declare neither, untested on a device. `Mode` stays
+  one closed set for every product here, and which modes a host offers
+  per product is the host's choice (com.heatzy follows the vendor's
+  documentation).
   `cur_mode` is
   `uint8 0..10` on the Glow family and an enum on the Pro; `com_temp`
   is `0..255` there and `0..100` on the Pro; `derog_mode` is `0..5` on
