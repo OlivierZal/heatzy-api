@@ -173,7 +173,7 @@ const describe = (facade: DeviceFacadeAny): void => {
 | Sensor calibration    | no        | no                         | `com_temp`                 | `com_temp`                 |
 | Open-window detection | no        | no                         | no                         | `window_switch`            |
 
-`mode` takes a `Mode`: `comfort`, `comfortMinus1`, `comfortMinus2`, `eco`, `frostProtection` or `stop`, which is off (`previousMode` remembers the mode to restore). `derog_mode` takes a `DerogationMode`: `off`, `boost`, `vacation`, or `presence` on the Pilote Pro only, and `derog_time` counts minutes for a boost, days for a vacation. `on_off`, `LOCK_C` and the three `_switch` attributes take a `Switch`, and `com_temp` a number (on the Pilote Pro, 0 to 100 where 50 changes nothing).
+`mode` takes a `Mode`: `comfort`, `comfortMinus1`, `comfortMinus2`, `eco`, `frostProtection` or `stop`, which is off (`previousMode` remembers the mode to restore). `comfortMinus1` and `comfortMinus2` exist from the fourth-generation Pilote on, the Pro and the Glow family included. `derog_mode` takes a `DerogationMode`: `off`, `boost`, `vacation`, or `presence` on the Pilote Pro only, and `derog_time` counts minutes for a boost, days for a vacation. `on_off`, `LOCK_C` and the three `_switch` attributes take a `Switch`, and `com_temp` a number (on the Pilote Pro, 0 to 100 where 50 changes nothing).
 
 ```ts title="control"
 import {

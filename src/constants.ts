@@ -51,9 +51,9 @@ export const isDerogationMode = (value: unknown): value is DerogationMode =>
   DEROGATION_MODES.has(value)
 
 /**
- * Heating modes. `cft1` and `cft2` are declared by the Pilotes from the
- * second generation on, the Pro and the Onyx; the first-generation
- * Pilote, the Glow and the Shine declare the four others alone.
+ * Heating modes. `cft1` and `cft2` exist from the fourth-generation
+ * Pilote on, the Pro and the Glow family included: the Pilotes of the
+ * first three generations have the four others alone.
  * @category Constants
  */
 export const Mode = {
