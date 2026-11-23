@@ -48,7 +48,18 @@ Architecture, toolchain and process are aligned on the sibling
   reads on the configs side — GitHub Packages strips
   `peerDependenciesMeta` from the packument, so the optional peer 4.x
   declared landed as a mandatory one in the three apps' locks — and the
-  preset only names the plugins for typedoc to load from this tree.
+  preset only names the plugins for typedoc to load from this tree. The
+  core is NOT external to this reference (`externalPattern` leaves
+  `@olivierzal` out): the theme hides an external package's members
+  until its reader ticks "External", and under the default pattern that
+  hid, on a first visit, eleven of the twenty-two members of `HeatzyAPI`
+  (`authenticate`, `logOut`, `dispose`, `setSyncInterval`…), measured
+  2026-11-23. What stays hidden is `Error`'s own and Temporal's.
+  `LifecycleEvents` is an alias of the core's generic, which typedoc
+  renders as a name and no more: TypeDoc's `@interface` tag makes it
+  render the seven callbacks. `jsdoc/check-tag-names` reads that tag as
+  JSDoc's (redundant in TypeScript) and has no exemption for it, hence
+  the described disable around that one block.
 
 ## Domain gotchas
 
@@ -794,9 +805,7 @@ configs' `library` preset, and the polyfill itself is
   on that site. Much of what it states is rendered NOWHERE else, so it
   follows the code by hand: above all which attribute each product
   accepts as a write (the `//` comments of `PostAttributes`, which
-  typedoc does not render), the seven `events` callbacks and when each
-  one fires (`LifecycleEvents` renders as an alias of the core's type,
-  without its members), the Glow setpoint bounds
+  typedoc does not render), the Glow setpoint bounds
   (`GLOW_SETPOINT_RANGES`, which is not exported) and the run-time
   figures, the request timeout apart (the last paragraph of "Mechanism
   boundary" says where each one lives).
