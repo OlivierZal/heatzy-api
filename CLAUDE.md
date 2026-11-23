@@ -18,12 +18,18 @@ Architecture, toolchain and process are aligned on the sibling
 - `npm run typecheck` — the native 7.x compiler (`@typescript/native`,
   `npm:typescript@^7`), reached by its explicit path
   `node ./node_modules/@typescript/native/bin/tsc`; does not cover
-  `*.config.ts` (the lint does). Keep that path in every script: the
-  native package ships no `.bin` shim, while both `.bin/tsc` and
-  `.bin/tsc6` point at `@typescript/old` — the `npm:typescript@^6` that
-  the compat package depends on — so a bare `tsc` would silently
-  typecheck with TypeScript 6. That TS6 line exists only for the tools
-  that import the JS API (typedoc, typescript-eslint), which resolve
+  `*.config.ts` (the lint does). Keep that path in every script. Not
+  because a bare `tsc` runs the wrong compiler today: re-measured
+  2026-11-22, in this tree and in fresh installs under npm 10.9.8 and
+  11.20.0, `.bin/tsc` is the native 7.x compiler and `tsc6` the only
+  shim of the TypeScript 6 compat package (it was the other way round
+  when the layout was adopted, in August 2026). Two installed packages
+  declare a `tsc` bin, `@typescript/native` and `@typescript/old` (the
+  TypeScript 6 the compat package depends on), and npm gives the shim to
+  one of them: the explicit path names the package the script means, so
+  a layout change fails loudly instead of swapping the compiler behind
+  the shim. The TypeScript 6 line exists only for the tools that import
+  the JS API (typedoc, typescript-eslint), which resolve
   `@typescript/typescript6` aliased under the `typescript` name — the
   official side-by-side layout.
 - `npm run build` — purges `dist` before emitting, because `tsc` overwrites
@@ -652,6 +658,29 @@ mid-ladder probe — each naming the two expressions that make the claim
 checkable, so a quarantine can never hide a harness limitation the way
 melcloud's first cut did.
 
+The README states the pipeline to a consumer as BEHAVIOUR, and the
+figures behind it are the core's, not this repo's: re-read them against
+the pinned core on every api-core bump, never from memory. `HeatzyAPI`
+gets two rungs, outermost first: the auth retry (`AuthRetryPolicy`: one
+re-login, then one replay; the one-second `RetryGuard` cooldown,
+`DEFAULT_AUTH_RETRY_COOLDOWN_MS`, grants that rung once per window and
+lets an auth failure inside it through as it is, so a credential
+refused again and again cannot spin), then, on reads only, the
+transient retry
+(`DEFAULT_TRANSIENT_RETRY_OPTIONS`: four retries, a 1 s delay doubling
+under a 16 s cap that four retries never reach, 25 % jitter). The
+session refreshes five minutes ahead of its expiry
+(`SESSION_REFRESH_AHEAD_MS`), so that no request pays the
+re-authentication round-trip on its critical path. Beside them: the
+15-minute login backoff and the one-minute resume retry
+(`LOGIN_BACKOFF_FAILURE_MS`, `RESUME_RETRY_AFTER_FAILURE_MS`), the
+3-second settle window after a write (`SYNC_SETTLE_MS`), the
+five-minute failure reminder (`FAILURE_REMINDER_INTERVAL_MS`) and the
+4 KiB bound on a logged body (`MAX_LOGGED_BODY_BYTES`). Only two
+figures are this repo's own, both in `src/api/heatzy.ts`: the
+five-second cadence (`DEFAULT_SYNC_INTERVAL_SECONDS`) and the 30-second
+request timeout (`DEFAULT_TIMEOUT_MS`).
+
 ## Tooling boundary (@olivierzal/configs)
 
 The shared tooling lives in `@olivierzal/configs` (exact pin): the
@@ -740,6 +769,26 @@ configs' `library` preset, and the polyfill itself is
   SECURITY.md, CLAUDE.md) — never a later sweep; the 2026-08 README
   audit caught exactly the drift this prevents (a shipped Home ATW
   driver absent from its README, a stale `Result` kind list).
+- The README speaks to the package's USER: what it gives, how to install
+  it and how to use it, with examples that compile. It never explains
+  how the package is built or why (owner's rule, 2026-11-22): the
+  architecture and the full surface are the generated reference's, the
+  doctrine and its reasons are this file's, the workflow is
+  CONTRIBUTING.md's. Nothing compiles or lints its examples (the lint
+  reads the Markdown, not the fences, and prettier only formats them),
+  so each one is checked by hand against `src/index.ts` and the
+  signatures it calls. It is also the index page of the generated
+  reference (typedoc's `readme`), which is why its License and Node
+  badges link to absolute GitHub URLs: a relative badge target is dead
+  on that site. Much of what it states is rendered NOWHERE else, so it
+  follows the code by hand: above all which attribute each product
+  accepts as a write (the `//` comments of `PostAttributes`, which
+  typedoc does not render), the seven `events` callbacks and when each
+  one fires (`LifecycleEvents` renders as an alias of the core's type,
+  without its members), the Glow setpoint bounds
+  (`GLOW_SETPOINT_RANGES`, which is not exported) and the run-time
+  figures, the request timeout apart (the last paragraph of "Mechanism
+  boundary" says where each one lives).
 
 - The PR title IS the commit that lands: `squash_merge_commit_title` is
   `PR_TITLE`, so the title is the single source (under the former

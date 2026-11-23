@@ -28,7 +28,7 @@ npm test                # vitest run
 npm run test:coverage   # vitest run --coverage (must remain at 100%)
 ```
 
-`typecheck` and `build` call the native compiler by its explicit path, `node ./node_modules/@typescript/native/bin/tsc` — do not shorten it to `tsc` or `tsc6`, which both resolve to the TypeScript 6 compat package and would typecheck against the wrong compiler.
+`typecheck` and `build` call the native compiler by its explicit path, `node ./node_modules/@typescript/native/bin/tsc`. Do not shorten it to `tsc`: two installed packages declare a `tsc` bin, and the explicit path names the one these scripts mean.
 
 The `prepublishOnly` script chains tests + typecheck + lint + format + docs — publishing locally without these passing is impossible.
 
