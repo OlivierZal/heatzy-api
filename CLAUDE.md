@@ -85,6 +85,16 @@ invalid!`, or a 401 — and rethrows anything else verbatim, which the
   sign in again — a restart signed straight back in. Until 21.3.0 every
   400 was a token verdict on a request and a credential verdict on the
   login.
+- A refused token is CLEARED before the reactive recovery runs
+  (`reauthenticate`: the 400/9004 names the token itself). With no
+  stored credentials behind it the session is gone for good, and until
+  21.3.3 nobody was told: the cleared token left the cycle's epilogue
+  reading a client that had never signed in, so `onAuthenticationLost`
+  never fired and the refresh stopped in silence (reproduced against
+  api-core 2.4.2 in the kernel: a stored token, no credentials, a
+  `400`/9004). api-core 2.4.3 announces it from the recovery itself;
+  the clause "announces a session the server refuses when no
+  credentials are stored" pins it on this dialect.
 - Wire-format types mirror the Gizwits API verbatim: snake_case and
   mixed keys (`dev_alias`, `derog_mode`, `cur_tempH`, `LOCK_C`) — do
   not rename them to satisfy style rules. The eslint overlay carries

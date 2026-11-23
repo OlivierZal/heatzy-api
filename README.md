@@ -98,7 +98,7 @@ try {
 
 - A session within 5 minutes of its expiry is renewed before the next request, and a request refused because the session is no longer valid triggers one sign-in before it is sent once more.
 - An automatic sign-in that fails for a passing reason (the network, a server error) is retried every minute.
-- When Heatzy refuses the stored credentials, only the user can restore the session: `events.onAuthenticationLost` fires once and the automatic refresh stops. Automatic sign-ins pause for 15 minutes after a refusal, but `authenticate()` never does: once it succeeds, `events.onAuthenticationRestored` fires and the refresh starts again. A session that ends while no credentials are stored fires no event: `isAuthenticated()` returns `false` and the refresh stops.
+- When only the user can restore the session, because Heatzy refuses the stored credentials or because the session ends while no credentials are stored, `events.onAuthenticationLost` fires once and the automatic refresh stops. Automatic sign-ins pause for 15 minutes after a refusal, but `authenticate()` never does: once it succeeds, `events.onAuthenticationRestored` fires and the refresh starts again.
 
 ### Keep the session across restarts
 
